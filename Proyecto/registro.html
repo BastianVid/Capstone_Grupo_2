@@ -2,21 +2,54 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registro - CulturaX</title>
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <main class="registro-container">
-    <h2>Registro</h2>
-    <form>
-      <label>Nombre de usuario:</label>
-      <input type="text" required />
-      <label>Email:</label>
-      <input type="email" required />
-      <label>Contraseña:</label>
-      <input type="password" required />
-      <button type="submit">Crear cuenta</button>
-    </form>
+  <!-- Header y navegación -->
+ <header>
+    <nav>
+      <h1>CulturaX</h1>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="Peliculas.html">Peliculas</a></li>
+        <li><a href="Anime.html">Anime</a></li>
+        <li><a href="Musica.html">Musica</a></li>
+        <li><a href="Series.html">Series</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Contenido principal: formulario de registro -->
+  <main>
+    <section class="registro-form">
+      <h2>Crear Cuenta</h2>
+      <form action="#" method="POST">
+        <label for="nombre">Nombre completo</label>
+        <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required>
+
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+
+        <label for="usuario">Nombre de usuario</label>
+        <input type="text" id="usuario" name="usuario" placeholder="Tu usuario" required>
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="********" required>
+
+        <label for="password2">Repetir contraseña</label>
+        <input type="password" id="password2" name="password2" placeholder="********" required>
+
+        <button type="submit" class="btn">Registrarse</button>
+      </form>
+      <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a></p>
+    </section>
   </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 CulturaX</p>
+  </footer>
 </body>
 </html>
