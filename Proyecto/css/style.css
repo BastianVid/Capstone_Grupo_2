@@ -178,8 +178,9 @@ footer {
   margin-bottom: 12px;
 }
 
-/* ============================ FORMULARIO DE REGISTRO ============================ */
-.registro-form {
+
+/* ============================ FORMULARIO REGISTRO/LOGIN  ============================ */
+.form-card {
   background: var(--card);
   max-width: 400px;
   margin: 60px auto;
@@ -189,24 +190,25 @@ footer {
   text-align: center;
 }
 
-.registro-form h2 {
+.form-card h2 {
   margin-bottom: 24px;
   color: var(--accent);
 }
 
-.registro-form form {
+.form-card form {
   display: flex;
   flex-direction: column;
   gap: 16px;
   text-align: left;
 }
 
-.registro-form label {
+.form-card label {
   font-weight: 500;
   color: var(--text);
 }
 
-.registro-form input {
+.form-card input {
+  width: 100%;            /* ocupa todo el ancho */
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #475569;
@@ -214,57 +216,15 @@ footer {
   color: var(--text);
 }
 
-.registro-form input::placeholder {
+
+.form-card input::placeholder {
   color: var(--muted);
 }
 
-.registro-form button {
+.form-card button {
   margin-top: 8px;
 }
 
-/* ============================ FORMULARIO LOGIN ============================ */
-.login-form {
-  background: var(--card);
-  max-width: 400px;
-  margin: 60px auto;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-  text-align: center;
-}
-
-.login-form h2 {
-  margin-bottom: 24px;
-  color: var(--accent);
-}
-
-.login-form form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-align: left;
-}
-
-.login-form label {
-  font-weight: 500;
-  color: var(--text);
-}
-
-.login-form input {
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #475569;
-  background: var(--bg);
-  color: var(--text);
-}
-
-.login-form input::placeholder {
-  color: var(--muted);
-}
-
-.login-form button {
-  margin-top: 8px;
-}
 
 
 /* ============================ ANIME ============================ */
