@@ -8,7 +8,7 @@
 </head>
 <body>
   <!-- Header y navegación -->
- <header>
+  <header>
     <nav>
       <h1>CulturaX</h1>
       <ul>
@@ -23,25 +23,35 @@
 
   <!-- Contenido principal: formulario de login -->
   <main>
-  <section class="form-card login-form">
-    <h2>Iniciar sesión</h2>
-    <form action="#" method="POST">
-      <label for="email">Correo electrónico</label>
-      <input type="email" id="email" name="email" placeholder="tu@email.com" required>
+    <section class="form-card login-form">
+      <h2>Iniciar sesión</h2>
+      <form id="login-form">
+        <label for="login-email">Correo electrónico</label>
+        <input type="email" id="login-email" name="email" placeholder="tu@email.com" required>
 
-      <label for="password">Contraseña</label>
-      <input type="password" id="password" name="password" placeholder="********" required>
+        <label for="login-password">Contraseña</label>
+        <input type="password" id="login-password" name="password" placeholder="********" required>
 
-      <button type="submit" class="btn">Ingresar</button>
-    </form>
-    <p>¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
-  </section>
+        <button type="submit" class="btn">Ingresar</button>
+      </form>
 
+      <p id="login-msg"></p>
+
+      <hr>
+      <button id="google-login" class="btn">Ingresar con Google</button>
+      <button id="logout" class="btn" hidden>Cerrar sesión</button>
+
+      <p id="user">No conectado</p>
+      <p>¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
+    </section>
   </main>
 
   <!-- Footer -->
   <footer>
     <p>&copy; 2025 CulturaX</p>
   </footer>
+
+  <!-- Script con la lógica de login -->
+  <script type="module" src="js/firebase.js"></script>
 </body>
 </html>
