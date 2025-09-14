@@ -31,21 +31,24 @@ header {
 
 nav {
   display: flex;
-  flex-direction: column;     
-  gap: 12px;
+  justify-content: space-between; /* Logo a la izquierda, menú a la derecha */
+  align-items: center;            /* Centra verticalmente */
   max-width: 1200px;
   margin: auto;
 }
 
+
 nav h1 {
-  font-size: 1.5rem;
-  color: var(--accent);
+  font-size: 1.8rem;
+  margin: 0;
+  line-height: 1;
 }
 
+
 nav ul {
-  list-style: none;
+  flex: 1;                  /* ocupa todo el ancho disponible */
   display: flex;
-  justify-content: center;     
+  justify-content: center;  /* centra solo el menú */
   gap: 20px;
 }
 
