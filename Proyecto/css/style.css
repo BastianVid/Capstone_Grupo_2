@@ -389,3 +389,14 @@ input.success {
   background: #1e1e2f;
 }
 /* ============================ CAMPOS CON ERROR EN FORMULARIOS ============================ */
+
+.item-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.item-info img {
+  max-width: 250px;
+  height: auto;
+}

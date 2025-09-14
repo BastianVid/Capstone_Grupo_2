@@ -6,6 +6,10 @@ import {
   updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
+import { 
+  getFirestore, collection, addDoc, getDocs, getDoc, query, where, orderBy, doc 
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 // ============================== CONFIG ==============================
 const firebaseConfig = {
   apiKey: "AIzaSyDLQmuQftLwcaSZmedwVyja81LnNRYB1tg",
@@ -18,14 +22,14 @@ const firebaseConfig = {
 
 // Inicializar Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+export const auth = getAuth(app);
+export const provider = new GoogleAuthProvider();
+export const db = getFirestore(app);
 
 // ============================== HELPERS ==============================
 function marcarError(input) {
   input.classList.add("input-error");
 }
-
 function limpiarError(input) {
   input.classList.remove("input-error");
 }
@@ -42,9 +46,6 @@ if (registerForm) {
     const pass2 = document.getElementById("password2");
     const usuario = document.getElementById("usuario")?.value?.trim();
 
-    let hayError = false;
-
-    // reset de estilos
     [email, pass, pass2].forEach(limpiarError);
 
     const strongPass = /^(?=.*[A-Z])(?=.*\d)(?=.*\.)[A-Za-z\d.]{8,}$/;
@@ -91,7 +92,6 @@ if (loginForm) {
     const email = document.getElementById("login-email");
     const pass = document.getElementById("login-password");
 
-    // reset de estilos
     [email, pass].forEach(limpiarError);
 
     try {
@@ -141,3 +141,45 @@ onAuthStateChanged(auth, (user) => {
     if (logoutBtn) logoutBtn.hidden = true;
   }
 });
+
+// ============================== FIRESTORE FUNCIONES ==============================
+
+// === Películas ===
+export async function obtenerPeliculas() {
+  const snapshot = await getDocs(collection(db, "peliculas"));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+export async function obtenerPelicula(id) {
+  const ref = doc(db, "peliculas", id);
+  const snap = await getDoc(ref);
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
+// === Item genérico (peliculas, series, anime, musica) ===
+export async function obtenerItem(tipo, id) {
+  const ref = doc(db, tipo, id);
+  const snap = await getDoc(ref);
+  return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+}
+
+// === Reseñas ===
+export async function guardarReseña(peliculaId, usuario, texto, rating) {
+  return await addDoc(collection(db, "reseñas"), {
+    pelicula: peliculaId,
+    usuario,
+    texto,
+    rating: parseInt(rating),
+    fecha: new Date()
+  });
+}
+
+export async function obtenerReseñas(peliculaId) {
+  const q = query(
+    collection(db, "reseñas"),
+    where("pelicula", "==", peliculaId),
+    orderBy("fecha", "desc")
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}

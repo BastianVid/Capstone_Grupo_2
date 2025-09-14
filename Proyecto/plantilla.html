@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plantilla - CulturaX</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header y navegación -->
+  <header>
+    <nav>
+      <h1>CulturaX</h1>
+      <ul>
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="Peliculas.html">Películas</a></li>
+        <li><a href="Series.html">Series</a></li>
+        <li><a href="Anime.html">Anime</a></li>
+        <li><a href="Musica.html">Música</a></li>
+      </ul>
+      <div class="userbox">
+        <span id="user">No conectado</span>
+        <button id="logout" class="btn" hidden>Salir</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Contenido principal -->
+  <main class="detalle-contenido">
+    <!-- Aquí va la información del item (película, serie, anime o música) -->
+    <section id="info-item" class="item-info">
+      <p>Cargando información...</p>
+    </section>
+
+    <!-- Sección de reseñas -->
+    <section class="reseñas">
+      <h2>Reseñas</h2>
+      <div id="reseñas-lista"></div>
+
+      <form id="reseña-form">
+        <textarea id="reseña-texto" placeholder="Escribe tu reseña..." required></textarea>
+        <label>Puntuación:
+          <select id="reseña-rating">
+            <option value="1">⭐</option>
+            <option value="2">⭐⭐</option>
+            <option value="3">⭐⭐⭐</option>
+            <option value="4">⭐⭐⭐⭐</option>
+            <option value="5">⭐⭐⭐⭐⭐</option>
+          </select>
+        </label>
+        <button type="submit" class="btn">Publicar reseña</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 CulturaX</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/plantilla.js"></script>
+</body>
+</html>
