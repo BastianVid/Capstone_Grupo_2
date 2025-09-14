@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { 
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
   GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
-  updateProfile // 👈 agregado para guardar nombre de usuario
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ============================== CONFIG ==============================
@@ -21,6 +21,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+// ============================== HELPERS ==============================
+function marcarError(input) {
+  input.classList.add("input-error");
+}
+
+function limpiarError(input) {
+  input.classList.remove("input-error");
+}
+
 // ============================== REGISTRO ==============================
 const registerForm = document.getElementById("register-form");
 const registerMsg = document.getElementById("register-msg");
@@ -28,23 +37,37 @@ const registerMsg = document.getElementById("register-msg");
 if (registerForm) {
   registerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = document.getElementById("register-email").value;
-    const pass = document.getElementById("register-password").value;
-    const pass2 = document.getElementById("password2").value;
-    const usuario = document.getElementById("usuario")?.value?.trim(); // 👈 nombre de usuario
+    const email = document.getElementById("register-email");
+    const pass = document.getElementById("register-password");
+    const pass2 = document.getElementById("password2");
+    const usuario = document.getElementById("usuario")?.value?.trim();
 
-    if (pass !== pass2) {
+    let hayError = false;
+
+    // reset de estilos
+    [email, pass, pass2].forEach(limpiarError);
+
+    const strongPass = /^(?=.*[A-Z])(?=.*\d)(?=.*\.)[A-Za-z\d.]{8,}$/;
+
+    if (pass.value !== pass2.value) {
       registerMsg.textContent = "❌ Las contraseñas no coinciden";
+      marcarError(pass);
+      marcarError(pass2);
+      return;
+    }
+
+    if (!strongPass.test(pass.value)) {
+      registerMsg.textContent = "⚠️ La contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un punto (.)";
+      marcarError(pass);
       return;
     }
 
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      const cred = await createUserWithEmailAndPassword(auth, email.value, pass.value);
 
-      // 👇 Guardar nombre de usuario en el perfil
       if (usuario) {
         await updateProfile(cred.user, { displayName: usuario });
-        await auth.currentUser.reload(); 
+        await auth.currentUser.reload();
       }
 
       registerMsg.textContent = "✅ Cuenta creada con éxito";
@@ -53,6 +76,7 @@ if (registerForm) {
       }, 1500);
     } catch (err) {
       registerMsg.textContent = "❌ Error: " + err.message;
+      marcarError(email);
     }
   });
 }
@@ -64,17 +88,22 @@ const loginMsg = document.getElementById("login-msg");
 if (loginForm) {
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = document.getElementById("login-email").value;
-    const pass = document.getElementById("login-password").value;
+    const email = document.getElementById("login-email");
+    const pass = document.getElementById("login-password");
+
+    // reset de estilos
+    [email, pass].forEach(limpiarError);
 
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
+      await signInWithEmailAndPassword(auth, email.value, pass.value);
       loginMsg.textContent = "✅ Sesión iniciada con éxito";
       setTimeout(() => {
         window.location.href = "index.html";
       }, 1500);
     } catch (err) {
       loginMsg.textContent = "❌ Error: " + err.message;
+      marcarError(email);
+      marcarError(pass);
     }
   });
 }
@@ -105,7 +134,6 @@ if (logoutBtn) {
 const userP = document.getElementById("user");
 onAuthStateChanged(auth, (user) => {
   if (user && userP) {
-    // 👇 Mostrar displayName si existe, si no fallback al email
     userP.textContent = `Hola ${user.displayName || user.email}`;
     if (logoutBtn) logoutBtn.hidden = false;
   } else if (userP) {

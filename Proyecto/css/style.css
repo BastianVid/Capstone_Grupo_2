@@ -224,7 +224,7 @@ footer {
 }
 
 .form-card input {
-  width: 100%;            /* ocupa todo el ancho */
+  width: 100%;            
   padding: 10px;
   border-radius: 8px;
   border: 1px solid #475569;
@@ -321,7 +321,6 @@ footer {
 .slider .prev { left: 10px; }
 .slider .next { right: 10px; }
 
-/* Indicadores (dots) */
 .dots {
   text-align: center;
   margin-top: 10px;
@@ -341,3 +340,51 @@ footer {
 .dot.active {
   background: var(--accent);
 }
+
+/* ============================ CAMPOS DE CONTRASEÑA ============================ */
+.password-field {
+  position: relative;
+  width: 100%;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 36px; /* espacio para el icono */
+}
+
+.password-field .toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;   /* tamaño justo para el emoji 🔒 */
+  cursor: pointer;
+  color: var(--muted);
+
+  /* 👇 evita que herede estilos de los demás botones */
+  padding: 0;
+  margin: 0;
+  width: auto;
+  height: auto;
+  line-height: 1;
+}
+
+.password-field .toggle-password:hover {
+  color: var(--accent);
+}
+
+
+
+/* ==== Inputs con error ==== */
+.input-error {
+  border: 2px solid red !important;
+  background: #ffe6e6;
+}
+
+input.success {
+  border: 2px solid #22c55e; /* verde */
+  background: #1e1e2f;
+}
+

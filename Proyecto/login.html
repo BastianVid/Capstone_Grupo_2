@@ -30,7 +30,11 @@
         <input type="email" id="login-email" name="email" placeholder="tu@email.com" required>
 
         <label for="login-password">Contraseña</label>
-        <input type="password" id="login-password" name="password" placeholder="********" required>
+        <div class="password-field">
+          <input type="password" id="login-password" name="password" placeholder="********" required>
+          <button type="button" class="toggle-password">👁️</button>
+        </div>
+
 
         <button type="submit" class="btn">Ingresar</button>
       </form>
@@ -41,7 +45,6 @@
       <button id="google-login" class="btn">Ingresar con Google</button>
       <button id="logout" class="btn" hidden>Cerrar sesión</button>
 
-      <p id="user">No conectado</p>
       <p>¿No tienes cuenta? <a href="registro.html">Regístrate</a></p>
     </section>
   </main>
@@ -53,5 +56,6 @@
 
   <!-- Script con la lógica de login -->
   <script type="module" src="js/firebase.js"></script>
+  <script src="js/app.js"></script> 
 </body>
 </html>
