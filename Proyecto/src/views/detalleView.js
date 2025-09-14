@@ -2,6 +2,7 @@ import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { ContentModel } from '../models/contentModel.js';
 import { auth } from '../lib/firebase.js'; // 👈 para validar login
+import { signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js"; // 👈 importar signOut
 
 export function DetalleView(item, categoria) {
   if (!item) {
@@ -57,6 +58,20 @@ export function DetalleView(item, categoria) {
     async bind() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+
+      // --- Cerrar sesión ---
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", async () => {
+          try {
+            await signOut(auth);
+            console.log("Sesión cerrada ✅");
+            window.location.hash = "#/login"; // redirige al login
+          } catch (error) {
+            console.error("Error al cerrar sesión:", error);
+          }
+        });
+      }
 
       // --- Variables para reseña ---
       let currentRating = 0;
