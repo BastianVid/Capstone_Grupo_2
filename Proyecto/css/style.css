@@ -52,6 +52,19 @@ nav ul {
   gap: 20px;
 }
 
+.userbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  font-size: .95rem;
+  color: var(--muted);
+}
+
+.userbox .btn {
+  padding: 6px 12px;
+}
+
 nav a {
   text-decoration: none;
   color: var(--text);

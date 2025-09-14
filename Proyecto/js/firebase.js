@@ -2,7 +2,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { 
   getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged
+  GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged,
+  updateProfile // 👈 agregado para guardar nombre de usuario
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // ============================== CONFIG ==============================
@@ -30,6 +31,7 @@ if (registerForm) {
     const email = document.getElementById("register-email").value;
     const pass = document.getElementById("register-password").value;
     const pass2 = document.getElementById("password2").value;
+    const usuario = document.getElementById("usuario")?.value?.trim(); // 👈 nombre de usuario
 
     if (pass !== pass2) {
       registerMsg.textContent = "❌ Las contraseñas no coinciden";
@@ -37,7 +39,14 @@ if (registerForm) {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, pass);
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+
+      // 👇 Guardar nombre de usuario en el perfil
+      if (usuario) {
+        await updateProfile(cred.user, { displayName: usuario });
+        await auth.currentUser.reload(); 
+      }
+
       registerMsg.textContent = "✅ Cuenta creada con éxito";
       setTimeout(() => {
         window.location.href = "login.html";
@@ -96,7 +105,8 @@ if (logoutBtn) {
 const userP = document.getElementById("user");
 onAuthStateChanged(auth, (user) => {
   if (user && userP) {
-    userP.textContent = `Conectado: ${user.email || user.displayName}`;
+    // 👇 Mostrar displayName si existe, si no fallback al email
+    userP.textContent = `Hola ${user.displayName || user.email}`;
     if (logoutBtn) logoutBtn.hidden = false;
   } else if (userP) {
     userP.textContent = "No conectado";
