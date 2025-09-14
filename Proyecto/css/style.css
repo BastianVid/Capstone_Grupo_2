@@ -232,7 +232,6 @@ footer {
   color: var(--text);
 }
 
-
 .form-card input::placeholder {
   color: var(--muted);
 }
@@ -341,6 +340,8 @@ footer {
   background: var(--accent);
 }
 
+/* ============================ SLIDER ============================ */
+
 /* ============================ CAMPOS DE CONTRASEÑA ============================ */
 .password-field {
   position: relative;
@@ -375,9 +376,9 @@ footer {
   color: var(--accent);
 }
 
+/* ============================ CAMPOS DE CONTRASEÑA ============================ */
 
-
-/* ==== Inputs con error ==== */
+/* ============================ CAMPOS CON ERROR EN FORMULARIOS ============================ */
 .input-error {
   border: 2px solid red !important;
   background: #ffe6e6;
@@ -387,4 +388,4 @@ input.success {
   border: 2px solid #22c55e; /* verde */
   background: #1e1e2f;
 }
-
+/* ============================ CAMPOS CON ERROR EN FORMULARIOS ============================ */
