@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CulturaX - Inicio</title>
- <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <header>
@@ -12,21 +12,23 @@
       <h1>CulturaX</h1>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="Peliculas.html">Peliculas</a></li>
+        <li><a href="Peliculas.html">Películas</a></li>
         <li><a href="Anime.html">Anime</a></li>
-        <li><a href="Musica.html">Musica</a></li>
+        <li><a href="Musica.html">Música</a></li>
         <li><a href="Series.html">Series</a></li>
       </ul>
 
       <div class="userbox">
         <span id="user">No conectado</span>
-        <button id="logout" class="btn" hidden>Salir</button>
+        <button id="logout" class="btn">Salir</button>
+        <a href="registro.html" id="register-btn" class="btn">Únete ahora</a>
+        <a href="login.html" id="login-btn" class="btn">Inicia sesión</a>
       </div>
+
     </nav>
   </header>
 
   <main>
-
     <!-- Slider -->
     <section class="slider">
       <div class="slides">
@@ -36,28 +38,26 @@
         <img src="img/stranger-things.jpg" alt="Stranger Things">
       </div>
 
-    <!-- Controles -->
+      <!-- Controles -->
       <button class="prev">&#10094;</button>
       <button class="next">&#10095;</button>
 
-    <!-- Indicadores -->
+      <!-- Indicadores -->
       <div class="dots"></div>
     </section>
 
     <section class="bienvenida">
       <h2>Bienvenido a CulturaX</h2>
       <p>Tu comunidad para descubrir, compartir y opinar sobre cultura.</p>
-      <a href="registro.html" class="btn">Únete ahora</a>
-      <a href="login.html" class="btn">Inicia sesion </a>
     </section>
-
   </main>
 
   <footer>
     <p>&copy; 2025 CulturaX</p>
   </footer>
 
-  <script src="js/app.js"></script>                    
-  <script type="module" src="js/firebase.js"></script> 
+  <!-- Scripts -->
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/firebase.js"></script>
 </body>
 </html>
