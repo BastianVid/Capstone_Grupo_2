@@ -8,20 +8,22 @@
 </head>
 <body>
   <!-- Header y navegación -->
- <header>
+   <header>
     <nav>
       <h1>CulturaX</h1>
       <ul>
         <li><a href="index.html">Inicio</a></li>
-        <li><a href="Peliculas.html">Peliculas</a></li>
+        <li><a href="Peliculas.html">Películas</a></li>
         <li><a href="Anime.html">Anime</a></li>
-        <li><a href="Musica.html">Musica</a></li>
+        <li><a href="Musica.html">Música</a></li>
         <li><a href="Series.html">Series</a></li>
       </ul>
 
-      <div class="userbox">
-        <span id="user">No conectado</span>
+      <div class="userbox" style="visibility:hidden">
+        <span id="user"></span>
         <button id="logout" class="btn" hidden>Salir</button>
+        <a href="registro.html" id="register-btn" class="btn">Únete ahora</a>
+        <a href="login.html" id="login-btn" class="btn">Inicia sesión</a>
       </div>
     </nav>
   </header>
@@ -83,5 +85,6 @@
     <p>&copy; 2025 CulturaX</p>
   </footer>
   <script type="module" src="js/firebase.js"></script> 
+  <script type="module" src="js/app.js"></script> 
 </body>
 </html>

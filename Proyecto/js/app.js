@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   const dots = document.querySelectorAll(".dot");
 
-  // Mostrar slide específico
   function showSlide(i) {
     index = i;
     slides.style.transform = `translateX(-${index * 100}%)`;
@@ -205,26 +204,47 @@ if (googleBtn) {
 // ============================== LOGOUT ==============================
 const logoutBtn = document.getElementById("logout");
 if (logoutBtn) {
-  logoutBtn.onclick = () => signOut(auth);
+  logoutBtn.onclick = () => {
+    localStorage.removeItem("usuario"); // limpiamos caché
+    signOut(auth);
+  };
 }
 
 // ============================== ESTADO DE SESIÓN ==============================
 const userP = document.getElementById("user");
 const loginBtn = document.getElementById("login-btn");
 const registerBtn = document.getElementById("register-btn");
+const userBox = document.querySelector(".userbox");
+
+// 👉 Mostrar lo que haya en caché primero (evita el parpadeo)
+const cachedUser = localStorage.getItem("usuario");
+if (cachedUser && userP) {
+  userP.textContent = `Hola ${cachedUser}`;
+  if (logoutBtn) logoutBtn.style.display = "inline-block";
+  if (loginBtn) loginBtn.style.display = "none";
+  if (registerBtn) registerBtn.style.display = "none";
+  if (userBox) userBox.style.visibility = "visible";
+}
 
 onAuthStateChanged(auth, (user) => {
   if (user && userP) {
-    userP.textContent = `Hola ${user.displayName || user.email}`;
+    const nombre = user.displayName || user.email;
+    userP.textContent = `Hola ${nombre}`;
+    localStorage.setItem("usuario", nombre);
+
     if (logoutBtn) logoutBtn.style.display = "inline-block";
     if (loginBtn) loginBtn.style.display = "none";
     if (registerBtn) registerBtn.style.display = "none";
   } else if (userP) {
     userP.textContent = "No conectado";
+    localStorage.removeItem("usuario");
+
     if (logoutBtn) logoutBtn.style.display = "none";
     if (loginBtn) loginBtn.style.display = "inline-block";
     if (registerBtn) registerBtn.style.display = "inline-block";
   }
+  // 👇 Revelamos userbox cuando ya sabemos el estado
+  if (userBox) userBox.style.visibility = "visible";
 });
 
 // ============================== FIRESTORE FUNCIONES ==============================

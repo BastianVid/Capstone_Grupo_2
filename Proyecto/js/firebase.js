@@ -125,21 +125,50 @@ if (googleBtn) {
 }
 
 // ============================== LOGOUT ==============================
-const logoutBtn = document.getElementById("logout");
-if (logoutBtn) {
-  logoutBtn.onclick = () => signOut(auth);
-}
+document.querySelectorAll("#logout").forEach((btn) => {
+  btn.onclick = () => {
+    localStorage.removeItem("usuario"); 
+    signOut(auth);
+  };
+});
 
 // ============================== ESTADO DE SESIÓN ==============================
-const userP = document.getElementById("user");
+// Todos los userbox y elementos repetidos
+const userBoxes   = document.querySelectorAll(".userbox");
+const userSpans   = document.querySelectorAll("#user");
+const logoutBtns  = document.querySelectorAll("#logout");
+const loginBtns   = document.querySelectorAll("#login-btn");
+const registerBtns= document.querySelectorAll("#register-btn");
+
+// 👉 Mostrar lo que haya en caché primero
+const cachedUser = localStorage.getItem("usuario");
+if (cachedUser) {
+  userSpans.forEach(u => u.textContent = `Hola ${cachedUser}`);
+  logoutBtns.forEach(b => b.style.display = "inline-block");
+  loginBtns.forEach(b => b.style.display = "none");
+  registerBtns.forEach(b => b.style.display = "none");
+  userBoxes.forEach(b => b.style.visibility = "visible");
+}
+
 onAuthStateChanged(auth, (user) => {
-  if (user && userP) {
-    userP.textContent = `Hola ${user.displayName || user.email}`;
-    if (logoutBtn) logoutBtn.hidden = false;
-  } else if (userP) {
-    userP.textContent = "No conectado";
-    if (logoutBtn) logoutBtn.hidden = true;
+  if (user) {
+    const nombre = user.displayName || user.email;
+    localStorage.setItem("usuario", nombre);
+
+    userSpans.forEach(u => u.textContent = `Hola ${nombre}`);
+    logoutBtns.forEach(b => b.style.display = "inline-block");
+    loginBtns.forEach(b => b.style.display = "none");
+    registerBtns.forEach(b => b.style.display = "none");
+  } else {
+    localStorage.removeItem("usuario");
+
+    userSpans.forEach(u => u.textContent = "No conectado");
+    logoutBtns.forEach(b => b.style.display = "none");
+    loginBtns.forEach(b => b.style.display = "inline-block");
+    registerBtns.forEach(b => b.style.display = "inline-block");
   }
+
+  userBoxes.forEach(b => b.style.visibility = "visible"); // ✅ se revela al final
 });
 
 // ============================== FIRESTORE FUNCIONES ==============================
@@ -187,4 +216,3 @@ export async function obtenerReseñas(peliculaId) {
     return [];
   }
 }
-
