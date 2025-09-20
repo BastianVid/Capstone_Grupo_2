@@ -35,11 +35,13 @@
     <!-- Sección de reseñas -->
     <section class="reseñas">
       <h2>Reseñas</h2>
-      <div id="reseñas-lista"></div>
 
-      <form id="reseña-form">
+      <!-- Formulario de nueva reseña -->
+      <form id="reseña-form" class="reseña-form">
         <textarea id="reseña-texto" placeholder="Escribe tu reseña..." required></textarea>
-        <label>Puntuación:
+        
+        <div class="form-row">
+          <label for="reseña-rating">Puntuación:</label>
           <select id="reseña-rating">
             <option value="1">⭐</option>
             <option value="2">⭐⭐</option>
@@ -47,9 +49,14 @@
             <option value="4">⭐⭐⭐⭐</option>
             <option value="5">⭐⭐⭐⭐⭐</option>
           </select>
-        </label>
-        <button type="submit" class="btn">Publicar reseña</button>
+          <button type="submit" class="btn">Publicar reseña</button>
+        </div>
       </form>
+
+      <!-- Lista de reseñas -->
+      <div id="reseñas-lista" class="reseñas-lista">
+        <p class="sin-reseñas">No hay reseñas aún. ¡Sé el primero en opinar!</p>
+      </div>
     </section>
   </main>
 
