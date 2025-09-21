@@ -101,7 +101,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         card.innerHTML = `
           <img src="${item.imagen}" alt="${item.titulo}">
           <h3>${item.titulo}</h3>
-          <p>${item.descripcion}</p>
           <a href="plantilla.html?tipo=${tipo}&id=${item.id}" class="btn">Leer reseña</a>
         `;
 
