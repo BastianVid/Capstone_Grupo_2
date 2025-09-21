@@ -7,7 +7,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 import { 
-  getFirestore, collection, addDoc, getDocs, getDoc, query, where, orderBy, doc 
+  getFirestore, collection, addDoc, getDocs, getDoc, query, where, doc 
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // ============================== CONFIG ==============================
@@ -20,19 +20,14 @@ const firebaseConfig = {
   appId: "1:994869052292:web:02f993e57d3bc727e9d3d1"
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const provider = new GoogleAuthProvider();
 export const db = getFirestore(app);
 
 // ============================== HELPERS ==============================
-function marcarError(input) {
-  input.classList.add("input-error");
-}
-function limpiarError(input) {
-  input.classList.remove("input-error");
-}
+function marcarError(input) { input.classList.add("input-error"); }
+function limpiarError(input) { input.classList.remove("input-error"); }
 
 // ============================== REGISTRO ==============================
 const registerForm = document.getElementById("register-form");
@@ -52,8 +47,7 @@ if (registerForm) {
 
     if (pass.value !== pass2.value) {
       registerMsg.textContent = "❌ Las contraseñas no coinciden";
-      marcarError(pass);
-      marcarError(pass2);
+      marcarError(pass); marcarError(pass2);
       return;
     }
 
@@ -65,16 +59,12 @@ if (registerForm) {
 
     try {
       const cred = await createUserWithEmailAndPassword(auth, email.value, pass.value);
-
       if (usuario) {
         await updateProfile(cred.user, { displayName: usuario });
         await auth.currentUser.reload();
       }
-
       registerMsg.textContent = "✅ Cuenta creada con éxito";
-      setTimeout(() => {
-        window.location.href = "login.html";
-      }, 1500);
+      setTimeout(() => { window.location.href = "login.html"; }, 1500);
     } catch (err) {
       registerMsg.textContent = "❌ Error: " + err.message;
       marcarError(email);
@@ -97,13 +87,10 @@ if (loginForm) {
     try {
       await signInWithEmailAndPassword(auth, email.value, pass.value);
       loginMsg.textContent = "✅ Sesión iniciada con éxito";
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 1500);
+      setTimeout(() => { window.location.href = "index.html"; }, 1500);
     } catch (err) {
       loginMsg.textContent = "❌ Error: " + err.message;
-      marcarError(email);
-      marcarError(pass);
+      marcarError(email); marcarError(pass);
     }
   });
 }
@@ -115,9 +102,7 @@ if (googleBtn) {
     try {
       await signInWithPopup(auth, provider);
       loginMsg.textContent = "✅ Sesión iniciada con Google";
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 1500);
+      setTimeout(() => { window.location.href = "index.html"; }, 1500);
     } catch (err) {
       loginMsg.textContent = "❌ Error: " + err.message;
     }
@@ -127,20 +112,18 @@ if (googleBtn) {
 // ============================== LOGOUT ==============================
 document.querySelectorAll("#logout").forEach((btn) => {
   btn.onclick = () => {
-    localStorage.removeItem("usuario"); 
+    localStorage.removeItem("usuario");
     signOut(auth);
   };
 });
 
 // ============================== ESTADO DE SESIÓN ==============================
-// Todos los userbox y elementos repetidos
 const userBoxes   = document.querySelectorAll(".userbox");
 const userSpans   = document.querySelectorAll("#user");
 const logoutBtns  = document.querySelectorAll("#logout");
 const loginBtns   = document.querySelectorAll("#login-btn");
 const registerBtns= document.querySelectorAll("#register-btn");
 
-// 👉 Mostrar lo que haya en caché primero
 const cachedUser = localStorage.getItem("usuario");
 if (cachedUser) {
   userSpans.forEach(u => u.textContent = `Hola ${cachedUser}`);
@@ -168,12 +151,10 @@ onAuthStateChanged(auth, (user) => {
     registerBtns.forEach(b => b.style.display = "inline-block");
   }
 
-  userBoxes.forEach(b => b.style.visibility = "visible"); // ✅ se revela al final
+  userBoxes.forEach(b => b.style.visibility = "visible");
 });
 
 // ============================== FIRESTORE FUNCIONES ==============================
-
-// === Películas ===
 export async function obtenerPeliculas() {
   const snapshot = await getDocs(collection(db, "peliculas"));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -185,14 +166,12 @@ export async function obtenerPelicula(id) {
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-// === Item genérico (peliculas, series, anime, musica) ===
 export async function obtenerItem(tipo, id) {
   const ref = doc(db, tipo, id);
   const snap = await getDoc(ref);
   return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 }
 
-// === Reseñas ===
 export async function guardarReseña(peliculaId, usuario, texto, rating) {
   return await addDoc(collection(db, "reseñas"), {
     pelicula: peliculaId,
@@ -205,10 +184,7 @@ export async function guardarReseña(peliculaId, usuario, texto, rating) {
 
 export async function obtenerReseñas(peliculaId) {
   try {
-    const q = query(
-      collection(db, "reseñas"),
-      where("pelicula", "==", peliculaId)
-    );
+    const q = query(collection(db, "reseñas"), where("pelicula", "==", peliculaId));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   } catch (err) {
