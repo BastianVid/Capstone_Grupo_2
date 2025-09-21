@@ -23,11 +23,13 @@ async function cargarItem() {
     return;
   }
 
-  // 🔹 Mostrar todos los campos disponibles
+  // 🔹 Mostrar título sobre la imagen
   infoDiv.innerHTML = `
-    <h2>${item.titulo}</h2>
     <div class="item-info">
-      <img src="${item.imagen}" alt="${item.titulo}">
+      <div class="item-image">
+        <h2 class="item-title">${item.titulo}</h2>
+        <img src="${item.imagen}" alt="${item.titulo}">
+      </div>
       <div class="item-details">
         <p>${item.descripcion}</p>
         ${item.director ? `<p><strong>Director:</strong> ${item.director}</p>` : ""}
