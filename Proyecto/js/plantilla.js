@@ -23,12 +23,20 @@ async function cargarItem() {
     return;
   }
 
- infoDiv.innerHTML = `
-  <h2>${item.titulo}</h2>
-  <img src="${item.imagen}" alt="${item.titulo}">
-  <p>${item.descripcion}</p>
-`;
-
+  // 🔹 Mostrar todos los campos disponibles
+  infoDiv.innerHTML = `
+    <h2>${item.titulo}</h2>
+    <div class="item-info">
+      <img src="${item.imagen}" alt="${item.titulo}">
+      <div class="item-details">
+        <p>${item.descripcion}</p>
+        ${item.director ? `<p><strong>Director:</strong> ${item.director}</p>` : ""}
+        ${item.año ? `<p><strong>Año:</strong> ${item.año}</p>` : ""}
+        ${item.genero ? `<p><strong>Género:</strong> ${Array.isArray(item.genero) ? item.genero.join(", ") : item.genero}</p>` : ""}
+        ${item.duracion ? `<p><strong>Duración:</strong> ${item.duracion} min</p>` : ""}
+      </div>
+    </div>
+  `;
 
   cargarReseñas();
 }
