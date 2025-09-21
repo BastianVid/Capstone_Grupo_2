@@ -139,9 +139,11 @@ footer {
 .pelicula-card:hover, .item-card:hover { transform: translateY(-5px); }
 
 .pelicula-card img, .item-card img {
-  width: 100%;
+ width: 100%;
+  height: 320px;         /* 🔹 Ajusta la altura según lo que quieras */
   border-radius: 8px;
   margin-bottom: 12px;
+  object-fit: cover;  
 }
 
 .pelicula-card h3 { margin-bottom: 8px; color: var(--text); }
