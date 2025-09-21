@@ -155,9 +155,21 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ============================== FIRESTORE FUNCIONES ==============================
+
+// 🔹 Función genérica para cualquier colección (anime, peliculas, musica, series)
+export async function obtenerColeccion(tipo) {
+  try {
+    const snapshot = await getDocs(collection(db, tipo));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  } catch (err) {
+    console.error(`❌ Error al obtener colección ${tipo}:`, err.message);
+    return [];
+  }
+}
+
+// 🔹 Función específica que ya tenías (la mantengo por compatibilidad)
 export async function obtenerPeliculas() {
-  const snapshot = await getDocs(collection(db, "peliculas"));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+  return await obtenerColeccion("peliculas");
 }
 
 export async function obtenerPelicula(id) {

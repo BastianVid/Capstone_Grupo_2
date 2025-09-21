@@ -11,53 +11,55 @@ document.addEventListener("DOMContentLoaded", () => {
   let index = 0;
   let interval;
 
-  // Crear los dots dinámicamente
-  images.forEach((_, i) => {
-    const dot = document.createElement("span");
-    dot.classList.add("dot");
-    if (i === 0) dot.classList.add("active");
-    dot.addEventListener("click", () => showSlide(i));
-    dotsContainer.appendChild(dot);
-  });
-  const dots = document.querySelectorAll(".dot");
+  if (slides && images.length > 0) {
+    // Crear los dots dinámicamente
+    images.forEach((_, i) => {
+      const dot = document.createElement("span");
+      dot.classList.add("dot");
+      if (i === 0) dot.classList.add("active");
+      dot.addEventListener("click", () => showSlide(i));
+      dotsContainer.appendChild(dot);
+    });
+    const dots = document.querySelectorAll(".dot");
 
-  function showSlide(i) {
-    index = i;
-    slides.style.transform = `translateX(-${index * 100}%)`;
-    dots.forEach(dot => dot.classList.remove("active"));
-    dots[index].classList.add("active");
-  }
+    function showSlide(i) {
+      index = i;
+      slides.style.transform = `translateX(-${index * 100}%)`;
+      dots.forEach(dot => dot.classList.remove("active"));
+      dots[index].classList.add("active");
+    }
 
-  function nextSlide() {
-    index = (index + 1) % totalSlides;
-    showSlide(index);
-  }
+    function nextSlide() {
+      index = (index + 1) % totalSlides;
+      showSlide(index);
+    }
 
-  function prevSlide() {
-    index = (index - 1 + totalSlides) % totalSlides;
-    showSlide(index);
-  }
+    function prevSlide() {
+      index = (index - 1 + totalSlides) % totalSlides;
+      showSlide(index);
+    }
 
-  function startAutoPlay() {
-    interval = setInterval(nextSlide, 4000);
-  }
-  function stopAutoPlay() {
-    clearInterval(interval);
-  }
+    function startAutoPlay() {
+      interval = setInterval(nextSlide, 4000);
+    }
+    function stopAutoPlay() {
+      clearInterval(interval);
+    }
 
-  nextBtn.addEventListener("click", () => {
-    nextSlide();
-    stopAutoPlay();
+    nextBtn?.addEventListener("click", () => {
+      nextSlide();
+      stopAutoPlay();
+      startAutoPlay();
+    });
+
+    prevBtn?.addEventListener("click", () => {
+      prevSlide();
+      stopAutoPlay();
+      startAutoPlay();
+    });
+
     startAutoPlay();
-  });
-
-  prevBtn.addEventListener("click", () => {
-    prevSlide();
-    stopAutoPlay();
-    startAutoPlay();
-  });
-
-  startAutoPlay();
+  }
 });
 
 // ============================== TOGGLE PASSWORD ==============================
@@ -72,4 +74,42 @@ document.querySelectorAll(".toggle-password").forEach((btn) => {
       btn.textContent = "🔒"; 
     }
   });
+});
+
+// ============================== LISTAS DINÁMICAS ==============================
+import { obtenerColeccion } from "./firebase.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const lista = document.getElementById("lista-items");
+  const tipo = lista?.dataset.tipo; // 🔑 Detecta si el HTML tiene un data-tipo
+
+  if (lista && tipo) {
+    try {
+      lista.innerHTML = "<p>Cargando...</p>";
+      const items = await obtenerColeccion(tipo);
+      lista.innerHTML = "";
+
+      if (items.length === 0) {
+        lista.innerHTML = "<p>No hay elementos disponibles.</p>";
+        return;
+      }
+
+      items.forEach(item => {
+        const card = document.createElement("div");
+        card.classList.add("item-card");
+
+        card.innerHTML = `
+          <img src="${item.imagen}" alt="${item.titulo}">
+          <h3>${item.titulo}</h3>
+          <p>${item.descripcion}</p>
+          <a href="plantilla.html?tipo=${tipo}&id=${item.id}" class="btn">Leer reseña</a>
+        `;
+
+        lista.appendChild(card);
+      });
+    } catch (error) {
+      console.error("❌ Error cargando colección:", error);
+      lista.innerHTML = "<p>Error al cargar los datos.</p>";
+    }
+  }
 });
