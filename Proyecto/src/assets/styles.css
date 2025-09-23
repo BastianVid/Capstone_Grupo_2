@@ -1,0 +1,267 @@
+/* ==== Reset básico ==== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ==== Paleta y tema (compatible con Bootstrap) ==== */
+:root {
+  --bg: #0f172a;        /* fondo general */
+  --card: #1e293b;      /* paneles / cards */
+  --accent: #38bdf8;    /* acento */
+  --text: #f1f5f9;      /* texto principal */
+  --muted: #94a3b8;     /* texto secundario */
+}
+
+/* Ajustes para Bootstrap en tema oscuro */
+html[data-bs-theme="light"] body { background: var(--bg); color: var(--text); }
+html[data-bs-theme="dark"] body  { background: var(--bg); color: var(--text); }
+
+/* Mapea variables Bootstrap al esquema de color */
+:root,
+html[data-bs-theme="dark"] {
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--text);
+  --bs-secondary-color: var(--muted);
+  --bs-emphasis-color: var(--text);
+  --bs-border-color: #334155;
+  --bs-card-bg: var(--card);
+  --bs-card-border-color: #334155;
+  --bs-link-color: var(--accent);
+  --bs-link-hover-color: #0ea5e9;
+  --bs-primary: #38bdf8;
+  --bs-primary-rgb: 56,189,248;
+}
+
+/* ==== Body ==== */
+body {
+  font-family: "Inter", system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ==== (Legacy) Header & Navbar simple ==== */
+/* Ya no se usa si renderizas la navbar de Bootstrap, pero lo dejo por si reutilizas */
+header {
+  background: var(--card);
+  padding: 16px 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1200px;
+  margin: auto;
+}
+nav h1 { font-size: 1.5rem; color: var(--accent); }
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+nav a {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+nav a:hover { color: var(--accent); }
+
+/* ==== Secciones genéricas ==== */
+main {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.bienvenida,
+.cx-hero {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.bienvenida h2,
+.cx-hero h2 {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+.bienvenida p,
+.cx-hero p {
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+/* ==== Botones propios (renombrado para no chocar con Bootstrap) ==== */
+.cx-btn {
+  display: inline-block;
+  background: var(--accent);
+  color: #0f172a;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+  border: 0;
+}
+.cx-btn:hover { background: #0ea5e9; }
+
+/* ==== Footer ==== */
+footer {
+  text-align: center;
+  padding: 20px;
+  background: var(--card);
+  color: var(--muted);
+  margin-top: 40px;
+}
+
+/* ==== Responsive ==== */
+@media (max-width: 768px) {
+  nav { gap: 8px; }
+  nav ul { flex-direction: column; gap: 12px; }
+  main { margin: 20px auto; }
+  .bienvenida, .cx-hero { padding: 40px 16px; }
+}
+
+/* ============================ PELÍCULAS ============================ */
+.peliculas { text-align: center; margin: 40px 20px; }
+.peliculas h2 { margin-bottom: 24px; color: var(--accent); }
+
+.grid-peliculas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.pelicula-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  text-align: center;
+  transition: transform 0.2s;
+}
+.pelicula-card:hover { transform: translateY(-5px); }
+.pelicula-card img {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+}
+.pelicula-card h3 { margin-bottom: 8px; color: var(--text); }
+.pelicula-card p { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; }
+
+/* ==================== FORMULARIO REGISTRO/LOGIN ==================== */
+.form-card {
+  background: var(--card);
+  max-width: 400px;
+  margin: 60px auto;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  text-align: center;
+}
+.form-card h2 { margin-bottom: 24px; color: var(--accent); }
+.form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
+.form-card label { font-weight: 500; color: var(--text); }
+.form-card input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #475569;
+  background: var(--bg);
+  color: var(--text);
+}
+.form-card input::placeholder { color: var(--muted); }
+.form-card button { margin-top: 8px; }
+
+/* ============================ ANIME / GENÉRICOS ============================ */
+.seccion {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+.seccion h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--accent);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.item-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  text-align: center;
+  transition: transform 0.2s;
+}
+.item-card:hover { transform: translateY(-5px); }
+.item-card h3 { margin-bottom: 12px; color: var(--accent); }
+.item-card p { color: var(--muted); }
+
+/* ============================ SLIDER ============================ */
+.slider {
+  position: relative;
+  max-width: 1000px;
+  margin: 40px auto;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.slides {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+.slides img {
+  width: 100%;
+  flex-shrink: 0;
+  object-fit: cover;
+  aspect-ratio: 16 / 9;
+}
+/* Controles */
+.slider button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.slider .prev { left: 10px; }
+.slider .next { right: 10px; }
+/* Indicadores */
+.dots { text-align: center; margin-top: 10px; }
+.dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 5px;
+  background: #475569;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.dot.active { background: var(--accent); }
+
+/* ============================ UTILIDADES ============================ */
+.card img { object-fit: cover; aspect-ratio: 4 / 3; } /* para cards de Bootstrap */
+.navbar { box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
