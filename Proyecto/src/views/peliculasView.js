@@ -118,6 +118,13 @@ export function PeliculasView() {
         const { logout } = await import('../controllers/authController.js');
         logout();
       });
+
+      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = e.currentTarget.querySelector('input').value.trim();
+      if (q) sessionStorage.setItem('cx:q', q);
+      location.hash = '#/peliculas';
+      });
     },
   };
 }

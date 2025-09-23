@@ -46,6 +46,13 @@ export function LoginView() {
         logout();
       });
 
+      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const q = e.currentTarget.querySelector('input').value.trim();
+      if (q) sessionStorage.setItem('cx:q', q);
+      location.hash = '#/peliculas';
+      });
+
       // Manejo del formulario
       const form = document.getElementById('loginForm');
       form.addEventListener('submit', async (e) => {
