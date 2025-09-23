@@ -26,14 +26,14 @@ const NotFoundView = () => ({
 
 // Tabla de rutas (hash-based)
 const routes = {
-  '/':          { view: HomeView,    secure: true,  title: 'Inicio • CulturaX' },
-  '/series':    { view: SeriesView,  secure: true,  title: 'Series • CulturaX' },
+  '/':          { view: HomeView,    secure: false,  title: 'Inicio • CulturaX' },
+  '/series':    { view: SeriesView,  secure: false,  title: 'Series • CulturaX' },
   '/login':     { view: LoginView,   secure: false, title: 'Iniciar sesión • CulturaX' },
   '/registro':  { view: RegistroView,secure: false, title: 'Registro • CulturaX' },
   '/404':       { view: NotFoundView,secure: false, title: 'No encontrado • CulturaX' },
-  '/peliculas': { view: PeliculasView,secure: true,  title: 'Películas • CulturaX' },
-  '/anime':     { view: AnimeView,    secure: true,  title: 'Anime • CulturaX' },
-  '/musica':    { view: MusicaView,   secure: true,  title: 'Música • CulturaX' },
+  '/peliculas': { view: PeliculasView,secure: false,  title: 'Películas • CulturaX' },
+  '/anime':     { view: AnimeView,    secure: false,  title: 'Anime • CulturaX' },
+  '/musica':    { view: MusicaView,   secure: false,  title: 'Música • CulturaX' },
 };
 
 // Normaliza el hash a un path conocido

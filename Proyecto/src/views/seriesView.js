@@ -1,6 +1,6 @@
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
-import { updateNavbarSessionUI } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher  } from './navbarSession.js';
 
 export function SeriesView() {
   const html = `
@@ -41,6 +41,7 @@ export function SeriesView() {
     html,
     async bind() {
       // Actualiza UI del navbar según sesión
+      initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
       const { ContentModel } = await import('../models/contentModel.js');

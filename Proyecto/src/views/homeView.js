@@ -1,5 +1,5 @@
 import { Navbar } from './navbar.js';
-import { updateNavbarSessionUI } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher  } from './navbarSession.js';
 
 
 
@@ -16,6 +16,7 @@ export function HomeView() {
     </header>
   `;
   return { html, bind() {
+  initNavbarSessionWatcher();
   updateNavbarSessionUI();
   document.getElementById('logoutBtn')?.addEventListener('click', async () => {
     const { logout } = await import('../controllers/authController.js');

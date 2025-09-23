@@ -1,5 +1,5 @@
 import { Navbar } from './navbar.js';
-import { updateNavbarSessionUI } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher  } from './navbarSession.js';
 
 export function RegistroView() {
   const html = `
@@ -60,6 +60,7 @@ export function RegistroView() {
     html,
     bind() {
       // Actualiza estado del navbar según la sesión
+      initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
       const form = document.getElementById('regForm');

@@ -1,8 +1,11 @@
-// /src/views/navbarSession.js
-import { currentUser } from '../lib/firebase.js';
+import { auth } from '../lib/firebase.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+let subscribed = false;
 
 export function updateNavbarSessionUI() {
-  const user = currentUser;
+  const user = auth.currentUser;
+
   const span = document.getElementById('userSpan');
   const loginBtn = document.getElementById('loginBtn');
   const registerBtn = document.getElementById('registerBtn');
@@ -22,4 +25,11 @@ export function updateNavbarSessionUI() {
     loginBtn.classList.remove('d-none');
     registerBtn.classList.remove('d-none');
   }
+}
+
+/** Llama esto una vez por vista (tras render) para mantener el navbar sincronizado */
+export function initNavbarSessionWatcher() {
+  if (subscribed) return;
+  subscribed = true;
+  onAuthStateChanged(auth, () => updateNavbarSessionUI());
 }

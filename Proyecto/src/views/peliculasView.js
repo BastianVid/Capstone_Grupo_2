@@ -1,6 +1,6 @@
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
-import { updateNavbarSessionUI } from './navbarSession.js';
+import { updateNavbarSessionUI,initNavbarSessionWatcher  } from './navbarSession.js';
 
 export function PeliculasView() {
   const html = `
@@ -33,6 +33,7 @@ export function PeliculasView() {
   return {
     html,
     async bind() {
+      initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
       const { ContentModel } = await import('../models/contentModel.js');

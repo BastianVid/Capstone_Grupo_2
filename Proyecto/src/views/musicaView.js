@@ -1,6 +1,6 @@
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
-import { updateNavbarSessionUI } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher  } from './navbarSession.js';
 
 export function MusicaView() {
   const html = `
@@ -22,6 +22,7 @@ export function MusicaView() {
     html,
     async bind() {
       // Actualiza estado del navbar según sesión
+      initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
       // 1) Datos desde Firestore (colección "musica")

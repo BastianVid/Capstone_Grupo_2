@@ -1,5 +1,5 @@
 import { Navbar } from './navbar.js';
-import { updateNavbarSessionUI } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher  } from './navbarSession.js';
 
 export function LoginView() {
   const html = `
@@ -37,6 +37,7 @@ export function LoginView() {
     html,
     bind() {
       // UI del navbar según sesión
+      initNavbarSessionWatcher(); 
       updateNavbarSessionUI();
 
       // Logout (por si se entra ya logueado)

@@ -1,6 +1,6 @@
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
-import { updateNavbarSessionUI } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher  } from './navbarSession.js';
 
 export function AnimeView() {
   const html = `
@@ -22,6 +22,7 @@ export function AnimeView() {
     html,
     async bind() {
       // Actualiza el estado del navbar según la sesión
+      initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
       // Carga datos desde Firestore (colección "anime")
