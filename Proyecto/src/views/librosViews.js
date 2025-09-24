@@ -1,27 +1,27 @@
-// src/views/peliculasView.js
+// src/views/librosView.js
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 
-export function PeliculasView() {
+export function LibrosView() {
   const html = `
     ${Navbar()}
     <div class="container py-4">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-        <h1 class="h3 mb-0"><i class="bi bi-camera-reels"></i> Películas</h1>
+        <h1 class="h3 mb-0"><i class="bi bi-book"></i> Libros</h1>
 
         <div class="d-flex gap-2 align-items-center">
           <div class="input-group w-auto">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por título, director, género o año...">
+            <input id="q" class="form-control" placeholder="Buscar por título, autor, género o año...">
           </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
           <select id="year" class="form-select form-select-sm w-auto">
             <option value="">Año</option>
-            ${Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i)
+            ${Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - i)
               .map((y) => `<option>${y}</option>`)
               .join('')}
           </select>
@@ -39,47 +39,52 @@ export function PeliculasView() {
       updateNavbarSessionUI();
 
       const { ContentModel } = await import('../models/contentModel.js');
-      let data = await ContentModel.listPeliculas();
 
-      // Normalizador -> resuelve la imagen a /src/assets/img/*
+      // Si aún no implementaste listLibros en el ContentModel, devolvemos []
+      const load = ContentModel.listLibros
+        ? ContentModel.listLibros
+        : async () => [];
+
+      let dataRaw = await load();
+
+      // Normalización a tu esquema en español
+      // Campos esperados: titulo/title, imagen/img/image, genero/genre (array o string),
+      // año/year, autor/author, descripcion/description
       const normalize = (arr) =>
         (arr || []).map((x) => {
-          const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
+          const genres = Array.isArray(x.genero)
+            ? x.genero
+            : (x.genre ? (Array.isArray(x.genre) ? x.genre : [x.genre]) : []);
           const year = x.año ?? x.year ?? '';
-          const director = x.director ?? '';
-
-          // 1) Tomamos cualquier campo posible con la imagen
-          // 2) Lo pasamos por resolveImagePath para que apunte a ./src/assets/img/*
-          const imgCandidate = x.imagen ?? x.img ?? x.image ?? 'inception.jpg';
-          const img = resolveImagePath(imgCandidate);
-
+          const author = x.autor ?? x.author ?? '';
           return {
             id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
             title: x.titulo ?? x.title ?? 'Sin título',
-            img,                                              // <-- ruta local resuelta
-            tag: genres[0] ?? 'Película',
-            genres,                                           // para filtros
-            subtitle: [director, year].filter(Boolean).join(' • '),
+            img: x.imagen ?? x.img ?? x.image ?? 'img/placeholder-book.jpg',
+            tag: genres[0] ?? 'Libro',
+            genres,
+            subtitle: [author, year].filter(Boolean).join(' • '),
             year: year ? String(year) : '',
             description: x.descripcion ?? x.description ?? '',
           };
         });
 
-      data = normalize(data);
+      let data = normalize(dataRaw);
 
-      // Poblar select de géneros
+      // Rellena select de géneros
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
       gEl.innerHTML =
         `<option value="">Género</option>` +
         uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
+      // Dibuja cards
       const draw = (arr) =>
         renderCards('#grid', arr, {
           showDescription: true,
-          ctaText: 'Leer reseña',
+          ctaText: 'Ver ficha',
           onCardClick: (item) => {
-            alert(`Próximamente reseña de: ${item.title}`);
+            alert(`Próximamente ficha de: ${item.title}`);
           },
         });
 
@@ -101,12 +106,12 @@ export function PeliculasView() {
               .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
 
-        const hayGenero =
-          !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const hayGenero =
+            !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
 
-        const hayAnio = !y || x.year === y;
+          const hayAnio = !y || x.year === y;
 
-        return hayTexto && hayGenero && hayAnio;
+          return hayTexto && hayGenero && hayAnio;
         });
 
         draw(filtered);
@@ -116,17 +121,16 @@ export function PeliculasView() {
       gEl?.addEventListener('change', applyFilters);
       yEl?.addEventListener('change', applyFilters);
 
-      // Navbar acciones
+      // Navbar actions
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
       });
-
       document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const q = e.currentTarget.querySelector('input').value.trim();
         if (q) sessionStorage.setItem('cx:q', q);
-        location.hash = '#/peliculas';
+        location.hash = '#/libros';
       });
     },
   };

@@ -39,10 +39,14 @@ async function listReviewsByPelicula(peliculaId) {
 // ============================== EXPORT ==============================
 export const ContentModel = {
   // Colecciones principales
-  listSeries:    () => readCollection('series'),
-  listPeliculas: () => readCollection('peliculas'),
-  listAnime:     () => readCollection('anime'),
-  listMusica:    () => readCollection('musica'),
+  listSeries:       () => readCollection('series'),
+  listPeliculas:    () => readCollection('peliculas'),
+  listAnime:        () => readCollection('anime'),
+  listMusica:       () => readCollection('musica'),
+
+  // 🔹 NUEVO
+  listVideojuegos:  () => readCollection('videojuegos'),
+  listLibros:       () => readCollection('libros'),
 
   // Items individuales
   getPelicula: (id) => readItem('peliculas', id),

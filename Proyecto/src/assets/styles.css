@@ -1,24 +1,29 @@
-/* ==== Reset básico ==== */
+/* =========================================================
+   Reset básico
+   ========================================================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* ==== Paleta y tema (compatible con Bootstrap) ==== */
+/* =========================================================
+   Paleta y tema (compatible con Bootstrap)
+   ========================================================= */
 :root {
   --bg: #0f172a;        /* fondo general */
   --card: #1e293b;      /* paneles / cards */
   --accent: #38bdf8;    /* acento */
   --text: #f1f5f9;      /* texto principal */
   --muted: #94a3b8;     /* texto secundario */
+
+  /* Rails (ancho y separación de tarjetas) */
+  --rail-card-w: clamp(170px, 18vw, 210px); /* compacto */
+  --rail-body-h: 150px;                     /* alto del bloque texto+botón */
+  --rail-gap: 14px;
 }
 
-/* Ajustes para Bootstrap en tema oscuro */
-html[data-bs-theme="light"] body { background: var(--bg); color: var(--text); }
-html[data-bs-theme="dark"] body  { background: var(--bg); color: var(--text); }
-
-/* Mapea variables Bootstrap al esquema de color */
+/* Tema Bootstrap oscuro mapeado a la paleta */
 :root,
 html[data-bs-theme="dark"] {
   --bs-body-bg: var(--bg);
@@ -34,7 +39,13 @@ html[data-bs-theme="dark"] {
   --bs-primary-rgb: 56,189,248;
 }
 
-/* ==== Body ==== */
+/* Compatibilidad si alguien fuerza data-bs-theme="light" */
+html[data-bs-theme="light"] body { background: var(--bg); color: var(--text); }
+html[data-bs-theme="dark"]  body { background: var(--bg); color: var(--text); }
+
+/* =========================================================
+   Tipografía y cuerpo
+   ========================================================= */
 body {
   font-family: "Inter", system-ui, Arial, sans-serif;
   background: var(--bg);
@@ -42,8 +53,58 @@ body {
   line-height: 1.6;
 }
 
-/* ==== (Legacy) Header & Navbar simple ==== */
-/* Ya no se usa si renderizas la navbar de Bootstrap, pero lo dejo por si reutilizas */
+/* =========================================================
+   Navbar (Bootstrap)
+   ========================================================= */
+.cx-header {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  background: var(--card);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+
+/* Links del navbar */
+.cx-header .nav-link { color: rgba(241,245,249,.7); }
+.cx-header .nav-link:hover,
+.cx-header .nav-link:focus { color: var(--accent) !important; }
+
+/* Dropdown en tema oscuro */
+.cx-header .dropdown-menu {
+  background-color: var(--card);
+  color: var(--text);
+  border-color: var(--bs-border-color);
+}
+.cx-header .dropdown-item { color: var(--text); }
+.cx-header .dropdown-item:hover,
+.cx-header .dropdown-item:focus {
+  background-color: #243244;
+  color: var(--text);
+}
+
+/* Inputs y selects en el header (buscador) */
+.cx-header .form-control,
+.cx-header .form-select {
+  background-color: #0f172a;
+  color: var(--text);
+  border-color: #475569;
+}
+.cx-header .form-control::placeholder { color: var(--muted); }
+
+/* Botones primarios en la cabecera */
+.cx-header .btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #0b1220;
+}
+.cx-header .btn-primary:hover {
+  background-color: #0ea5e9;
+  border-color: #0ea5e9;
+}
+
+/* =========================================================
+   (Legacy) Header & Navbar simple – compatibilidad
+   ========================================================= */
 header {
   background: var(--card);
   padding: 16px 24px;
@@ -71,7 +132,9 @@ nav a {
 }
 nav a:hover { color: var(--accent); }
 
-/* ==== Secciones genéricas ==== */
+/* =========================================================
+   Secciones genéricas
+   ========================================================= */
 main {
   max-width: 1000px;
   margin: 40px auto;
@@ -93,12 +156,11 @@ main {
   color: var(--accent);
 }
 .bienvenida p,
-.cx-hero p {
-  color: var(--muted);
-  margin-bottom: 24px;
-}
+.cx-hero p { color: var(--muted); margin-bottom: 24px; }
 
-/* ==== Botones propios (renombrado para no chocar con Bootstrap) ==== */
+/* =========================================================
+   Botones propios (no Bootstrap)
+   ========================================================= */
 .cx-btn {
   display: inline-block;
   background: var(--accent);
@@ -112,7 +174,9 @@ main {
 }
 .cx-btn:hover { background: #0ea5e9; }
 
-/* ==== Footer ==== */
+/* =========================================================
+   Footer
+   ========================================================= */
 footer {
   text-align: center;
   padding: 20px;
@@ -121,7 +185,9 @@ footer {
   margin-top: 40px;
 }
 
-/* ==== Responsive ==== */
+/* =========================================================
+   Responsive global
+   ========================================================= */
 @media (max-width: 768px) {
   nav { gap: 8px; }
   nav ul { flex-direction: column; gap: 12px; }
@@ -129,7 +195,9 @@ footer {
   .bienvenida, .cx-hero { padding: 40px 16px; }
 }
 
-/* ============================ PELÍCULAS ============================ */
+/* =========================================================
+   Catálogo de películas
+   ========================================================= */
 .peliculas { text-align: center; margin: 40px 20px; }
 .peliculas h2 { margin-bottom: 24px; color: var(--accent); }
 
@@ -157,7 +225,9 @@ footer {
 .pelicula-card h3 { margin-bottom: 8px; color: var(--text); }
 .pelicula-card p { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; }
 
-/* ==================== FORMULARIO REGISTRO/LOGIN ==================== */
+/* =========================================================
+   Formularios (registro / login)
+   ========================================================= */
 .form-card {
   background: var(--card);
   max-width: 400px;
@@ -168,12 +238,7 @@ footer {
   text-align: center;
 }
 .form-card h2 { margin-bottom: 24px; color: var(--accent); }
-.form-card form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  text-align: left;
-}
+.form-card form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
 .form-card label { font-weight: 500; color: var(--text); }
 .form-card input {
   width: 100%;
@@ -186,22 +251,16 @@ footer {
 .form-card input::placeholder { color: var(--muted); }
 .form-card button { margin-top: 8px; }
 
-/* ============================ ANIME / GENÉRICOS ============================ */
+/* =========================================================
+   Secciones genéricas (grid reutilizable)
+   ========================================================= */
 .seccion {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
 }
-.seccion h2 {
-  text-align: center;
-  margin-bottom: 24px;
-  color: var(--accent);
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
+.seccion h2 { text-align: center; margin-bottom: 24px; color: var(--accent); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
 .item-card {
   background: var(--card);
   border-radius: 12px;
@@ -214,7 +273,9 @@ footer {
 .item-card h3 { margin-bottom: 12px; color: var(--accent); }
 .item-card p { color: var(--muted); }
 
-/* ============================ SLIDER ============================ */
+/* =========================================================
+   Slider antiguo (si aún se usa en alguna vista)
+   ========================================================= */
 .slider {
   position: relative;
   max-width: 1000px;
@@ -223,17 +284,13 @@ footer {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
-.slides {
-  display: flex;
-  transition: transform 0.5s ease-in-out;
-}
+.slides { display: flex; transition: transform 0.5s ease-in-out; }
 .slides img {
   width: 100%;
   flex-shrink: 0;
   object-fit: cover;
   aspect-ratio: 16 / 9;
 }
-/* Controles */
 .slider button {
   position: absolute;
   top: 50%;
@@ -248,7 +305,6 @@ footer {
 }
 .slider .prev { left: 10px; }
 .slider .next { right: 10px; }
-/* Indicadores */
 .dots { text-align: center; margin-top: 10px; }
 .dot {
   display: inline-block;
@@ -262,6 +318,173 @@ footer {
 }
 .dot.active { background: var(--accent); }
 
-/* ============================ UTILIDADES ============================ */
-.card img { object-fit: cover; aspect-ratio: 4 / 3; } /* para cards de Bootstrap */
-.navbar { box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+/* =========================================================
+   HERO (carrusel principal)
+   ========================================================= */
+.cx-hero {
+  height: 620px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+@media (max-width: 768px) {
+  .cx-hero { height: 240px; }
+}
+.cx-hero .carousel-inner,
+.cx-hero .carousel-item { height: 100%; }
+.cx-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* =========================================================
+   Sidebar (publicidad y próximos estrenos)
+   ========================================================= */
+.ad-billboard { height: 160px; object-fit: cover; border-radius: 8px; }
+@media (min-width: 1200px) { .ad-billboard { height: 200px; } }
+
+.upcoming-card .list-group { max-height: 360px; overflow: auto; }
+.upcoming-thumb { width: 56px; height: 84px; object-fit: cover; border-radius: 6px; }
+
+/* =========================================================
+   Utilidades: truncado multilínea
+   ========================================================= */
+.text-truncate-1,
+.text-truncate-2,
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.text-truncate-1 { -webkit-line-clamp: 1; line-clamp: 1; }
+.text-truncate-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+.text-truncate-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+
+/* Placeholder aplicado por image-fallback.js */
+.is-fallback {
+  filter: none;
+  background: #0f172a;
+}
+
+/* =========================================================
+   Rails (tarjetas uniformes y simétricas)
+   ========================================================= */
+
+/* Contenedor desplazable horizontal (sin barra visible) */
+.cx-rail {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0;              /* sin espacio extra debajo */
+  scrollbar-width: none;          /* Firefox: oculta scrollbar */
+  -ms-overflow-style: none;       /* IE/Edge Legacy */
+}
+.cx-rail::-webkit-scrollbar {      /* Chrome/Safari/Edge: oculta scrollbar */
+  height: 0 !important;
+  background: transparent;
+}
+
+/* Pista en columnas de ancho fijo para cada tarjeta */
+.cx-rail-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: var(--rail-card-w);
+  gap: var(--rail-gap);
+  align-items: stretch;
+  scroll-snap-type: x mandatory;
+}
+
+/* Cada tarjeta: altura TOTAL fija = alto de imagen (relación 2:3) + cuerpo */
+.cx-rail-card {
+  scroll-snap-align: start;
+  background: var(--card);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc((var(--rail-card-w) * 1.5) + var(--rail-body-h)); /* 1.5 = 3/2 */
+  box-shadow: 0 6px 14px rgba(0,0,0,.25);
+  border: 1px solid var(--bs-border-color);
+}
+
+/* El thumb mantiene relación 2:3 y no altera la altura */
+.cx-rail-thumb {
+  width: 100%;
+  aspect-ratio: 2 / 3;            /* asegura alto = 1.5 * ancho */
+  object-fit: cover;
+  display: block;
+  background: #0b1220;
+}
+
+/* Cuerpo con altura fija y botón pegado al fondo */
+.cx-rail-body {
+  height: var(--rail-body-h);     /* fuerza igual alto en todas */
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;               /* evita que textos hagan crecer la tarjeta */
+}
+
+/* Meta, título y descripción (truncadas) */
+.cx-rail-meta { font-size: .8rem; color: var(--muted); }
+
+/* Título más pequeño */
+.cx-rail-title {
+  font-weight: 600;
+  line-height: 1.2;
+  font-size: 0.95rem;             /* reducido */
+}
+.cx-rail-title.text-truncate-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+
+.cx-rail-desc { font-size: .9rem; color: var(--muted); }
+.cx-rail-desc.text-truncate-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+
+/* CTA idéntico en todas las tarjetas */
+.cx-rail-actions { margin-top: auto; }
+.cx-rail-actions .btn {
+  width: 100%;
+  height: 38px;                   /* mismo alto en todo */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* Ajuste extra en móviles para títulos */
+@media (max-width: 576px) {
+  .cx-rail-title { font-size: 0.9rem; }
+}
+
+/* =========================================================
+   Footer (CulturaX)
+   ========================================================= */
+.cx-footer {
+  text-align: initial;                 /* evita centrado global del tag footer */
+  background: var(--card);
+  border-top: 1px solid var(--bs-border-color);
+  color: var(--muted);
+}
+
+.cx-footer .cx-footer-link {
+  color: rgba(241,245,249,.85);
+  text-decoration: none;
+}
+.cx-footer .cx-footer-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cx-footer h6 { letter-spacing: .02em; }
+
+.cx-footer .btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #0b1220;
+}
+.cx-footer .btn-primary:hover {
+  background-color: #0ea5e9;
+  border-color: #0ea5e9;
+}
