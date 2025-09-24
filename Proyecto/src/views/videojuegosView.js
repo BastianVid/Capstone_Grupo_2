@@ -1,4 +1,3 @@
-// src/views/videojuegosView.js
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
@@ -14,16 +13,15 @@ export function VideojuegosView() {
         <div class="d-flex gap-2 align-items-center">
           <div class="input-group w-auto">
             <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por título, desarrollador, género o año...">
+            <input id="q" class="form-control" placeholder="Buscar por título, género, plataforma o año...">
           </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
           <select id="year" class="form-select form-select-sm w-auto">
             <option value="">Año</option>
-            ${Array.from({ length: 50 }, (_, i) => new Date().getFullYear() - i)
-              .map((y) => `<option>${y}</option>`)
-              .join('')}
+            ${Array.from({ length: 40 }, (_, i) => new Date().getFullYear() - i)
+              .map((y) => `<option>${y}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -39,32 +37,25 @@ export function VideojuegosView() {
       updateNavbarSessionUI();
 
       const { ContentModel } = await import('../models/contentModel.js');
+      let dataRaw = await ContentModel.listVideojuegos();
 
-      // Si aún no implementaste listVideojuegos en el ContentModel, devolvemos []
-      const load = ContentModel.listVideojuegos
-        ? ContentModel.listVideojuegos
-        : async () => [];
-
-      let dataRaw = await load();
-
-      // Normalización a tu esquema en español
-      // Campos esperados en BD (flexible): titulo/title, imagen/img/image, genero/genre (array o string),
-      // año/year, desarrollador/developer, descripcion/description
+      // Normaliza según tu esquema en Firestore (ejemplo sugerido)
+      // { titulo, imagen, genero(array|string), plataforma, año, descripcion }
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero)
             ? x.genero
-            : (x.genre ? (Array.isArray(x.genre) ? x.genre : [x.genre]) : []);
+            : (x.genero ? String(x.genero).split(',').map(s => s.trim()) : []);
           const year = x.año ?? x.year ?? '';
-          const developer = x.desarrollador ?? x.developer ?? '';
+          const meta = [x.plataforma, year].filter(Boolean).join(' • ');
+
           return {
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
+            id: x.id ?? x.slug ?? null,
             title: x.titulo ?? x.title ?? 'Sin título',
-            // Deja que renderCards resuelva la ruta local con resolveImagePath
-            img: x.imagen ?? x.img ?? x.image ?? 'img/placeholder-game.jpg',
-            tag: genres[0] ?? 'Videojuego',
+            img: resolveImagePath(x.imagen ?? x.img ?? 'placeholder.jpg'),
+            tag: genres[0] ?? 'Juego',
             genres,
-            subtitle: [developer, year].filter(Boolean).join(' • '),
+            subtitle: meta,
             year: year ? String(year) : '',
             description: x.descripcion ?? x.description ?? '',
           };
@@ -72,21 +63,17 @@ export function VideojuegosView() {
 
       let data = normalize(dataRaw);
 
-      // Rellena select de géneros
+      // Poblar géneros dinámicamente
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
-      gEl.innerHTML =
-        `<option value="">Género</option>` +
-        uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+      gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
-      // Dibuja cards
+      // Dibujar cards
       const draw = (arr) =>
         renderCards('#grid', arr, {
-          showDescription: true,
-          ctaText: 'Ver ficha',
-          onCardClick: (item) => {
-            alert(`Próximamente ficha de: ${item.title}`);
-          },
+          showDescription: false,           // sin descripción (solo título)
+          ctaText: 'Ver más',
+          onCardClick: (item) => alert(`Próximamente detalle de: ${item.title}`),
         });
 
       draw(data);
@@ -101,18 +88,16 @@ export function VideojuegosView() {
         const y = String(yEl?.value || '').trim();
 
         const filtered = data.filter((x) => {
-          const hayTexto =
+          const textoOk =
             !q ||
-            [x.title, x.subtitle, x.description, ...(x.genres || [])]
+            [x.title, x.subtitle, ...(x.genres || [])]
               .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
 
-          const hayGenero =
-            !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const yearOk = !y || x.year === y;
 
-          const hayAnio = !y || x.year === y;
-
-          return hayTexto && hayGenero && hayAnio;
+          return textoOk && generoOk && yearOk;
         });
 
         draw(filtered);

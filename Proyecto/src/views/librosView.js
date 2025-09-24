@@ -1,4 +1,3 @@
-// src/views/librosView.js
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
@@ -21,9 +20,8 @@ export function LibrosView() {
           </select>
           <select id="year" class="form-select form-select-sm w-auto">
             <option value="">Año</option>
-            ${Array.from({ length: 80 }, (_, i) => new Date().getFullYear() - i)
-              .map((y) => `<option>${y}</option>`)
-              .join('')}
+            ${Array.from({ length: 60 }, (_, i) => new Date().getFullYear() - i)
+              .map((y) => `<option>${y}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -39,31 +37,25 @@ export function LibrosView() {
       updateNavbarSessionUI();
 
       const { ContentModel } = await import('../models/contentModel.js');
+      let dataRaw = await ContentModel.listLibros();
 
-      // Si aún no implementaste listLibros en el ContentModel, devolvemos []
-      const load = ContentModel.listLibros
-        ? ContentModel.listLibros
-        : async () => [];
-
-      let dataRaw = await load();
-
-      // Normalización a tu esquema en español
-      // Campos esperados: titulo/title, imagen/img/image, genero/genre (array o string),
-      // año/year, autor/author, descripcion/description
+      // Normaliza según tu esquema en Firestore
+      // { titulo, imagen, genero(array|string), autor, año, descripcion }
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero)
             ? x.genero
-            : (x.genre ? (Array.isArray(x.genre) ? x.genre : [x.genre]) : []);
+            : (x.genero ? String(x.genero).split(',').map(s => s.trim()) : []);
           const year = x.año ?? x.year ?? '';
-          const author = x.autor ?? x.author ?? '';
+          const meta = [x.autor ?? x.author, year].filter(Boolean).join(' • ');
+
           return {
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
+            id: x.id ?? x.slug ?? null,
             title: x.titulo ?? x.title ?? 'Sin título',
-            img: x.imagen ?? x.img ?? x.image ?? 'img/placeholder-book.jpg',
+            img: resolveImagePath(x.imagen ?? x.img ?? 'placeholder.jpg'),
             tag: genres[0] ?? 'Libro',
             genres,
-            subtitle: [author, year].filter(Boolean).join(' • '),
+            subtitle: meta,
             year: year ? String(year) : '',
             description: x.descripcion ?? x.description ?? '',
           };
@@ -71,21 +63,17 @@ export function LibrosView() {
 
       let data = normalize(dataRaw);
 
-      // Rellena select de géneros
+      // Poblar géneros dinámicamente
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
-      gEl.innerHTML =
-        `<option value="">Género</option>` +
-        uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+      gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
-      // Dibuja cards
+      // Dibujar cards
       const draw = (arr) =>
         renderCards('#grid', arr, {
-          showDescription: true,
-          ctaText: 'Ver ficha',
-          onCardClick: (item) => {
-            alert(`Próximamente ficha de: ${item.title}`);
-          },
+          showDescription: false,           // solo título para que quede compacto
+          ctaText: 'Ver más',
+          onCardClick: (item) => alert(`Próximamente detalle de: ${item.title}`),
         });
 
       draw(data);
@@ -100,18 +88,16 @@ export function LibrosView() {
         const y = String(yEl?.value || '').trim();
 
         const filtered = data.filter((x) => {
-          const hayTexto =
+          const textoOk =
             !q ||
-            [x.title, x.subtitle, x.description, ...(x.genres || [])]
+            [x.title, x.subtitle, ...(x.genres || [])]
               .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
 
-          const hayGenero =
-            !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const yearOk = !y || x.year === y;
 
-          const hayAnio = !y || x.year === y;
-
-          return hayTexto && hayGenero && hayAnio;
+          return textoOk && generoOk && yearOk;
         });
 
         draw(filtered);

@@ -43,8 +43,6 @@ export const ContentModel = {
   listPeliculas:    () => readCollection('peliculas'),
   listAnime:        () => readCollection('anime'),
   listMusica:       () => readCollection('musica'),
-
-  // 🔹 NUEVO
   listVideojuegos:  () => readCollection('videojuegos'),
   listLibros:       () => readCollection('libros'),
 
