@@ -17,6 +17,8 @@ export function Navbar() {
           <li class="nav-item"><a class="nav-link" href="#/series">Series</a></li>
           <li class="nav-item"><a class="nav-link" href="#/anime">Anime</a></li>
           <li class="nav-item"><a class="nav-link" href="#/musica">Música</a></li>
+          <li class="nav-item"><a class="nav-link" href="#/libros">Libros</a></li>
+          <li class="nav-item"><a class="nav-link" href="#/videojuegos">VideoJuegos</a></li>
         </ul>
 
         <!-- Búsqueda global -->

@@ -1,8 +1,7 @@
 import { render, mount } from './render.js';
 import { authGuard } from '../controllers/authController.js';
 
-// Importa aquí las vistas que tengas creadas
-
+// Vistas
 import { HomeView } from '../views/homeView.js';
 import { LoginView } from '../views/loginView.js';
 import { RegistroView } from '../views/registroView.js';
@@ -10,8 +9,10 @@ import { PeliculasView } from '../views/peliculasView.js';
 import { AnimeView } from '../views/animeView.js';
 import { MusicaView } from '../views/musicaView.js';
 import { SeriesView } from '../views/seriesView.js';
+import { LibrosView } from '../views/LibrosView.js';
+import { VideojuegosView } from '../views/videojuegosView.js';
 
-// (Opcional) Vista 404 si luego quieres una página de no-encontrado
+// (Opcional) Vista 404
 const NotFoundView = () => ({
   html: `
     <div class="container py-5">
@@ -20,20 +21,22 @@ const NotFoundView = () => ({
       <a class="btn btn-dark mt-3" href="#/">Volver al inicio</a>
     </div>
   `,
-  bind(){},
+  bind() {},
   title: 'No encontrado • CulturaX',
 });
 
 // Tabla de rutas (hash-based)
 const routes = {
-  '/':          { view: HomeView,    secure: false,  title: 'Inicio • CulturaX' },
-  '/series':    { view: SeriesView,  secure: false,  title: 'Series • CulturaX' },
-  '/login':     { view: LoginView,   secure: false, title: 'Iniciar sesión • CulturaX' },
-  '/registro':  { view: RegistroView,secure: false, title: 'Registro • CulturaX' },
-  '/404':       { view: NotFoundView,secure: false, title: 'No encontrado • CulturaX' },
-  '/peliculas': { view: PeliculasView,secure: false,  title: 'Películas • CulturaX' },
-  '/anime':     { view: AnimeView,    secure: false,  title: 'Anime • CulturaX' },
-  '/musica':    { view: MusicaView,   secure: false,  title: 'Música • CulturaX' },
+  '/':            { view: HomeView,       secure: false, title: 'Inicio • CulturaX' },
+  '/series':      { view: SeriesView,     secure: false, title: 'Series • CulturaX' },
+  '/peliculas':   { view: PeliculasView,  secure: false, title: 'Películas • CulturaX' },
+  '/anime':       { view: AnimeView,      secure: false, title: 'Anime • CulturaX' },
+  '/musica':      { view: MusicaView,     secure: false, title: 'Música • CulturaX' },
+  '/libros':      { view: LibrosView,     secure: false, title: 'Libros • CulturaX' },
+  '/videojuegos': { view: VideojuegosView,secure: false, title: 'Videojuegos • CulturaX' },
+  '/login':       { view: LoginView,      secure: false, title: 'Iniciar sesión • CulturaX' },
+  '/registro':    { view: RegistroView,   secure: false, title: 'Registro • CulturaX' },
+  '/404':         { view: NotFoundView,   secure: false, title: 'No encontrado • CulturaX' },
 };
 
 // Normaliza el hash a un path conocido
@@ -62,7 +65,7 @@ function resolve() {
   // Título del documento
   document.title = title || route.title || 'CulturaX';
 
-  // Marca el link activo del navbar (si existe)
+  // Marca el link activo del navbar
   highlightActiveLink(path);
 }
 
