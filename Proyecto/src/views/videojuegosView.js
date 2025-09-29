@@ -73,7 +73,11 @@ export function VideojuegosView() {
         renderCards('#grid', arr, {
           showDescription: false,           // sin descripción (solo título)
           ctaText: 'Ver más',
-          onCardClick: (item) => alert(`Próximamente detalle de: ${item.title}`),
+          onCardClick: (item) => {
+            sessionStorage.setItem("detalleItem", JSON.stringify(item));
+            sessionStorage.setItem("detalleCategoria", "peliculas");
+            location.hash = "#/detalle";
+          },
         });
 
       draw(data);

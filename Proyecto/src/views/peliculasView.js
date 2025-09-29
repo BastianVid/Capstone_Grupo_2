@@ -79,7 +79,9 @@ export function PeliculasView() {
           showDescription: true,
           ctaText: 'Leer reseña',
           onCardClick: (item) => {
-            alert(`Próximamente reseña de: ${item.title}`);
+            sessionStorage.setItem("detalleItem", JSON.stringify(item));
+            sessionStorage.setItem("detalleCategoria", "peliculas");
+            location.hash = "#/detalle";
           },
         });
 

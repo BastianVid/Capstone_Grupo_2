@@ -1,7 +1,7 @@
 import { render, mount } from './render.js';
 import { authGuard } from '../controllers/authController.js';
 
-// Importa aquí las vistas que tengas creadas
+// Importa las vistas
 import { HomeView } from '../views/homeView.js';
 import { LoginView } from '../views/loginView.js';
 import { RegistroView } from '../views/registroView.js';
@@ -11,8 +11,9 @@ import { MusicaView } from '../views/musicaView.js';
 import { SeriesView } from '../views/seriesView.js';
 import { VideojuegosView } from '../views/videojuegosView.js';
 import { LibrosView } from '../views/librosView.js';
+import { DetalleView } from '../views/detalleView.js';
 
-// (Opcional) Vista 404 si luego quieres una página de no-encontrado
+// (Opcional) Vista 404
 const NotFoundView = () => ({
   html: `
     <div class="container py-5">
@@ -21,7 +22,7 @@ const NotFoundView = () => ({
       <a class="btn btn-dark mt-3" href="#/">Volver al inicio</a>
     </div>
   `,
-  bind(){},
+  bind() {},
   title: 'No encontrado • CulturaX',
 });
 
@@ -36,6 +37,7 @@ const routes = {
   '/libros':      { view: LibrosView,      secure: false, title: 'Libros • CulturaX' },
   '/login':       { view: LoginView,       secure: false, title: 'Iniciar sesión • CulturaX' },
   '/registro':    { view: RegistroView,    secure: false, title: 'Registro • CulturaX' },
+  '/detalle':     { view: DetalleView,     secure: false, title: 'Detalle • CulturaX' },
   '/404':         { view: NotFoundView,    secure: false, title: 'No encontrado • CulturaX' },
 };
 
@@ -49,7 +51,19 @@ function getPathFromHash() {
 // Pinta la ruta actual
 function resolve() {
   const path = getPathFromHash();
-  const route = routes[path] || routes['/404'];
+  let route = routes[path] || routes['/404'];
+
+  // Si es la vista de detalle, le pasamos item y categoría
+  if (path === '/detalle') {
+    const item = JSON.parse(sessionStorage.getItem("detalleItem"));
+    const categoria = sessionStorage.getItem("detalleCategoria");
+    const { html, bind, title } = route.view(item, categoria);
+    render(html);
+    mount(bind);
+    document.title = title || route.title || 'CulturaX';
+    highlightActiveLink(path);
+    return;
+  }
 
   // Protege rutas seguras
   if (route.secure && !authGuard()) {
@@ -65,7 +79,7 @@ function resolve() {
   // Título del documento
   document.title = title || route.title || 'CulturaX';
 
-  // Marca el link activo del navbar (si existe)
+  // Marca el link activo del navbar
   highlightActiveLink(path);
 }
 
@@ -75,12 +89,11 @@ export function navigate(path) {
   if (`#${path}` !== location.hash) {
     location.hash = `#${path}`;
   } else {
-    // Si navegas a la misma ruta, fuerza render
-    resolve();
+    resolve(); // fuerza render si es la misma ruta
   }
 }
 
-// Marca activo el link actual del navbar (compatible con tu .cx-header)
+// Marca activo el link actual del navbar
 function highlightActiveLink(currentPath) {
   const links = document.querySelectorAll('.cx-header .nav .nav-link');
   links.forEach((a) => {
@@ -95,6 +108,5 @@ export function initRouter() {
   window.addEventListener('hashchange', resolve, { passive: true });
   window.addEventListener('load', resolve, { passive: true });
 
-  // Si el usuario entra sin hash, envíalo a "/"
   if (!location.hash) navigate('/');
 }

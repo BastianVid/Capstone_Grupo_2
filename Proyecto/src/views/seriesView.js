@@ -71,7 +71,11 @@ export function SeriesView() {
         renderCards('#grid', arr, {
           showDescription: true,
           ctaText: 'Leer reseña',
-          onCardClick: (item) => alert(`Próximamente reseña de: ${item.title}`),
+          onCardClick: (item) => {
+            sessionStorage.setItem("detalleItem", JSON.stringify(item));
+            sessionStorage.setItem("detalleCategoria", "peliculas");
+            location.hash = "#/detalle";
+          },
         });
 
       draw(data);

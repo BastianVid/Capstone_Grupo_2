@@ -73,7 +73,11 @@ export function LibrosView() {
         renderCards('#grid', arr, {
           showDescription: false,           // solo título para que quede compacto
           ctaText: 'Ver más',
-          onCardClick: (item) => alert(`Próximamente detalle de: ${item.title}`),
+          onCardClick: (item) => {
+            sessionStorage.setItem("detalleItem", JSON.stringify(item));
+            sessionStorage.setItem("detalleCategoria", "peliculas");
+            location.hash = "#/detalle";
+          },
         });
 
       draw(data);
