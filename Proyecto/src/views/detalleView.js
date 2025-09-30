@@ -1,5 +1,7 @@
 import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
+import { ContentModel } from '../models/contentModel.js';
+import { auth } from '../lib/firebase.js'; // 👈 para validar login
 
 export function DetalleView(item, categoria) {
   if (!item) {
@@ -45,6 +47,7 @@ export function DetalleView(item, categoria) {
           <input id="commentInput" class="form-control" placeholder="Escribe un comentario...">
           <button id="addComment" class="btn btn-primary">Comentar</button>
         </div>
+        <small id="errorMessage" class="text-danger"></small>
       </div>
     </div>
   `;
@@ -55,13 +58,16 @@ export function DetalleView(item, categoria) {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
-      // --- Calificación ---
+      // --- Variables para reseña ---
+      let currentRating = 0;
       const stars = document.querySelectorAll("#rating i");
       const msg = document.getElementById("ratingMessage");
+      const errorEl = document.getElementById("errorMessage");
 
       stars.forEach(star => {
         star.addEventListener("click", () => {
-          const value = star.getAttribute("data-value");
+          const value = parseInt(star.getAttribute("data-value"));
+          currentRating = value;
           msg.textContent = `Tu calificación: ${value} estrellas`;
 
           // Marcar visualmente
@@ -69,10 +75,6 @@ export function DetalleView(item, categoria) {
           for (let i = 0; i < value; i++) {
             stars[i].classList.replace("bi-star", "bi-star-fill");
           }
-
-          // Guardar calificación en localStorage (se puede cambiar a Firebase)
-          const key = `rating:${categoria}:${item.id}`;
-          localStorage.setItem(key, value);
         });
       });
 
@@ -80,25 +82,64 @@ export function DetalleView(item, categoria) {
       const listEl = document.getElementById("commentsList");
       const inputEl = document.getElementById("commentInput");
       const addBtn = document.getElementById("addComment");
-      const commentsKey = `comments:${categoria}:${item.id}`;
 
-      const renderComments = () => {
-        const comments = JSON.parse(localStorage.getItem(commentsKey) || "[]");
-        listEl.innerHTML = comments.length
-          ? comments.map(c => `<div class="border rounded p-2 mb-2">${c}</div>`).join('')
+      // 🔹 Render desde Firebase
+      const renderComments = async () => {
+        const reviews = await ContentModel.listReviewsByPelicula(item.id);
+        listEl.innerHTML = reviews.length
+          ? reviews.map(r => `
+              <div class="border rounded p-2 mb-2">
+                <strong>${r.usuario}</strong> (${r.rating}⭐)<br>
+                ${r.texto}
+              </div>
+            `).join('')
           : `<p class="text-muted">No hay comentarios aún</p>`;
       };
 
-      addBtn.addEventListener("click", () => {
+      // 🔹 Guardar comentario en Firebase
+      addBtn.addEventListener("click", async () => {
+        errorEl.textContent = "";
         const val = inputEl.value.trim();
-        if (!val) return;
-        const comments = JSON.parse(localStorage.getItem(commentsKey) || "[]");
-        comments.push(val);
-        localStorage.setItem(commentsKey, JSON.stringify(comments));
+
+        // 1. Validar login
+        const user = auth.currentUser;
+        if (!user) {
+          errorEl.textContent = "⚠️ Debes iniciar sesión para comentar.";
+          return;
+        }
+
+        // 2. Validar rating
+        if (currentRating === 0) {
+          errorEl.textContent = "⚠️ Debes calificar con estrellas antes de comentar.";
+          return;
+        }
+
+        // 3. Validar comentario vacío
+        if (!val) {
+          errorEl.textContent = "⚠️ El comentario no puede estar vacío.";
+          return;
+        }
+
+        // Usuario logueado → usamos displayName o email
+        const usuario = user.displayName || user.email;
+
+        await ContentModel.addReview({
+          peliculaId: item.id,
+          usuario,
+          texto: val,
+          rating: currentRating
+        });
+
+        // 🔹 Reset inputs después de guardar
         inputEl.value = "";
-        renderComments();
+        currentRating = 0;
+        stars.forEach(s => s.classList.replace("bi-star-fill", "bi-star"));
+        msg.textContent = "";
+
+        await renderComments();
       });
 
+      // 🔹 Inicializar comentarios
       renderComments();
     }
   };
