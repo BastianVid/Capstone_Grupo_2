@@ -4,59 +4,31 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CulturaX - Inicio</title>
-  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- Bootstrap CSS + Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+  <!-- Tu CSS (mantenlo después de Bootstrap para poder sobreescribir) -->
+  <link rel="stylesheet" href="./src/assets/styles.css">
 </head>
 <body>
-  <header>
-    <nav>
-      <h1>CulturaX</h1>
-      <ul>
-        <li><a href="index.html">Inicio</a></li>
-        <li><a href="Peliculas.html">Películas</a></li>
-        <li><a href="Anime.html">Anime</a></li>
-        <li><a href="Musica.html">Música</a></li>
-        <li><a href="Series.html">Series</a></li>
-      </ul>
+  <div id="app"></div>
 
-      <div class="userbox" style="visibility:hidden">
-        <span id="user"></span>
-        <button id="logout" class="btn" hidden>Salir</button>
-        <a href="registro.html" id="register-btn" class="btn">Únete ahora</a>
-        <a href="login.html" id="login-btn" class="btn">Inicia sesión</a>
-      </div>
-    </nav>
-  </header>
+  <!-- Bootstrap JS (para navbar, toasts, modals, etc.) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <main>
-    <!-- Slider -->
-    <section class="slider">
-      <div class="slides">
-        <img src="img/inception.jpg" alt="Inception">
-        <img src="img/naruto.jpg" alt="Naruto">
-        <img src="img/concierto.jpg" alt="Concierto de música">
-        <img src="img/stranger-things.jpg" alt="Stranger Things">
-      </div>
+  <!-- Arranque de la app (MVC + Router + Firebase) -->
+  <script type="module">
+    // Inicializa Firebase (pegarás tu config en /src/lib/firebase.js)
+    import './src/lib/firebase.js';
 
-      <!-- Controles -->
-      <button class="prev">&#10094;</button>
-      <button class="next">&#10095;</button>
+    // Inicia el enrutador (hash routes: #/, #/login, #/registro, #/series, etc.)
+    import { initRouter } from './src/core/router.js';
+    initRouter();
 
-      <!-- Indicadores -->
-      <div class="dots"></div>
-    </section>
-
-    <section class="bienvenida">
-      <h2>Bienvenido a CulturaX</h2>
-      <p>Tu comunidad para descubrir, compartir y opinar sobre cultura.</p>
-    </section>
-  </main>
-
-  <footer>
-    <p>&copy; 2025 CulturaX</p>
-  </footer>
-
-  <!-- Scripts -->
-  <script type="module" src="js/app.js"></script>
-  <script type="module" src="js/firebase.js"></script>
+    // Nota: las rutas del menú ya NO son archivos .html;
+    // ahora son rutas hash (el navbar se renderiza desde /src/views/navbar.js)
+  </script>
 </body>
 </html>
