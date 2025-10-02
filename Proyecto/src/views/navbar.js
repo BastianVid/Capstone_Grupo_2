@@ -27,7 +27,7 @@ export function Navbar() {
 
         <!-- Session -->
         <div id="navSessionBox" class="d-flex align-items-center gap-2">
-          <!-- Único botón (no autenticado) -->
+          <!-- Botón (no autenticado) -->
           <a id="loginSignupBtn" href="#/login" class="btn btn-primary btn-sm">Login / Sign up</a>
 
           <!-- Menú usuario (autenticado) -->
@@ -40,6 +40,7 @@ export function Navbar() {
             <ul class="dropdown-menu dropdown-menu-end">
               <li><h6 class="dropdown-header" id="navUserEmail"></h6></li>
               <li><a class="dropdown-item" href="#/">Inicio</a></li>
+              <li><a class="dropdown-item" href="#/perfil">Mi perfil</a></li> 
               <li><hr class="dropdown-divider"></li>
               <li><button id="logoutBtn" class="dropdown-item">Cerrar sesión</button></li>
             </ul>

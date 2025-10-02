@@ -3,7 +3,13 @@
 
 import { db } from '../lib/firebase.js';
 import {
-  collection, addDoc, getDocs, getDoc, query, where, doc,
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  doc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // 🔹 Función genérica: lee cualquier colección (ej: "peliculas", "anime")
@@ -36,6 +42,13 @@ async function listReviewsByPelicula(peliculaId) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+// 🔹 Nuevo: Reseñas por usuario
+async function listReviewsByUser(email) {
+  const q = query(collection(db, 'reseñas'), where('usuario', '==', email));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
 // ============================== EXPORT ==============================
 export const ContentModel = {
   // Colecciones principales
@@ -53,4 +66,5 @@ export const ContentModel = {
   // Reseñas
   addReview,
   listReviewsByPelicula,
+  listReviewsByUser, // 👈 agregado para la vista "Mi Perfil"
 };
