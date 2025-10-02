@@ -14,15 +14,15 @@ export function DetalleView(item, categoria) {
   const html = `
     ${Navbar()}
     <div class="container py-4">
-      <h1 class="mb-3">${item.title}</h1>
+      <h1 class="mb-3">${item.titulo || item.title}</h1>
       <div class="row">
         <div class="col-md-4">
-          <img src="${item.img}" alt="${item.title}" class="img-fluid rounded shadow">
+          <img src="${item.imagen || item.img}" alt="${item.titulo || item.title}" class="img-fluid rounded shadow">
         </div>
         <div class="col-md-8">
           <p class="text-muted">${item.subtitle || ''}</p>
-          <p><strong>Género:</strong> ${(item.genres || []).join(', ')}</p>
-          <p>${item.description}</p>
+          <p><strong>Género:</strong> ${(item.genero || item.genres || []).join(', ')}</p>
+          <p>${item.descripcion || item.description || ''}</p>
         </div>
       </div>
 
@@ -125,7 +125,10 @@ export function DetalleView(item, categoria) {
 
         await ContentModel.addReview({
           peliculaId: item.id,
+          peliculaTitulo: item.titulo || item.title,
+          peliculaImg: item.imagen || item.img,
           usuario,
+          usuarioEmail: user.email, // 👈 nuevo campo
           texto: val,
           rating: currentRating
         });

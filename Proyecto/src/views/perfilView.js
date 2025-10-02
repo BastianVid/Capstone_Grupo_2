@@ -53,9 +53,12 @@ export function PerfilView() {
 
       container.innerHTML = reviews.length
         ? reviews.map(r => `
-            <div class="border rounded p-3 mb-2">
-              <strong>${r.pelicula}</strong> (${r.rating}⭐)<br>
-              ${r.texto}
+            <div class="border rounded p-3 mb-2 d-flex align-items-center gap-3">
+              <img src="${r.peliculaImg}" width="60" class="rounded shadow">
+              <div>
+                <strong>${r.peliculaTitulo}</strong> (${r.rating}⭐)<br>
+                ${r.texto}
+              </div>
             </div>
           `).join('')
         : `<p class="text-muted">Aún no has publicado reseñas.</p>`;
