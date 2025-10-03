@@ -1,4 +1,5 @@
-import { Navbar } from './navbar.js';
+// src/views/seriesView.js
+import { Navbar, initNavbarSearch } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
@@ -30,8 +31,10 @@ export function SeriesView() {
   return {
     html,
     async bind() {
+      // 🔹 Inicialización de sesión y buscador global
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch(); // <<--- se activa el buscador global del navbar aquí
 
       const { ContentModel } = await import('../models/contentModel.js');
       let raw = await ContentModel.listSeries();

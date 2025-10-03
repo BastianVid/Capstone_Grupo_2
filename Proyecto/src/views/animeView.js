@@ -1,4 +1,4 @@
-import { Navbar } from './navbar.js';
+import { Navbar, initNavbarSearch} from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
@@ -32,6 +32,7 @@ export function AnimeView() {
     async bind() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch();
 
       const { ContentModel } = await import('../models/contentModel.js');
       let raw = await ContentModel.listAnime();

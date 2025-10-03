@@ -1,5 +1,5 @@
 // src/views/peliculasView.js
-import { Navbar } from './navbar.js';
+import { Navbar, initNavbarSearch } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
@@ -31,12 +31,15 @@ export function PeliculasView() {
   return {
     html,
     async bind() {
+      // 🔹 Inicialización de sesión y buscador global
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch(); // <<--- se activa el buscador del navbar aquí
 
       const { ContentModel } = await import('../models/contentModel.js');
       let data = await ContentModel.listPeliculas();
 
+      // Normaliza los datos a un formato estándar
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
@@ -59,13 +62,14 @@ export function PeliculasView() {
 
       data = normalize(data);
 
-      // Poblar géneros
+      // Poblar géneros en el <select>
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
       gEl.innerHTML =
         `<option value="">Género</option>` +
         uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
+      // Render inicial de tarjetas
       const draw = (arr) =>
         renderCards('#grid', arr, {
           showDescription: true,
@@ -113,7 +117,7 @@ export function PeliculasView() {
         applyFilters(q);
       });
 
-      // Navbar logout
+      // Logout
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();

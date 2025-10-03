@@ -52,3 +52,18 @@ export function Navbar() {
   </header>
   `;
 }
+
+/**
+ * 🔹 Inicializa el buscador global en el navbar
+ * - Cada letra escrita en el input dispara un evento "globalSearch"
+ * - Las vistas pueden escuchar este evento y filtrar en tiempo real
+ */
+export function initNavbarSearch() {
+  const input = document.getElementById("siteSearchInput");
+  if (!input) return;
+
+  input.addEventListener("input", (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
+  });
+}
