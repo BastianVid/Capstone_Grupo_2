@@ -1,4 +1,3 @@
-// src/views/seriesView.js
 import { Navbar } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
@@ -12,10 +11,6 @@ export function SeriesView() {
         <h1 class="h3 mb-0"><i class="bi bi-tv"></i> Series</h1>
 
         <div class="d-flex gap-2 align-items-center">
-          <div class="input-group w-auto">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por título, creador/director, género o año...">
-          </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
@@ -47,7 +42,7 @@ export function SeriesView() {
           const year = x.año ?? x.year ?? '';
           const director = x.director ?? '';
           return {
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
+            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? null,
             title: x.titulo ?? x.title ?? 'Sin título',
             img: resolveImagePath(x.imagen ?? x.img ?? 'stranger-things.jpg'),
             tag: genres[0] ?? 'Serie',
@@ -60,7 +55,7 @@ export function SeriesView() {
 
       let data = normalize(raw);
 
-      // Géneros dinámicos
+      // Poblar géneros dinámicamente
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
       gEl.innerHTML =
@@ -73,52 +68,47 @@ export function SeriesView() {
           ctaText: 'Leer reseña',
           onCardClick: (item) => {
             sessionStorage.setItem("detalleItem", JSON.stringify(item));
-            sessionStorage.setItem("detalleCategoria", "peliculas");
+            sessionStorage.setItem("detalleCategoria", "series");
             location.hash = "#/detalle";
           },
         });
 
       draw(data);
 
-      // Filtros
-      const qEl = document.getElementById('q');
+      // Función de filtros
       const yEl = document.getElementById('year');
-
-      const applyFilters = () => {
-        const q = String(qEl?.value || '').toLowerCase().trim();
+      const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
         const filtered = data.filter((x) => {
-          const hayTexto =
+          const textoOk =
             !q ||
             [x.title, x.subtitle, x.description, ...(x.genres || [])]
-              .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
 
-        const hayGenero = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
-        const hayAnio = !y || x.year === y;
+          const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const yearOk = !y || x.year === y;
 
-        return hayTexto && hayGenero && hayAnio;
+          return textoOk && generoOk && yearOk;
         });
 
         draw(filtered);
       };
 
-      qEl?.addEventListener('input', applyFilters);
-      gEl?.addEventListener('change', applyFilters);
-      yEl?.addEventListener('change', applyFilters);
+      gEl?.addEventListener('change', () => applyFilters());
+      yEl?.addEventListener('change', () => applyFilters());
 
-      // Navbar acciones
+      // 🔹 escuchar buscador global del navbar
+      window.addEventListener("globalSearch", (e) => {
+        const q = e.detail.query;
+        applyFilters(q);
+      });
+
+      // Logout
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
-      });
-      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const q = e.currentTarget.querySelector('input').value.trim();
-        if (q) sessionStorage.setItem('cx:q', q);
-        location.hash = '#/peliculas';
       });
     },
   };
