@@ -1,7 +1,7 @@
 import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
-import { signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { guardarReseña, obtenerReseñaUsuario } from '../controllers/reseñasController.js';
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
@@ -16,18 +16,13 @@ export function DetalleView(item, categoria) {
   const html = `
     ${Navbar()}
     <style>
-      /* ⭐ Estilo visual para las estrellas */
       #rating i {
         color: #ccc;
         transition: color 0.2s ease;
       }
       #rating i.active,
-      #rating i:hover,
       #rating i.hovered {
-        color: #ffc107; /* amarillo dorado de Bootstrap */
-      }
-      #rating i:hover ~ i {
-        color: #ccc; /* las que siguen al hover vuelven grises */
+        color: #ffc107;
       }
     </style>
 
@@ -48,7 +43,6 @@ export function DetalleView(item, categoria) {
 
       <hr>
 
-      <!-- Calificación -->
       <div class="my-4">
         <h4>Tu Calificación</h4>
         <div id="rating" class="d-flex gap-2 fs-3 mb-2">
@@ -62,10 +56,9 @@ export function DetalleView(item, categoria) {
 
       <hr>
 
-      <!-- Reseñas -->
       <div class="my-4">
         <h4>Reseñas de usuarios</h4>
-        <div id="commentsList" class="mb-3"></div>
+        <div id="commentsList" class="mb-3 text-start"></div>
       </div>
     </div>
   `;
@@ -76,7 +69,7 @@ export function DetalleView(item, categoria) {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
-      // --- Botón cerrar sesión ---
+      // Botón cerrar sesión
       const logoutBtn = document.getElementById("logoutBtn");
       if (logoutBtn) {
         logoutBtn.addEventListener("click", async () => {
@@ -89,7 +82,7 @@ export function DetalleView(item, categoria) {
         });
       }
 
-      // --- Variables de UI ---
+      // Elementos UI
       const stars = document.querySelectorAll("#rating i");
       const msg = document.getElementById("ratingMessage");
       const errorEl = document.getElementById("errorMessage");
@@ -100,7 +93,7 @@ export function DetalleView(item, categoria) {
 
       let currentRating = 0;
 
-      // --- Estrellas interactivas ---
+      // ---- Estrellas visuales ----
       const pintarEstrellas = (value) => {
         stars.forEach((s, i) => {
           s.classList.remove("bi-star-fill", "active");
@@ -109,20 +102,13 @@ export function DetalleView(item, categoria) {
         });
       };
 
-      // Hover visual
       stars.forEach((star, index) => {
         star.addEventListener("mouseenter", () => {
-          stars.forEach((s, i) => {
-            s.classList.toggle("hovered", i <= index);
-          });
+          stars.forEach((s, i) => s.classList.toggle("hovered", i <= index));
         });
         star.addEventListener("mouseleave", () => {
           stars.forEach(s => s.classList.remove("hovered"));
         });
-      });
-
-      // Clic para fijar valor
-      stars.forEach(star => {
         star.addEventListener("click", () => {
           currentRating = parseInt(star.getAttribute("data-value"));
           pintarEstrellas(currentRating);
@@ -130,12 +116,17 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      // --- Función: mostrar promedio general ---
+      // ---- Render promedio general ----
       const renderPromedioGeneral = async () => {
-        const itemRef = doc(db, `${categoria}/${item.id}`);
-        const snap = await getDoc(itemRef);
+        try {
+          const itemRef = doc(db, `${categoria}/${item.id}`);
+          const snap = await getDoc(itemRef);
 
-        if (snap.exists()) {
+          if (!snap.exists()) {
+            promedioGeneralEl.textContent = "⭐ Sin calificaciones aún";
+            return;
+          }
+
           const data = snap.data();
           const promedio = data.calificacionPromedio || 0;
           const votos = data.totalVotos || 0;
@@ -151,86 +142,103 @@ export function DetalleView(item, categoria) {
               <span class="text-muted">(${votos} votos)</span>
             `;
           }
-        } else {
-          promedioGeneralEl.textContent = "⭐ Sin calificaciones aún";
+        } catch (e) {
+          console.error("Error al mostrar promedio:", e);
         }
       };
 
-      // --- Precargar reseña del usuario ---
-      const user = auth.currentUser;
-      if (user) {
-        const reseña = await obtenerReseñaUsuario(categoria, item.id);
-        if (reseña) {
-          currentRating = reseña.estrellas;
-          comentarioEl.value = reseña.comentario;
-          pintarEstrellas(currentRating);
-          msg.textContent = "Ya habías calificado esta obra. Puedes editar tu reseña.";
-        }
-      } else {
-        msg.textContent = "Inicia sesión para dejar una reseña.";
-      }
+      // ---- Render reseñas (todas) ----
+      const renderReseñas = async (user) => {
+        try {
+          console.log("🔥 DEBUG DetalleView");
+          console.log("categoria:", categoria);
+          console.log("item:", item);
+          console.log("item.id:", item.id);
+          console.log("ruta esperada:", `${categoria}/${item.id}/reseñas`);
 
-      // --- Guardar reseña ---
-      addBtn.addEventListener("click", async () => {
-        errorEl.textContent = "";
+          const reseñasRef = collection(doc(db, categoria, item.id), "reseñas");
+          const snapshot = await getDocs(reseñasRef);
 
-        const comentario = comentarioEl.value.trim();
-        const user = auth.currentUser;
+          console.log(`🔍 ${snapshot.size} reseñas encontradas en ${categoria}/${item.id}`);
 
-        if (!user) {
-          errorEl.textContent = "⚠️ Debes iniciar sesión para comentar.";
-          return;
-        }
-        if (currentRating === 0) {
-          errorEl.textContent = "⚠️ Debes calificar con estrellas antes de comentar.";
-          return;
-        }
-        if (!comentario) {
-          errorEl.textContent = "⚠️ El comentario no puede estar vacío.";
-          return;
-        }
-
-        await guardarReseña(categoria, item.id, currentRating, comentario);
-        msg.textContent = "✅ Reseña guardada correctamente.";
-        comentarioEl.value = "";
-        await renderReseñas();
-        await renderPromedioGeneral();
-      });
-
-      // --- Mostrar todas las reseñas ---
-      const renderReseñas = async () => {
-        const reseñasRef = collection(db, `${categoria}/${item.id}/reseñas`);
-        const snapshot = await getDocs(reseñasRef);
-
-        const user = auth.currentUser;
-        let userReviewHTML = "";
-        let otherReviewsHTML = "";
-
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const isUserReview = user && data.userId === user.uid;
-
-          const reseñaHTML = `
-            <div class="border rounded p-2 mb-2 ${isUserReview ? 'bg-light border-2 border-dark' : ''}">
-              <strong>${data.userEmail || "Usuario anónimo"} ${isUserReview ? '(Tu reseña)' : ''}</strong> 
-              (${data.estrellas}⭐)
-              <p class="mb-0">${data.comentario}</p>
-            </div>
-          `;
-
-          if (isUserReview) {
-            userReviewHTML = reseñaHTML;
-          } else {
-            otherReviewsHTML += reseñaHTML;
+          if (snapshot.empty) {
+            commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`;
+            return;
           }
-        });
 
-        commentsList.innerHTML =
-          userReviewHTML + (otherReviewsHTML || `<p class="text-muted">No hay reseñas aún.</p>`);
+          let userReviewHTML = "";
+          let otherReviewsHTML = "";
+
+          snapshot.forEach(docSnap => {
+            const data = docSnap.data();
+            const isUserReview = user && data.userId === user.uid;
+
+            const reseñaHTML = `
+              <div class="border rounded p-2 mb-2 ${isUserReview ? 'bg-light border-2 border-dark' : ''}">
+                <strong>${data.userEmail || "Usuario anónimo"} ${isUserReview ? '(Tu reseña)' : ''}</strong>
+                <p class="mb-1 text-warning">${"★".repeat(data.estrellas)}${"☆".repeat(5 - data.estrellas)}</p>
+                <p class="mb-0">${data.comentario}</p>
+              </div>
+            `;
+
+            if (isUserReview) userReviewHTML = reseñaHTML;
+            else otherReviewsHTML += reseñaHTML;
+          });
+
+          commentsList.innerHTML =
+            (userReviewHTML || "") +
+            (otherReviewsHTML || `<p class="text-muted">No hay reseñas aún.</p>`);
+        } catch (e) {
+          console.error("Error al obtener reseñas:", e);
+          commentsList.innerHTML = `<p class="text-danger">Error al cargar reseñas.</p>`;
+        }
       };
 
-      await renderPromedioGeneral();
-      await renderReseñas();
+      // ---- Control de sesión ----
+      onAuthStateChanged(auth, async (user) => {
+        console.log("👤 Usuario actual:", user ? user.email : "No logueado");
+
+        await renderPromedioGeneral();
+        await renderReseñas(user);
+
+        // Si hay login, precargar reseña propia
+        if (user) {
+          const reseña = await obtenerReseñaUsuario(categoria, item.id);
+          if (reseña) {
+            currentRating = reseña.estrellas;
+            comentarioEl.value = reseña.comentario;
+            pintarEstrellas(currentRating);
+            msg.textContent = "Ya habías calificado esta obra. Puedes editar tu reseña.";
+          }
+        } else {
+          msg.textContent = "Inicia sesión para dejar una reseña.";
+        }
+
+        // Guardar reseña
+        addBtn.addEventListener("click", async () => {
+          errorEl.textContent = "";
+          const comentario = comentarioEl.value.trim();
+
+          if (!user) {
+            errorEl.textContent = "⚠️ Debes iniciar sesión para comentar.";
+            return;
+          }
+          if (currentRating === 0) {
+            errorEl.textContent = "⚠️ Debes calificar con estrellas antes de comentar.";
+            return;
+          }
+          if (!comentario) {
+            errorEl.textContent = "⚠️ El comentario no puede estar vacío.";
+            return;
+          }
+
+          await guardarReseña(categoria, item.id, currentRating, comentario);
+          msg.textContent = "✅ Reseña guardada correctamente.";
+
+          await renderReseñas(user);
+          await renderPromedioGeneral();
+        });
+      });
     }
   };
 }

@@ -20,8 +20,10 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   }
 
   const userId = user.uid;
-  const itemRef = doc(db, `${categoria}/${itemId}`);
-  const reseñaRef = doc(db, `${categoria}/${itemId}/reseñas/${userId}`);
+
+  // ✅ Rutas correctas
+  const itemRef = doc(db, categoria, itemId);
+  const reseñaRef = doc(itemRef, "reseñas", userId);
 
   await runTransaction(db, async (tx) => {
     const itemSnap = await tx.get(itemRef);
@@ -36,6 +38,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       });
       tx.set(reseñaRef, {
         userId,
+        userEmail: user.email || null,
         estrellas,
         comentario,
         fecha: new Date().toISOString()
@@ -88,7 +91,8 @@ export async function obtenerReseñaUsuario(categoria, itemId) {
   if (!user) return null;
 
   const userId = user.uid;
-  const reseñaRef = doc(db, `${categoria}/${itemId}/reseñas/${userId}`);
+  // ✅ Ruta corregida
+  const reseñaRef = doc(doc(db, categoria, itemId), "reseñas", userId);
   const snap = await getDoc(reseñaRef);
   return snap.exists() ? snap.data() : null;
 }
