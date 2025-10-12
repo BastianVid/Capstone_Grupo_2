@@ -696,3 +696,21 @@ footer {
     margin: 1.5rem 0;
   }
 }
+
+#stars span {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  color: gray;
+}
+
+#stars span:hover {
+  color: gold;
+}
+.bg-light.border-2.border-dark {
+  background-color: #f8f9fa !important;
+  border-color: #212529 !important;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+#promedioGeneral {
+  transition: transform 0.3s ease;
+}
