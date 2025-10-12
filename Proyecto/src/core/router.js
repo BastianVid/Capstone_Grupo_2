@@ -12,6 +12,7 @@ import { SeriesView } from '../views/seriesView.js';
 import { VideojuegosView } from '../views/videojuegosView.js';
 import { LibrosView } from '../views/librosView.js';
 import { DetalleView } from '../views/detalleView.js';
+import { PerfilView } from '../views/perfilView.js';
 
 // (Opcional) Vista 404
 const NotFoundView = () => ({
@@ -38,6 +39,7 @@ const routes = {
   '/login':       { view: LoginView,       secure: false, title: 'Iniciar sesión • CulturaX' },
   '/registro':    { view: RegistroView,    secure: false, title: 'Registro • CulturaX' },
   '/detalle':     { view: DetalleView,     secure: false, title: 'Detalle • CulturaX' },
+  '/perfil':      { view: PerfilView,      secure: true, title: 'Perfil • CulturaX' },
   '/404':         { view: NotFoundView,    secure: false, title: 'No encontrado • CulturaX' },
 };
 

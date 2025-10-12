@@ -1,5 +1,5 @@
 // src/views/peliculasView.js
-import { Navbar } from './navbar.js';
+import { Navbar, initNavbarSearch } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
@@ -12,10 +12,6 @@ export function PeliculasView() {
         <h1 class="h3 mb-0"><i class="bi bi-camera-reels"></i> Películas</h1>
 
         <div class="d-flex gap-2 align-items-center">
-          <div class="input-group w-auto">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por título, director, género o año...">
-          </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
@@ -35,30 +31,29 @@ export function PeliculasView() {
   return {
     html,
     async bind() {
+      // 🔹 Inicialización de sesión y buscador global
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch(); // <<--- se activa el buscador del navbar aquí
 
       const { ContentModel } = await import('../models/contentModel.js');
       let data = await ContentModel.listPeliculas();
 
-      // Normalizador -> resuelve la imagen a /src/assets/img/*
+      // Normaliza los datos a un formato estándar
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
           const year = x.año ?? x.year ?? '';
           const director = x.director ?? '';
-
-          // 1) Tomamos cualquier campo posible con la imagen
-          // 2) Lo pasamos por resolveImagePath para que apunte a ./src/assets/img/*
           const imgCandidate = x.imagen ?? x.img ?? x.image ?? 'inception.jpg';
           const img = resolveImagePath(imgCandidate);
 
           return {
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
+            id: x.id,
             title: x.titulo ?? x.title ?? 'Sin título',
-            img,                                              // <-- ruta local resuelta
+            img,
             tag: genres[0] ?? 'Película',
-            genres,                                           // para filtros
+            genres,
             subtitle: [director, year].filter(Boolean).join(' • '),
             year: year ? String(year) : '',
             description: x.descripcion ?? x.description ?? '',
@@ -67,13 +62,14 @@ export function PeliculasView() {
 
       data = normalize(data);
 
-      // Poblar select de géneros
+      // Poblar géneros en el <select>
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
       gEl.innerHTML =
         `<option value="">Género</option>` +
         uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
+      // Render inicial de tarjetas
       const draw = (arr) =>
         renderCards('#grid', arr, {
           showDescription: true,
@@ -87,12 +83,10 @@ export function PeliculasView() {
 
       draw(data);
 
-      // Filtros
-      const qEl = document.getElementById('q');
+      // Filtros locales
       const yEl = document.getElementById('year');
 
-      const applyFilters = () => {
-        const q = String(qEl?.value || '').toLowerCase().trim();
+      const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
@@ -103,32 +97,30 @@ export function PeliculasView() {
               .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
 
-        const hayGenero =
-          !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const hayGenero =
+            !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
 
-        const hayAnio = !y || x.year === y;
+          const hayAnio = !y || x.year === y;
 
-        return hayTexto && hayGenero && hayAnio;
+          return hayTexto && hayGenero && hayAnio;
         });
 
         draw(filtered);
       };
 
-      qEl?.addEventListener('input', applyFilters);
-      gEl?.addEventListener('change', applyFilters);
-      yEl?.addEventListener('change', applyFilters);
+      gEl?.addEventListener('change', () => applyFilters());
+      yEl?.addEventListener('change', () => applyFilters());
 
-      // Navbar acciones
+      // 🔹 Escuchar el buscador global del Navbar
+      window.addEventListener("globalSearch", (e) => {
+        const q = e.detail.query;
+        applyFilters(q);
+      });
+
+      // Logout
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
-      });
-
-      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const q = e.currentTarget.querySelector('input').value.trim();
-        if (q) sessionStorage.setItem('cx:q', q);
-        location.hash = '#/peliculas';
       });
     },
   };

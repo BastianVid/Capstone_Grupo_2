@@ -1,5 +1,4 @@
-// src/views/animeView.js
-import { Navbar } from './navbar.js';
+import { Navbar, initNavbarSearch} from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
@@ -12,10 +11,6 @@ export function AnimeView() {
         <h1 class="h3 mb-0"><i class="bi bi-emoji-smile"></i> Anime</h1>
 
         <div class="d-flex gap-2 align-items-center">
-          <div class="input-group w-auto">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por título, director, género o año...">
-          </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
@@ -37,18 +32,18 @@ export function AnimeView() {
     async bind() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch();
 
       const { ContentModel } = await import('../models/contentModel.js');
       let raw = await ContentModel.listAnime();
 
-      // Normalizador a tu esquema (año, descripcion, director, genero[], imagen, titulo)
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
           const year = x.año ?? x.year ?? '';
           const director = x.director ?? '';
           return {
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
+            id: x.id ?? x.slug ?? null,
             title: x.titulo ?? x.title ?? 'Sin título',
             img: resolveImagePath(x.imagen ?? x.img ?? 'naruto.jpg'),
             tag: genres[0] ?? 'Anime',
@@ -74,7 +69,7 @@ export function AnimeView() {
           ctaText: 'Leer reseña',
           onCardClick: (item) => {
             sessionStorage.setItem("detalleItem", JSON.stringify(item));
-            sessionStorage.setItem("detalleCategoria", "peliculas");
+            sessionStorage.setItem("detalleCategoria", "anime");
             location.hash = "#/detalle";
           },
         });
@@ -82,44 +77,38 @@ export function AnimeView() {
       draw(data);
 
       // Filtros
-      const qEl = document.getElementById('q');
       const yEl = document.getElementById('year');
-
-      const applyFilters = () => {
-        const q = String(qEl?.value || '').toLowerCase().trim();
+      const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
         const filtered = data.filter((x) => {
-          const hayTexto =
+          const textoOk =
             !q ||
             [x.title, x.subtitle, x.description, ...(x.genres || [])]
-              .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
 
-          const hayGenero = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
-          const hayAnio = !y || x.year === y;
+          const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const yearOk = !y || x.year === y;
 
-          return hayTexto && hayGenero && hayAnio;
+          return textoOk && generoOk && yearOk;
         });
 
         draw(filtered);
       };
 
-      qEl?.addEventListener('input', applyFilters);
-      gEl?.addEventListener('change', applyFilters);
-      yEl?.addEventListener('change', applyFilters);
+      gEl?.addEventListener('change', () => applyFilters());
+      yEl?.addEventListener('change', () => applyFilters());
 
-      // Navbar acciones
+      // 🔹 buscar desde navbar
+      window.addEventListener("globalSearch", (e) => {
+        const q = e.detail.query;
+        applyFilters(q);
+      });
+
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
-      });
-      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const q = e.currentTarget.querySelector('input').value.trim();
-        if (q) sessionStorage.setItem('cx:q', q);
-        location.hash = '#/peliculas';
       });
     },
   };

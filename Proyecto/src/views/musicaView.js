@@ -1,5 +1,4 @@
-// src/views/musicaView.js
-import { Navbar } from './navbar.js';
+import { Navbar, initNavbarSearch } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
@@ -12,18 +11,13 @@ export function MusicaView() {
         <h1 class="h3 mb-0"><i class="bi bi-music-note-beamed"></i> Música</h1>
 
         <div class="d-flex gap-2 align-items-center">
-          <div class="input-group w-auto">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por álbum, artista, género o año...">
-          </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
           <select id="year" class="form-select form-select-sm w-auto">
             <option value="">Año</option>
             ${Array.from({ length: 60 }, (_, i) => new Date().getFullYear() - i)
-              .map((y) => `<option>${y}</option>`)
-              .join('')}
+              .map((y) => `<option>${y}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -37,18 +31,18 @@ export function MusicaView() {
     async bind() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch();
 
       const { ContentModel } = await import('../models/contentModel.js');
       let raw = await ContentModel.listMusica();
 
-      // En música tu "director" en la BD equivale al artista
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
           const year = x.año ?? x.year ?? '';
           const artist = x.director ?? x.artist ?? '';
           return {
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
+            id: x.id ?? x.slug ?? null,
             title: x.titulo ?? x.title ?? x.nombre ?? 'Sin título',
             img: resolveImagePath(x.imagen ?? x.img ?? x.image ?? 'concierto.jpg'),
             tag: genres[0] ?? (artist || 'Música'),
@@ -61,7 +55,7 @@ export function MusicaView() {
 
       let data = normalize(raw);
 
-      // Géneros dinámicos
+      // Poblar géneros
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
       gEl.innerHTML =
@@ -74,7 +68,7 @@ export function MusicaView() {
           ctaText: 'Leer reseña',
           onCardClick: (item) => {
             sessionStorage.setItem("detalleItem", JSON.stringify(item));
-            sessionStorage.setItem("detalleCategoria", "peliculas");
+            sessionStorage.setItem("detalleCategoria", "musica");
             location.hash = "#/detalle";
           },
         });
@@ -82,44 +76,35 @@ export function MusicaView() {
       draw(data);
 
       // Filtros
-      const qEl = document.getElementById('q');
       const yEl = document.getElementById('year');
-
-      const applyFilters = () => {
-        const q = String(qEl?.value || '').toLowerCase().trim();
+      const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
         const filtered = data.filter((x) => {
-          const hayTexto =
-            !q ||
+          const textoOk = !q ||
             [x.title, x.subtitle, x.description, ...(x.genres || [])]
-              .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
+          const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const yearOk = !y || x.year === y;
 
-          const hayGenero = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
-          const hayAnio = !y || x.year === y;
-
-          return hayTexto && hayGenero && hayAnio;
+          return textoOk && generoOk && yearOk;
         });
 
         draw(filtered);
       };
 
-      qEl?.addEventListener('input', applyFilters);
-      gEl?.addEventListener('change', applyFilters);
-      yEl?.addEventListener('change', applyFilters);
+      gEl?.addEventListener('change', () => applyFilters());
+      yEl?.addEventListener('change', () => applyFilters());
 
-      // Navbar acciones
+      // 🔹 Buscar desde navbar
+      window.addEventListener("globalSearch", (e) => {
+        applyFilters(e.detail.query);
+      });
+
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
-      });
-      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const q = e.currentTarget.querySelector('input').value.trim();
-        if (q) sessionStorage.setItem('cx:q', q);
-        location.hash = '#/peliculas';
       });
     },
   };
