@@ -3,7 +3,13 @@
 
 import { db } from '../lib/firebase.js';
 import {
-  collection, addDoc, getDocs, getDoc, query, where, doc,
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  query,
+  where,
+  doc,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 // 🔹 Función genérica: lee cualquier colección (ej: "peliculas", "anime")
@@ -20,10 +26,13 @@ async function readItem(name, id) {
 }
 
 // 🔹 Reseñas
-async function addReview({ peliculaId, usuario, texto, rating }) {
+async function addReview({ peliculaId, peliculaTitulo, peliculaImg, usuario, usuarioEmail, texto, rating }) {
   return await addDoc(collection(db, 'reseñas'), {
-    pelicula: peliculaId,
+    peliculaId,
+    peliculaTitulo,
+    peliculaImg,
     usuario,
+    usuarioEmail, // 👈 aseguramos siempre guardar el email
     texto,
     rating: parseInt(rating, 10),
     fecha: new Date(),
@@ -31,7 +40,14 @@ async function addReview({ peliculaId, usuario, texto, rating }) {
 }
 
 async function listReviewsByPelicula(peliculaId) {
-  const q = query(collection(db, 'reseñas'), where('pelicula', '==', peliculaId));
+  const q = query(collection(db, 'reseñas'), where('peliculaId', '==', peliculaId));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// 🔹 Reseñas por usuario (usamos usuarioEmail fijo)
+async function listReviewsByUser(email) {
+  const q = query(collection(db, 'reseñas'), where('usuarioEmail', '==', email));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
@@ -53,4 +69,5 @@ export const ContentModel = {
   // Reseñas
   addReview,
   listReviewsByPelicula,
+  listReviewsByUser,
 };

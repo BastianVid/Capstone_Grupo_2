@@ -1,4 +1,4 @@
-import { Navbar } from './navbar.js';
+import { Navbar, initNavbarSearch } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
@@ -11,10 +11,6 @@ export function LibrosView() {
         <h1 class="h3 mb-0"><i class="bi bi-book"></i> Libros</h1>
 
         <div class="d-flex gap-2 align-items-center">
-          <div class="input-group w-auto">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por título, autor, género o año...">
-          </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
@@ -35,12 +31,11 @@ export function LibrosView() {
     async bind() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch();
 
       const { ContentModel } = await import('../models/contentModel.js');
       let dataRaw = await ContentModel.listLibros();
 
-      // Normaliza según tu esquema en Firestore
-      // { titulo, imagen, genero(array|string), autor, año, descripcion }
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero)
@@ -63,37 +58,34 @@ export function LibrosView() {
 
       let data = normalize(dataRaw);
 
-      // Poblar géneros dinámicamente
+      // Poblar géneros
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
       gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
-      // Dibujar cards
       const draw = (arr) =>
         renderCards('#grid', arr, {
-          showDescription: false,           // solo título para que quede compacto
+          showDescription: false,
           ctaText: 'Ver más',
-          onCardClick: (item) => alert(`Próximamente detalle de: ${item.title}`),
+          onCardClick: (item) => {
+            sessionStorage.setItem("detalleItem", JSON.stringify(item));
+            sessionStorage.setItem("detalleCategoria", "libros");
+            location.hash = "#/detalle";
+          },
         });
 
       draw(data);
 
       // Filtros
-      const qEl = document.getElementById('q');
       const yEl = document.getElementById('year');
-
-      const applyFilters = () => {
-        const q = String(qEl?.value || '').toLowerCase().trim();
+      const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
         const filtered = data.filter((x) => {
-          const textoOk =
-            !q ||
+          const textoOk = !q ||
             [x.title, x.subtitle, ...(x.genres || [])]
-              .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
-
           const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
           const yearOk = !y || x.year === y;
 
@@ -103,20 +95,17 @@ export function LibrosView() {
         draw(filtered);
       };
 
-      qEl?.addEventListener('input', applyFilters);
-      gEl?.addEventListener('change', applyFilters);
-      yEl?.addEventListener('change', applyFilters);
+      gEl?.addEventListener('change', () => applyFilters());
+      yEl?.addEventListener('change', () => applyFilters());
 
-      // Navbar actions
+      // 🔹 Escucha el buscador global
+      window.addEventListener("globalSearch", (e) => {
+        applyFilters(e.detail.query);
+      });
+
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
-      });
-      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const q = e.currentTarget.querySelector('input').value.trim();
-        if (q) sessionStorage.setItem('cx:q', q);
-        location.hash = '#/libros';
       });
     },
   };

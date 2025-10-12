@@ -22,12 +22,12 @@ export function Navbar() {
 
         <!-- Search -->
         <form id="siteSearch" class="ms-auto me-2 d-none d-md-flex" role="search" style="min-width:360px;">
-          <input class="form-control form-control-sm" placeholder="Buscar títulos, géneros, artistas" />
+          <input id="siteSearchInput" class="form-control form-control-sm" placeholder="Buscar títulos, géneros, artistas" />
         </form>
 
         <!-- Session -->
         <div id="navSessionBox" class="d-flex align-items-center gap-2">
-          <!-- Único botón (no autenticado) -->
+          <!-- Botón (no autenticado) -->
           <a id="loginSignupBtn" href="#/login" class="btn btn-primary btn-sm">Login / Sign up</a>
 
           <!-- Menú usuario (autenticado) -->
@@ -40,6 +40,7 @@ export function Navbar() {
             <ul class="dropdown-menu dropdown-menu-end">
               <li><h6 class="dropdown-header" id="navUserEmail"></h6></li>
               <li><a class="dropdown-item" href="#/">Inicio</a></li>
+              <li><a class="dropdown-item" href="#/perfil">Mi perfil</a></li> 
               <li><hr class="dropdown-divider"></li>
               <li><button id="logoutBtn" class="dropdown-item">Cerrar sesión</button></li>
             </ul>
@@ -50,4 +51,19 @@ export function Navbar() {
     </div>
   </header>
   `;
+}
+
+/**
+ * 🔹 Inicializa el buscador global en el navbar
+ * - Cada letra escrita en el input dispara un evento "globalSearch"
+ * - Las vistas pueden escuchar este evento y filtrar en tiempo real
+ */
+export function initNavbarSearch() {
+  const input = document.getElementById("siteSearchInput");
+  if (!input) return;
+
+  input.addEventListener("input", (e) => {
+    const query = e.target.value.trim().toLowerCase();
+    window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
+  });
 }
