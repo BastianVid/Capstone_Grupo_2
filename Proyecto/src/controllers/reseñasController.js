@@ -1,8 +1,8 @@
 // ============================== IMPORTS ==============================
-import { 
-  doc, 
-  getDoc, 
-  runTransaction 
+import {
+  doc,
+  getDoc,
+  runTransaction
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { db, auth } from "../lib/firebase.js";
 
@@ -15,15 +15,15 @@ import { db, auth } from "../lib/firebase.js";
 export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   const user = auth.currentUser;
   if (!user) {
-    alert("Debes iniciar sesión para dejar una reseña.");
+    alert("⚠️ Debes iniciar sesión para dejar una reseña.");
     return;
   }
 
   const userId = user.uid;
 
-  // ✅ Rutas correctas
+  // ✅ Rutas corregidas (sin ñ)
   const itemRef = doc(db, categoria, itemId);
-  const reseñaRef = doc(itemRef, "reseñas", userId);
+  const resenaRef = doc(itemRef, "resenas", userId);
 
   await runTransaction(db, async (tx) => {
     const itemSnap = await tx.get(itemRef);
@@ -36,13 +36,15 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
         calificacionPromedio: estrellas,
         totalVotos: 1
       });
-      tx.set(reseñaRef, {
+
+      tx.set(resenaRef, {
         userId,
         userEmail: user.email || null,
         estrellas,
         comentario,
         fecha: new Date().toISOString()
       });
+
       return;
     }
 
@@ -50,11 +52,11 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
     totalVotos = itemSnap.data().totalVotos || 0;
     promedio = itemSnap.data().calificacionPromedio || 0;
 
-    const reseñaSnap = await tx.get(reseñaRef);
+    const resenaSnap = await tx.get(resenaRef);
 
-    if (reseñaSnap.exists()) {
+    if (resenaSnap.exists()) {
       // 🔁 Actualizar reseña existente
-      const prevEstrellas = reseñaSnap.data().estrellas;
+      const prevEstrellas = resenaSnap.data().estrellas;
       const nuevaSuma = promedio * totalVotos - prevEstrellas + estrellas;
 
       tx.update(itemRef, {
@@ -72,7 +74,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
     }
 
     // ✅ Guardar o actualizar la reseña
-    tx.set(reseñaRef, {
+    tx.set(resenaRef, {
       userId,
       userEmail: user.email || null,
       estrellas,
@@ -91,8 +93,8 @@ export async function obtenerReseñaUsuario(categoria, itemId) {
   if (!user) return null;
 
   const userId = user.uid;
-  // ✅ Ruta corregida
-  const reseñaRef = doc(doc(db, categoria, itemId), "reseñas", userId);
-  const snap = await getDoc(reseñaRef);
+  // ✅ Ruta corregida (sin ñ)
+  const resenaRef = doc(doc(db, categoria, itemId), "resenas", userId);
+  const snap = await getDoc(resenaRef);
   return snap.exists() ? snap.data() : null;
 }

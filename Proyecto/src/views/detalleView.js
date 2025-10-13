@@ -152,14 +152,13 @@ export function DetalleView(item, categoria) {
         try {
           console.log("🔥 DEBUG DetalleView");
           console.log("categoria:", categoria);
-          console.log("item:", item);
           console.log("item.id:", item.id);
-          console.log("ruta esperada:", `${categoria}/${item.id}/reseñas`);
+          console.log("ruta esperada:", `${categoria}/${item.id}/resenas`);
 
-          const reseñasRef = collection(doc(db, categoria, item.id), "reseñas");
-          const snapshot = await getDocs(reseñasRef);
+          const resenasRef = collection(doc(db, categoria, item.id), "resenas");
+          const snapshot = await getDocs(resenasRef);
 
-          console.log(`🔍 ${snapshot.size} reseñas encontradas en ${categoria}/${item.id}`);
+          console.log(`🔍 ${snapshot.size} reseñas encontradas en ${categoria}/${item.id}/resenas`);
 
           if (snapshot.empty) {
             commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`;
@@ -173,7 +172,7 @@ export function DetalleView(item, categoria) {
             const data = docSnap.data();
             const isUserReview = user && data.userId === user.uid;
 
-            const reseñaHTML = `
+            const resenaHTML = `
               <div class="border rounded p-2 mb-2 ${isUserReview ? 'bg-light border-2 border-dark' : ''}">
                 <strong>${data.userEmail || "Usuario anónimo"} ${isUserReview ? '(Tu reseña)' : ''}</strong>
                 <p class="mb-1 text-warning">${"★".repeat(data.estrellas)}${"☆".repeat(5 - data.estrellas)}</p>
@@ -181,13 +180,11 @@ export function DetalleView(item, categoria) {
               </div>
             `;
 
-            if (isUserReview) userReviewHTML = reseñaHTML;
-            else otherReviewsHTML += reseñaHTML;
+            if (isUserReview) userReviewHTML = resenaHTML;
+            else otherReviewsHTML += resenaHTML;
           });
 
-          commentsList.innerHTML =
-            (userReviewHTML || "") +
-            (otherReviewsHTML || `<p class="text-muted">No hay reseñas aún.</p>`);
+          commentsList.innerHTML = userReviewHTML + otherReviewsHTML;
         } catch (e) {
           console.error("Error al obtener reseñas:", e);
           commentsList.innerHTML = `<p class="text-danger">Error al cargar reseñas.</p>`;
