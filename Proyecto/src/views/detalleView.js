@@ -144,8 +144,8 @@ export function DetalleView(item, categoria) {
             const estrellasHTML = "★".repeat(estrellas) + "☆".repeat(5 - estrellas);
             promedioGeneralEl.innerHTML = `
               <span class="text-warning">${estrellasHTML}</span>
-              <span class="text-dark fw-semibold ms-2">${promedio.toFixed(1)} / 5</span>
-              <span class="text-muted">(${votos} votos)</span>
+              <span class="text-light fw-semibold ms-2">${promedio.toFixed(1)} / 5</span>
+              <span class="text-secondary">(${votos} votos)</span>
             `;
           }
         } catch (e) {
@@ -156,22 +156,13 @@ export function DetalleView(item, categoria) {
       // RESEÑAS
       const renderReseñas = async (user) => {
         try {
-          console.log("🔥 DEBUG DetalleView");
-          console.log("categoria:", categoria);
-          console.log("item.id:", item.id);
-          console.log("ruta esperada:", `${categoria}/${item.id}/resenas`);
-
           if (!categoria || !item?.id) {
-            console.error("❌ Datos insuficientes para construir la ruta Firestore");
             commentsList.innerHTML = `<p class="text-danger">Error: datos inválidos para ruta de reseñas.</p>`;
             return;
           }
 
           const resenasRef = collection(db, categoria, item.id, "resenas");
-          console.log("📁 Referencia creada correctamente:", resenasRef.path);
-
           const snapshot = await getDocs(resenasRef);
-          console.log(`🔍 ${snapshot.size} reseñas encontradas en ${categoria}/${item.id}/resenas`);
 
           if (snapshot.empty) {
             commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`;
@@ -186,8 +177,8 @@ export function DetalleView(item, categoria) {
             const isUserReview = user && data.userId === user.uid;
 
             const resenaHTML = `
-              <div class="border rounded p-2 mb-2 ${isUserReview ? 'bg-light border-2 border-dark' : ''}">
-                <strong>${data.userEmail || "Usuario anónimo"} ${isUserReview ? '(Tu reseña)' : ''}</strong>
+              <div class="border rounded p-3 mb-3 ${isUserReview ? 'review-own' : 'review-other'}">
+                <strong>${data.userEmail || "Usuario anónimo"} ${isUserReview ? '<span class="text-accent">(Tu reseña)</span>' : ''}</strong>
                 <p class="mb-1 text-warning">${"★".repeat(data.estrellas)}${"☆".repeat(5 - data.estrellas)}</p>
                 <p class="mb-0">${data.comentario}</p>
               </div>
@@ -208,8 +199,6 @@ export function DetalleView(item, categoria) {
       // 👤 CONTROL DE SESIÓN
       // =========================
       onAuthStateChanged(auth, async (user) => {
-        console.log("👤 Usuario actual:", user ? user.email : "No logueado");
-
         await renderPromedioGeneral();
         await renderReseñas(user);
 
