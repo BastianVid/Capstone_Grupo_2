@@ -1,18 +1,14 @@
 // ============================== IMPORTS ==============================
-// 🔄 Todos los imports actualizados a Firebase 10.14.0
 import {
   doc,
   getDoc,
-  runTransaction
+  runTransaction,
+  setDoc,
+  collection
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { db, auth } from "../lib/firebase.js";
 
 // ============================== GUARDAR O ACTUALIZAR RESEÑA ==============================
-/**
- * Guarda o actualiza una reseña en Firestore.
- * Si el usuario ya calificó antes, actualiza la reseña y recalcula el promedio.
- * Si es la primera vez, agrega una nueva reseña y suma un voto.
- */
 export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   const user = auth.currentUser;
   if (!user) {
@@ -21,60 +17,44 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   }
 
   const userId = user.uid;
-
-  // ✅ Estructura correcta: /categoria/itemId/resenas/userId
   const itemRef = doc(db, categoria, itemId);
   const resenaRef = doc(db, categoria, itemId, "resenas", userId);
+
+  console.log("🟢 Guardando reseña en:", `${categoria}/${itemId}/resenas/${userId}`);
 
   await runTransaction(db, async (tx) => {
     const itemSnap = await tx.get(itemRef);
     let totalVotos = 0;
     let promedio = 0;
 
-    // Si el documento del ítem no existe, lo creamos
     if (!itemSnap.exists()) {
       tx.set(itemRef, {
         calificacionPromedio: estrellas,
         totalVotos: 1
       });
-
-      tx.set(resenaRef, {
-        userId,
-        userEmail: user.email || null,
-        estrellas,
-        comentario,
-        fecha: new Date().toISOString()
-      });
-
-      return;
-    }
-
-    // Datos actuales del ítem
-    totalVotos = itemSnap.data().totalVotos || 0;
-    promedio = itemSnap.data().calificacionPromedio || 0;
-
-    const resenaSnap = await tx.get(resenaRef);
-
-    if (resenaSnap.exists()) {
-      // 🔁 Actualizar reseña existente
-      const prevEstrellas = resenaSnap.data().estrellas;
-      const nuevaSuma = promedio * totalVotos - prevEstrellas + estrellas;
-
-      tx.update(itemRef, {
-        calificacionPromedio: nuevaSuma / totalVotos
-      });
     } else {
-      // 🆕 Nueva reseña
-      const nuevaSuma = promedio * totalVotos + estrellas;
-      const nuevoTotal = totalVotos + 1;
+      totalVotos = itemSnap.data().totalVotos || 0;
+      promedio = itemSnap.data().calificacionPromedio || 0;
 
-      tx.update(itemRef, {
-        calificacionPromedio: nuevaSuma / nuevoTotal,
-        totalVotos: nuevoTotal
-      });
+      const resenaSnap = await tx.get(resenaRef);
+
+      if (resenaSnap.exists()) {
+        const prevEstrellas = resenaSnap.data().estrellas;
+        const nuevaSuma = promedio * totalVotos - prevEstrellas + estrellas;
+        tx.update(itemRef, {
+          calificacionPromedio: nuevaSuma / totalVotos
+        });
+      } else {
+        const nuevaSuma = promedio * totalVotos + estrellas;
+        const nuevoTotal = totalVotos + 1;
+        tx.update(itemRef, {
+          calificacionPromedio: nuevaSuma / nuevoTotal,
+          totalVotos: nuevoTotal
+        });
+      }
     }
 
-    // ✅ Guardar o actualizar la reseña
+    // ✅ Guardar o actualizar la reseña principal
     tx.set(resenaRef, {
       userId,
       userEmail: user.email || null,
@@ -83,12 +63,36 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       fecha: new Date().toISOString()
     });
   });
+
+  // ============================== REGISTRO GLOBAL ==============================
+  try {
+    const itemSnap = await getDoc(itemRef);
+    const itemData = itemSnap.exists() ? itemSnap.data() : {};
+
+    const obraTitulo = itemData.titulo || itemData.title || "Sin título";
+    const obraImg = itemData.imagen || itemData.img || "";
+
+    const uniqueId = `${userId}_${categoria}_${itemId}`;
+    const globalRef = doc(db, "userResenas", uniqueId);
+
+    await setDoc(globalRef, {
+      userId,
+      categoria,
+      obraId: itemId,
+      obraTitulo,
+      obraImg,
+      estrellas,
+      comentario,
+      fecha: new Date().toISOString()
+    });
+
+    console.log("✅ Reseña registrada en /userResenas con ID:", uniqueId);
+  } catch (error) {
+    console.error("❌ Error al registrar reseña global:", error);
+  }
 }
 
 // ============================== OBTENER RESEÑA DE USUARIO ==============================
-/**
- * Devuelve la reseña del usuario actual para un ítem específico (si existe)
- */
 export async function obtenerReseñaUsuario(categoria, itemId) {
   const user = auth.currentUser;
   if (!user) return null;
