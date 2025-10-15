@@ -3,7 +3,7 @@ import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { resolveImagePath } from './shared/resolve-image-path.js';
 
 // ============================== PERFIL VIEW ==============================
@@ -42,7 +42,7 @@ export function PerfilView() {
         userReviewsEl.innerHTML = `<p class="text-muted">Cargando reseñas...</p>`;
 
         try {
-          // 🔍 Consulta única optimizada: todas las reseñas del usuario desde /userResenas
+          // 🔍 Cargar todas las reseñas del usuario desde /userResenas
           const q = query(collection(db, "userResenas"), where("userId", "==", user.uid));
           const snap = await getDocs(q);
 
@@ -59,14 +59,14 @@ export function PerfilView() {
             .map(r => `
               <div class="border rounded p-3 mb-3 bg-dark text-light">
                 <div class="d-flex align-items-center gap-3">
-                  <img src="${resolveImagePath(r.obraImg)}" 
-                       alt="${r.obraTitulo}" 
+                  <img src="${resolveImagePath(r.obraImg || '')}" 
+                       alt="${r.obraTitulo || 'Obra'}" 
                        class="rounded" 
                        style="width:80px;height:110px;object-fit:cover;">
                   <div>
-                    <h5 class="mb-1">${r.obraTitulo}</h5>
+                    <h5 class="mb-1">${r.obraTitulo || 'Sin título'}</h5>
                     <p class="mb-1 text-warning">${"★".repeat(r.estrellas)}${"☆".repeat(5 - r.estrellas)}</p>
-                    <p class="mb-1">${r.comentario}</p>
+                    <p class="mb-1">${r.comentario || ''}</p>
                     <small class="text-secondary">${r.categoria}</small>
                     <br>
                     <button class="btn btn-outline-light btn-sm mt-2 verObraBtn" 
@@ -80,20 +80,44 @@ export function PerfilView() {
             `)
             .join("");
 
-          // 🔗 Listeners de navegación hacia el detalle
+          // ============================== EVENTOS: Ver obra ==============================
           document.querySelectorAll(".verObraBtn").forEach(btn => {
-            btn.addEventListener("click", (e) => {
+            btn.addEventListener("click", async (e) => {
               const categoria = e.target.dataset.categoria;
               const id = e.target.dataset.id;
 
-              // Guardamos el contexto en sessionStorage
-              sessionStorage.setItem("detalleCategoria", categoria);
-              sessionStorage.setItem("detalleItem", JSON.stringify({ id }));
+              try {
+                // 📄 Obtener datos reales desde Firestore
+                const ref = doc(db, categoria, id);
+                const snap = await getDoc(ref);
 
-              // Redirigir al detalle
-              location.hash = "#/detalle";
+                if (!snap.exists()) {
+                  alert("❌ No se encontró la obra en la base de datos.");
+                  return;
+                }
+
+                const data = snap.data();
+
+                // 🧠 Guardamos el objeto completo para DetalleView
+                sessionStorage.setItem("detalleCategoria", categoria);
+                sessionStorage.setItem("detalleItem", JSON.stringify({
+                  id,
+                  titulo: data.titulo || data.title || "Sin título",
+                  img: data.imagen || data.img || "",
+                  genero: data.genero || data.genres || [],
+                  descripcion: data.descripcion || data.description || "",
+                  subtitle: data.director || data.autor || ""
+                }));
+
+                // 🔀 Redirigir al DetalleView
+                location.hash = "#/detalle";
+              } catch (error) {
+                console.error("❌ Error al cargar la obra seleccionada:", error);
+                alert("Error al intentar abrir la obra.");
+              }
             });
           });
+
         } catch (error) {
           console.error("❌ Error al cargar reseñas:", error);
           userReviewsEl.innerHTML = `<p class="text-danger">Error al cargar tus reseñas.</p>`;

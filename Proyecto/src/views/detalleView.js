@@ -5,16 +5,45 @@ import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { guardarReseña, obtenerReseñaUsuario } from '../controllers/reseñasController.js';
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-console.log("🧠 Tipo de db:", db.constructor.name);
+// ✅ Nueva función: corrige rutas de imagen automáticamente
+function resolveImagePath(imgName = "") {
+  if (!imgName) return "src/assets/img/default.jpg";
+  if (imgName.startsWith("http")) return imgName;
+
+  // Si no tiene extensión, se asume .jpg
+  if (!/\.(jpg|jpeg|png|gif|webp)$/i.test(imgName)) {
+    imgName = `${imgName}.jpg`;
+  }
+
+  // Rutas relativas internas
+  if (imgName.startsWith("src/assets/img/")) return imgName;
+  if (imgName.startsWith("assets/img/")) return `src/${imgName}`;
+  return `src/assets/img/${imgName}`;
+}
 
 export function DetalleView(item, categoria) {
+  // =========================
+  // ✅ Recuperar item desde sessionStorage si no viene desde router
+  // =========================
   if (!item) {
+    const storedItem = sessionStorage.getItem("detalleItem");
+    const storedCategoria = sessionStorage.getItem("detalleCategoria");
+    if (storedItem) {
+      item = JSON.parse(storedItem);
+      categoria = storedCategoria || categoria;
+    }
+  }
+
+  if (!item || !categoria) {
     return {
-      html: `<div class="container py-5"><h2>No se encontró la reseña</h2></div>`,
+      html: `<div class="container py-5"><h2>No se encontró la obra seleccionada.</h2></div>`,
       bind() {}
     };
   }
 
+  // =========================
+  // 🎨 HTML de la vista
+  // =========================
   const html = `
     ${Navbar()}
     <style>
@@ -26,15 +55,24 @@ export function DetalleView(item, categoria) {
       #rating i.hovered {
         color: #ffc107;
       }
+      .review-own {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid #ffc107;
+      }
     </style>
 
     <div class="container py-4">
-      <h1 class="mb-1">${item.titulo || item.title}</h1>
+      <h1 class="mb-1">${item.titulo || item.title || "Sin título"}</h1>
       <p id="promedioGeneral" class="text-warning fs-5 mb-3"></p>
 
       <div class="row">
         <div class="col-md-4">
-          <img src="${item.imagen || item.img}" alt="${item.titulo || item.title}" class="img-fluid rounded shadow">
+          <img 
+            src="${resolveImagePath(item.img || item.imagen)}" 
+            alt="${item.titulo || item.title || 'Obra'}" 
+            class="img-fluid rounded shadow"
+            onerror="this.src='src/assets/img/default.jpg'"
+          >
         </div>
         <div class="col-md-8">
           <p class="text-muted">${item.subtitle || ''}</p>
@@ -45,10 +83,12 @@ export function DetalleView(item, categoria) {
 
       <hr>
 
-      <div class="my-4">
+      <div id="reseñaSection" class="my-4">
         <h4>Tu Calificación</h4>
         <div id="rating" class="d-flex gap-2 fs-3 mb-2">
-          ${[1, 2, 3, 4, 5].map(i => `<i class="bi bi-star" data-value="${i}" style="cursor:pointer;"></i>`).join('')}
+          ${[1, 2, 3, 4, 5]
+            .map(i => `<i class="bi bi-star" data-value="${i}" style="cursor:pointer;"></i>`)
+            .join('')}
         </div>
         <textarea id="commentInput" class="form-control mb-2" placeholder="Escribe un comentario..."></textarea>
         <button id="addComment" class="btn btn-dark">Guardar reseña</button>
@@ -122,7 +162,6 @@ export function DetalleView(item, categoria) {
       // ✅ FUNCIONES DE RENDER
       // =========================
 
-      // PROMEDIO GENERAL
       const renderPromedioGeneral = async () => {
         try {
           const itemRef = doc(db, categoria, item.id);
@@ -153,14 +192,8 @@ export function DetalleView(item, categoria) {
         }
       };
 
-      // RESEÑAS
       const renderReseñas = async (user) => {
         try {
-          if (!categoria || !item?.id) {
-            commentsList.innerHTML = `<p class="text-danger">Error: datos inválidos para ruta de reseñas.</p>`;
-            return;
-          }
-
           const resenasRef = collection(db, categoria, item.id, "resenas");
           const snapshot = await getDocs(resenasRef);
 
@@ -177,8 +210,8 @@ export function DetalleView(item, categoria) {
             const isUserReview = user && data.userId === user.uid;
 
             const resenaHTML = `
-              <div class="border rounded p-3 mb-3 ${isUserReview ? 'review-own' : 'review-other'}">
-                <strong>${data.userEmail || "Usuario anónimo"} ${isUserReview ? '<span class="text-accent">(Tu reseña)</span>' : ''}</strong>
+              <div class="border rounded p-3 mb-3 ${isUserReview ? 'review-own' : ''}">
+                <strong>${data.userEmail || "Usuario anónimo"} ${isUserReview ? '(Tu reseña)' : ''}</strong>
                 <p class="mb-1 text-warning">${"★".repeat(data.estrellas)}${"☆".repeat(5 - data.estrellas)}</p>
                 <p class="mb-0">${data.comentario}</p>
               </div>
@@ -202,6 +235,9 @@ export function DetalleView(item, categoria) {
         await renderPromedioGeneral();
         await renderReseñas(user);
 
+        // 🧭 Scroll automático a reseñas (mejor UX)
+        document.getElementById("reseñaSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+
         if (user) {
           const reseña = await obtenerReseñaUsuario(categoria, item.id);
           if (reseña) {
@@ -214,7 +250,6 @@ export function DetalleView(item, categoria) {
           msg.textContent = "Inicia sesión para dejar una reseña.";
         }
 
-        // Guardar reseña
         addBtn.addEventListener("click", async () => {
           errorEl.textContent = "";
           const comentario = comentarioEl.value.trim();
