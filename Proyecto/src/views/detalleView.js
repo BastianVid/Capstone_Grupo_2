@@ -5,6 +5,8 @@ import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { guardarReseña, obtenerReseñaUsuario } from '../controllers/reseñasController.js';
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+console.log("🧠 Tipo de db:", db.constructor.name);
+
 export function DetalleView(item, categoria) {
   if (!item) {
     return {
@@ -46,7 +48,7 @@ export function DetalleView(item, categoria) {
       <div class="my-4">
         <h4>Tu Calificación</h4>
         <div id="rating" class="d-flex gap-2 fs-3 mb-2">
-          ${[1,2,3,4,5].map(i => `<i class="bi bi-star" data-value="${i}" style="cursor:pointer;"></i>`).join('')}
+          ${[1, 2, 3, 4, 5].map(i => `<i class="bi bi-star" data-value="${i}" style="cursor:pointer;"></i>`).join('')}
         </div>
         <textarea id="commentInput" class="form-control mb-2" placeholder="Escribe un comentario..."></textarea>
         <button id="addComment" class="btn btn-dark">Guardar reseña</button>
@@ -82,7 +84,7 @@ export function DetalleView(item, categoria) {
         });
       }
 
-      // Elementos UI
+      // ---- ELEMENTOS UI ----
       const stars = document.querySelectorAll("#rating i");
       const msg = document.getElementById("ratingMessage");
       const errorEl = document.getElementById("errorMessage");
@@ -93,7 +95,7 @@ export function DetalleView(item, categoria) {
 
       let currentRating = 0;
 
-      // ---- Estrellas visuales ----
+      // ---- ⭐ Estrellas visuales ----
       const pintarEstrellas = (value) => {
         stars.forEach((s, i) => {
           s.classList.remove("bi-star-fill", "active");
@@ -116,10 +118,14 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      // ---- Render promedio general ----
+      // =========================
+      // ✅ FUNCIONES DE RENDER
+      // =========================
+
+      // PROMEDIO GENERAL
       const renderPromedioGeneral = async () => {
         try {
-          const itemRef = doc(db, `${categoria}/${item.id}`);
+          const itemRef = doc(db, categoria, item.id);
           const snap = await getDoc(itemRef);
 
           if (!snap.exists()) {
@@ -147,7 +153,7 @@ export function DetalleView(item, categoria) {
         }
       };
 
-      // ---- Render reseñas (todas) ----
+      // RESEÑAS
       const renderReseñas = async (user) => {
         try {
           console.log("🔥 DEBUG DetalleView");
@@ -155,9 +161,16 @@ export function DetalleView(item, categoria) {
           console.log("item.id:", item.id);
           console.log("ruta esperada:", `${categoria}/${item.id}/resenas`);
 
-          const resenasRef = collection(doc(db, categoria, item.id), "resenas");
-          const snapshot = await getDocs(resenasRef);
+          if (!categoria || !item?.id) {
+            console.error("❌ Datos insuficientes para construir la ruta Firestore");
+            commentsList.innerHTML = `<p class="text-danger">Error: datos inválidos para ruta de reseñas.</p>`;
+            return;
+          }
 
+          const resenasRef = collection(db, categoria, item.id, "resenas");
+          console.log("📁 Referencia creada correctamente:", resenasRef.path);
+
+          const snapshot = await getDocs(resenasRef);
           console.log(`🔍 ${snapshot.size} reseñas encontradas en ${categoria}/${item.id}/resenas`);
 
           if (snapshot.empty) {
@@ -186,19 +199,20 @@ export function DetalleView(item, categoria) {
 
           commentsList.innerHTML = userReviewHTML + otherReviewsHTML;
         } catch (e) {
-          console.error("Error al obtener reseñas:", e);
+          console.error("❌ Error al obtener reseñas:", e);
           commentsList.innerHTML = `<p class="text-danger">Error al cargar reseñas.</p>`;
         }
       };
 
-      // ---- Control de sesión ----
+      // =========================
+      // 👤 CONTROL DE SESIÓN
+      // =========================
       onAuthStateChanged(auth, async (user) => {
         console.log("👤 Usuario actual:", user ? user.email : "No logueado");
 
         await renderPromedioGeneral();
         await renderReseñas(user);
 
-        // Si hay login, precargar reseña propia
         if (user) {
           const reseña = await obtenerReseñaUsuario(categoria, item.id);
           if (reseña) {
