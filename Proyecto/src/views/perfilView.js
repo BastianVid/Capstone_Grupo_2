@@ -11,18 +11,29 @@ import { eliminarReseña } from '../controllers/reseñasController.js';
 export function PerfilView() {
   const html = `
     ${Navbar()}
+
     <section class="perfil-container py-5 text-light">
       <div class="perfil-hero">
         <div class="perfil-content container">
           <img src="src/assets/img/default-avatar.png" alt="Avatar" id="userAvatar" class="perfil-avatar border-gradient">
-          <div>
-            <h2 id="userName" class="perfil-nombre mb-1">Usuario</h2>
-            <p id="userEmail" class="perfil-correo mb-0">correo@ejemplo.com</p>
+          <div class="perfil-userinfo">
+            <p class="perfil-line mb-1">
+              <i class="bi bi-person-fill text-accent"></i> 
+              <span id="userName">Usuario</span>
+            </p>
+            <p class="perfil-line mb-1">
+              <i class="bi bi-envelope-fill text-accent"></i> 
+              <span id="userEmail">correo@ejemplo.com</span>
+            </p>
+            <p class="perfil-line mb-0">
+              <i class="bi bi-calendar-event text-accent"></i> 
+              Registrado: <span id="userCreated">—</span>
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="container mt-4">
+      <div class="container mt-5">
         <div class="perfil-divider"></div>
         <div class="d-flex align-items-center mb-3 perfil-subtitulo">
           <i class="bi bi-star-fill text-accent"></i>
@@ -66,7 +77,6 @@ export function PerfilView() {
 
           const reseñas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-          // ✅ Renderizar tarjetas
           userReviewsEl.innerHTML = reseñas
             .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
             .map(r => `
@@ -108,6 +118,7 @@ export function PerfilView() {
             btn.addEventListener("click", async (e) => {
               const categoria = e.target.closest("button").dataset.categoria;
               const id = e.target.closest("button").dataset.id;
+
               try {
                 const ref = doc(db, categoria, id);
                 const snap = await getDoc(ref);
@@ -142,6 +153,7 @@ export function PerfilView() {
               const categoria = e.target.closest("button").dataset.categoria;
               const id = e.target.closest("button").dataset.id;
               if (!confirm("¿Seguro que deseas eliminar esta reseña?")) return;
+
               try {
                 await eliminarReseña(categoria, id);
                 const globalRef = doc(db, "userResenas", `${user.uid}_${categoria}_${id}`);
@@ -170,6 +182,12 @@ export function PerfilView() {
 
         document.getElementById("userName").textContent = user.displayName || "Usuario";
         document.getElementById("userEmail").textContent = user.email;
+
+        document.getElementById("userCreated").textContent =
+          new Date(user.metadata.creationTime).toLocaleDateString("es-ES", {
+            year: "numeric", month: "short", day: "numeric"
+          });
+
         if (user.photoURL) avatarEl.src = user.photoURL;
 
         await renderUserReviews(user);

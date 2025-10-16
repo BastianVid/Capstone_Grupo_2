@@ -743,3 +743,22 @@ footer {
 .text-accent {
   color: var(--accent);
 }
+
+/* ============================== PERFIL - INFORMACIÓN DEL USUARIO ============================== */
+
+.perfil-userinfo {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #f1f5f9;
+}
+
+.perfil-line i {
+  margin-right: 6px;
+  color: var(--accent);
+}
+
+.perfil-line span {
+  font-weight: 500;
+  color: #e2e8f0;
+}
+
