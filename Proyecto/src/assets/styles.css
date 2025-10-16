@@ -762,3 +762,34 @@ footer {
   color: #e2e8f0;
 }
 
+.cx-header {
+  backdrop-filter: blur(10px);
+  background-color: rgba(20, 25, 40, 0.9) !important;
+}
+
+.cx-header .dropdown-menu-dark {
+  background-color: #1e2233 !important;
+}
+
+.cx-header .dropdown-item:hover {
+  background-color: #2a3045 !important;
+  color: #f5c518 !important;
+}
+
+.fade-rotate {
+  opacity: 0;
+  transform: scale(1.02);
+  animation: fadeSlide 1s ease forwards;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
