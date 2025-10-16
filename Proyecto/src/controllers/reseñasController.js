@@ -4,7 +4,11 @@ import {
   getDoc,
   runTransaction,
   setDoc,
-  collection
+  deleteDoc,
+  collection,
+  query,
+  where,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { db, auth } from "../lib/firebase.js";
 
@@ -19,6 +23,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   const userId = user.uid;
   const itemRef = doc(db, categoria, itemId);
   const resenaRef = doc(db, categoria, itemId, "resenas", userId);
+  const globalRef = doc(db, "userResenas", `${userId}_${categoria}_${itemId}`);
 
   console.log("🟢 Guardando reseña en:", `${categoria}/${itemId}/resenas/${userId}`);
 
@@ -54,7 +59,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       }
     }
 
-    // ✅ Guardar o actualizar la reseña principal
+    // ✅ Guardar o actualizar reseña
     tx.set(resenaRef, {
       userId,
       userEmail: user.email || null,
@@ -72,9 +77,6 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
     const obraTitulo = itemData.titulo || itemData.title || "Sin título";
     const obraImg = itemData.imagen || itemData.img || "";
 
-    const uniqueId = `${userId}_${categoria}_${itemId}`;
-    const globalRef = doc(db, "userResenas", uniqueId);
-
     await setDoc(globalRef, {
       userId,
       categoria,
@@ -86,7 +88,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       fecha: new Date().toISOString()
     });
 
-    console.log("✅ Reseña registrada en /userResenas con ID:", uniqueId);
+    console.log("✅ Reseña registrada en /userResenas con ID:", globalRef.id);
   } catch (error) {
     console.error("❌ Error al registrar reseña global:", error);
   }
@@ -102,4 +104,43 @@ export async function obtenerReseñaUsuario(categoria, itemId) {
   const snap = await getDoc(resenaRef);
 
   return snap.exists() ? snap.data() : null;
+}
+
+// ============================== ELIMINAR RESEÑA (completa) ==============================
+export async function eliminarReseña(categoria, itemId) {
+  const user = auth.currentUser;
+  if (!user) return;
+
+  const userId = user.uid;
+  const resenaRef = doc(db, categoria, itemId, "resenas", userId);
+  const globalRef = doc(db, "userResenas", `${userId}_${categoria}_${itemId}`);
+
+  try {
+    // 🔥 Eliminar de subcolección de la obra
+    await deleteDoc(resenaRef);
+    console.log("🗑️ Eliminada reseña de la obra:", resenaRef.path);
+
+    // 🔥 Eliminar del registro global del usuario
+    await deleteDoc(globalRef);
+    console.log("🗑️ Eliminada reseña global:", globalRef.path);
+
+    // 🔁 Recalcular el promedio
+    const resenasSnap = await getDocs(collection(db, categoria, itemId, "resenas"));
+    let total = 0, suma = 0;
+    resenasSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+      suma += data.estrellas;
+      total++;
+    });
+
+    const nuevoPromedio = total ? suma / total : 0;
+    await setDoc(doc(db, categoria, itemId), {
+      calificacionPromedio: nuevoPromedio,
+      totalVotos: total
+    }, { merge: true });
+
+    console.log("🔄 Promedio actualizado correctamente.");
+  } catch (error) {
+    console.error("❌ Error al eliminar reseña:", error);
+  }
 }

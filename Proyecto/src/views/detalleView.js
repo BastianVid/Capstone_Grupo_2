@@ -1,29 +1,23 @@
+// ============================== IMPORTS ==============================
 import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { guardarReseña, obtenerReseñaUsuario } from '../controllers/reseñasController.js';
+import { guardarReseña, obtenerReseñaUsuario, eliminarReseña } from '../controllers/reseñasController.js';
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-/* ✅ Resolver imagen de forma robusta:
-   - Acepta "avatar", "img/avatar.jpg", "assets/img/avatar.jpg", "src/assets/img/avatar.jpg"
-   - Toma siempre el último segmento (nombre de archivo) y garantiza extensión.
-   - Devuelve siempre "src/assets/img/<archivo>".
-*/
+// ============================== UTILIDAD: Resolver ruta de imagen ==============================
 function resolveImagePath(input = "") {
   if (!input) return "src/assets/img/default.jpg";
   if (input.startsWith("http")) return input;
-
-  // Quitar query/hash y quedarnos con el último segmento
   const clean = String(input).split(/[?#]/)[0];
-  const file = clean.split("/").pop(); // "avatar" o "avatar.jpg"
-
+  const file = clean.split("/").pop();
   const withExt = /\.(jpg|jpeg|png|gif|webp)$/i.test(file) ? file : `${file}.jpg`;
   return `src/assets/img/${withExt}`;
 }
 
+// ============================== DETALLE VIEW ==============================
 export function DetalleView(item, categoria) {
-  // 1) Recuperar del sessionStorage si vino vacío
   if (!item) {
     const storedItem = sessionStorage.getItem("detalleItem");
     const storedCategoria = sessionStorage.getItem("detalleCategoria");
@@ -65,13 +59,17 @@ export function DetalleView(item, categoria) {
 
       <hr>
 
+      <!-- Sección de reseña personal -->
       <div id="reseñaSection" class="my-4">
         <h4>Tu Calificación</h4>
         <div id="rating" class="d-flex gap-2 fs-3 mb-2">
           ${[1,2,3,4,5].map(i => `<i class="bi bi-star" data-value="${i}" style="cursor:pointer;"></i>`).join('')}
         </div>
         <textarea id="commentInput" class="form-control mb-2" placeholder="Escribe un comentario..."></textarea>
-        <button id="addComment" class="btn btn-dark">Guardar reseña</button>
+        <div class="d-flex gap-2 flex-wrap">
+          <button id="addComment" class="btn btn-dark">Guardar reseña</button>
+          <button id="deleteComment" class="btn btn-outline-danger d-none">Eliminar reseña</button>
+        </div>
         <small id="errorMessage" class="text-danger d-block mt-2"></small>
         <small id="ratingMessage" class="text-muted"></small>
       </div>
@@ -96,7 +94,7 @@ export function DetalleView(item, categoria) {
         location.hash = "#/login";
       });
 
-      // 2) Si el item viene solo con id, traemos el doc completo
+      // ============================== CARGAR DETALLE DE OBRA ==============================
       if (!item.titulo && !item.title) {
         try {
           const docRef = doc(db, categoria, item.id);
@@ -107,7 +105,6 @@ export function DetalleView(item, categoria) {
         }
       }
 
-      // 3) Pinta los datos en el DOM (normalizando imagen SIEMPRE)
       const imgEl   = document.getElementById("detalleImg");
       const titEl   = document.getElementById("detalleTitulo");
       const subEl   = document.getElementById("detalleSubtitle");
@@ -118,22 +115,21 @@ export function DetalleView(item, categoria) {
       subEl.textContent  = item.subtitle || "";
       genEl.textContent  = Array.isArray(item.genero) ? item.genero.join(", ") : (item.genero || item.genres || "");
       descEl.textContent = item.descripcion || item.description || "";
-
-      // 👇 Aquí la clave: SIEMPRE pasar por resolveImagePath,
-      // sin importar cómo venga guardado (nombre, "img/.../file.jpg", etc.)
       imgEl.src = resolveImagePath(item.img || item.imagen);
       imgEl.onerror = () => (imgEl.src = "src/assets/img/default.jpg");
 
-      // ---------- Estrellas ----------
+      // ============================== VARIABLES ==============================
       const stars = document.querySelectorAll("#rating i");
       const msg = document.getElementById("ratingMessage");
       const errorEl = document.getElementById("errorMessage");
       const comentarioEl = document.getElementById("commentInput");
       const addBtn = document.getElementById("addComment");
+      const delBtn = document.getElementById("deleteComment");
       const commentsList = document.getElementById("commentsList");
       const promedioGeneralEl = document.getElementById("promedioGeneral");
       let currentRating = 0;
 
+      // ============================== PINTAR ESTRELLAS ==============================
       const pintarEstrellas = (v) => {
         stars.forEach((s, i) => {
           s.classList.remove("bi-star-fill", "active");
@@ -141,6 +137,7 @@ export function DetalleView(item, categoria) {
           if (i < v) s.classList.add("active");
         });
       };
+
       stars.forEach((star, idx) => {
         star.addEventListener("mouseenter", () => {
           stars.forEach((s, i) => s.classList.toggle("hovered", i <= idx));
@@ -155,7 +152,7 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      // ---------- Promedio ----------
+      // ============================== PROMEDIO GENERAL ==============================
       const renderPromedioGeneral = async () => {
         try {
           const itemRef = doc(db, categoria, item.id);
@@ -181,7 +178,7 @@ export function DetalleView(item, categoria) {
         }
       };
 
-      // ---------- Reseñas ----------
+      // ============================== RENDER RESEÑAS ==============================
       const renderReseñas = async (user) => {
         try {
           const ref = collection(db, categoria, item.id, "resenas");
@@ -206,7 +203,7 @@ export function DetalleView(item, categoria) {
         }
       };
 
-      // ---------- Sesión ----------
+      // ============================== SESIÓN DE USUARIO ==============================
       onAuthStateChanged(auth, async (user) => {
         await renderPromedioGeneral();
         await renderReseñas(user);
@@ -217,12 +214,14 @@ export function DetalleView(item, categoria) {
             currentRating = r.estrellas;
             comentarioEl.value = r.comentario;
             pintarEstrellas(currentRating);
-            msg.textContent = "Ya habías calificado esta obra. Puedes editar tu reseña.";
+            msg.textContent = "Ya habías calificado esta obra. Puedes editar o eliminar tu reseña.";
+            delBtn.classList.remove("d-none");
           }
         } else {
           msg.textContent = "Inicia sesión para dejar una reseña.";
         }
 
+        // ============================== GUARDAR RESEÑA ==============================
         addBtn.addEventListener("click", async () => {
           errorEl.textContent = "";
           const comentario = comentarioEl.value.trim();
@@ -234,6 +233,21 @@ export function DetalleView(item, categoria) {
           msg.textContent = "✅ Reseña guardada correctamente.";
           await renderReseñas(user);
           await renderPromedioGeneral();
+          delBtn.classList.remove("d-none");
+        });
+
+        // ============================== ELIMINAR RESEÑA ACTUAL ==============================
+        delBtn.addEventListener("click", async () => {
+          if (confirm("¿Seguro que deseas eliminar tu reseña?")) {
+            await eliminarReseña(categoria, item.id);
+            comentarioEl.value = "";
+            currentRating = 0;
+            pintarEstrellas(0);
+            msg.textContent = "🗑️ Reseña eliminada.";
+            delBtn.classList.add("d-none");
+            await renderReseñas(user);
+            await renderPromedioGeneral();
+          }
         });
       });
     }

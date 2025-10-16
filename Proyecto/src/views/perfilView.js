@@ -3,8 +3,9 @@ import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { collection, query, where, getDocs, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { resolveImagePath } from './shared/resolve-image-path.js';
+import { eliminarReseña } from '../controllers/reseñasController.js';
 
 // ============================== PERFIL VIEW ==============================
 export function PerfilView() {
@@ -31,7 +32,6 @@ export function PerfilView() {
   return {
     html,
     async bind() {
-      // Inicialización de la sesión
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
@@ -42,7 +42,7 @@ export function PerfilView() {
         userReviewsEl.innerHTML = `<p class="text-muted">Cargando reseñas...</p>`;
 
         try {
-          // 🔍 Cargar todas las reseñas del usuario desde /userResenas
+          // 🔍 Obtener reseñas de la colección global /userResenas
           const q = query(collection(db, "userResenas"), where("userId", "==", user.uid));
           const snap = await getDocs(q);
 
@@ -53,7 +53,7 @@ export function PerfilView() {
 
           const reseñas = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-          // ✅ Renderizar tarjetas de reseñas
+          // ✅ Renderizar tarjetas
           userReviewsEl.innerHTML = reseñas
             .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
             .map(r => `
@@ -63,17 +63,24 @@ export function PerfilView() {
                        alt="${r.obraTitulo || 'Obra'}" 
                        class="rounded" 
                        style="width:80px;height:110px;object-fit:cover;">
-                  <div>
+                  <div class="flex-grow-1">
                     <h5 class="mb-1">${r.obraTitulo || 'Sin título'}</h5>
                     <p class="mb-1 text-warning">${"★".repeat(r.estrellas)}${"☆".repeat(5 - r.estrellas)}</p>
                     <p class="mb-1">${r.comentario || ''}</p>
                     <small class="text-secondary">${r.categoria}</small>
                     <br>
-                    <button class="btn btn-outline-light btn-sm mt-2 verObraBtn" 
-                            data-categoria="${r.categoria}" 
-                            data-id="${r.obraId}">
-                      Ver obra
-                    </button>
+                    <div class="d-flex gap-2 mt-2">
+                      <button class="btn btn-outline-light btn-sm verObraBtn" 
+                              data-categoria="${r.categoria}" 
+                              data-id="${r.obraId}">
+                        Ver obra
+                      </button>
+                      <button class="btn btn-outline-danger btn-sm eliminarResenaBtn" 
+                              data-categoria="${r.categoria}" 
+                              data-id="${r.obraId}">
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -87,7 +94,6 @@ export function PerfilView() {
               const id = e.target.dataset.id;
 
               try {
-                // 📄 Obtener datos reales desde Firestore
                 const ref = doc(db, categoria, id);
                 const snap = await getDoc(ref);
 
@@ -114,6 +120,29 @@ export function PerfilView() {
               } catch (error) {
                 console.error("❌ Error al cargar la obra seleccionada:", error);
                 alert("Error al intentar abrir la obra.");
+              }
+            });
+          });
+
+          // ============================== EVENTOS: Eliminar reseña ==============================
+          document.querySelectorAll(".eliminarResenaBtn").forEach(btn => {
+            btn.addEventListener("click", async (e) => {
+              const categoria = e.target.dataset.categoria;
+              const id = e.target.dataset.id;
+
+              if (!confirm("¿Seguro que deseas eliminar esta reseña?")) return;
+
+              try {
+                await eliminarReseña(categoria, id);
+                // 🔥 Eliminar también de la colección /userResenas
+                const globalRef = doc(db, "userResenas", `${user.uid}_${categoria}_${id}`);
+                await deleteDoc(globalRef);
+
+                alert("🗑️ Reseña eliminada correctamente.");
+                await renderUserReviews(user); // Refrescar vista
+              } catch (error) {
+                console.error("❌ Error al eliminar reseña:", error);
+                alert("Error al eliminar reseña.");
               }
             });
           });
