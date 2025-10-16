@@ -119,11 +119,12 @@ export function RegistroView() {
         logout();
       });
 
+      // 👇 cambio: buscador envía a /buscar (antes /peliculas)
       document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const q = e.currentTarget.querySelector('input').value.trim();
-      if (q) sessionStorage.setItem('cx:q', q);
-      location.hash = '#/peliculas';
+        e.preventDefault();
+        const q = e.currentTarget.querySelector('input').value.trim();
+        if (q) sessionStorage.setItem('cx:q', q);
+        location.hash = '#/buscar';
       });
     },
   };

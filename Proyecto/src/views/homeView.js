@@ -1,4 +1,3 @@
-// src/views/homeView.js
 import { Navbar } from './navbar.js';
 import { Footer } from './footer.js';  
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
@@ -232,7 +231,7 @@ export function HomeView() {
       // Por si tu renderRail aún no aplica fallback internamente:
       applyImgFallback(document, '.rail-card img');
 
-      // Navbar
+      // Navbar: redirección del buscador -> ahora a /buscar
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
@@ -241,7 +240,7 @@ export function HomeView() {
         e.preventDefault();
         const q = e.currentTarget.querySelector('input').value.trim();
         if (q) sessionStorage.setItem('cx:q', q);
-        location.hash = '#/peliculas';
+        location.hash = '#/buscar'; // 👈 ANTES era '#/peliculas'
       });
     },
   };

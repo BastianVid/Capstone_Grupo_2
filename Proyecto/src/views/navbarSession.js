@@ -1,4 +1,3 @@
-// src/views/navbarSession.js
 import { auth } from '../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
@@ -49,7 +48,15 @@ export function initNavbarSessionWatcher() {
     if (e.target.id === "siteSearch") {
       e.preventDefault();
       const query = document.getElementById("siteSearchInput").value.trim().toLowerCase();
+
+      // Guarda la query para la vista /buscar
+      sessionStorage.setItem('cx:q', query);
+
+      // Dispara el evento global (para vistas que ya escuchan esto)
       window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
+
+      // 🔀 En lugar de forzar /peliculas, vamos a /buscar (vista de resultados globales)
+      location.hash = "#/buscar";
     }
   });
 }
