@@ -11,22 +11,26 @@ import { eliminarReseña } from '../controllers/reseñasController.js';
 export function PerfilView() {
   const html = `
     ${Navbar()}
-    <div class="container py-5">
-      <!-- Cabecera del perfil -->
-      <div class="text-center mb-5">
-        <div 
-          class="d-inline-block bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center"
-          style="width:100px;height:100px;font-size:32px;">
-          <span id="userInitial">U</span>
+    <section class="perfil-container py-5 text-light">
+      <div class="perfil-hero">
+        <div class="perfil-content container">
+          <img src="src/assets/img/default-avatar.png" alt="Avatar" id="userAvatar" class="perfil-avatar border-gradient">
+          <div>
+            <h2 id="userName" class="perfil-nombre mb-1">Usuario</h2>
+            <p id="userEmail" class="perfil-correo mb-0">correo@ejemplo.com</p>
+          </div>
         </div>
-        <h3 id="userName" class="mt-3">Usuario</h3>
-        <p id="userEmail" class="text-muted"></p>
       </div>
 
-      <!-- Sección de reseñas -->
-      <h4 class="mb-3"><i class="bi bi-star-fill text-warning"></i> Mis Reseñas</h4>
-      <div id="userReviews" class="text-start"></div>
-    </div>
+      <div class="container mt-4">
+        <div class="perfil-divider"></div>
+        <div class="d-flex align-items-center mb-3 perfil-subtitulo">
+          <i class="bi bi-star-fill text-accent"></i>
+          <span>Mis Reseñas</span>
+        </div>
+        <div id="userReviews" class="text-start"></div>
+      </div>
+    </section>
   `;
 
   return {
@@ -36,18 +40,27 @@ export function PerfilView() {
       updateNavbarSessionUI();
 
       const userReviewsEl = document.getElementById("userReviews");
+      const avatarEl = document.getElementById("userAvatar");
 
       // ============================== FUNCIÓN: Renderizar reseñas ==============================
       async function renderUserReviews(user) {
-        userReviewsEl.innerHTML = `<p class="text-muted">Cargando reseñas...</p>`;
+        userReviewsEl.innerHTML = `
+          <div class="text-center py-4 text-secondary">
+            <div class="spinner-border text-info mb-2" role="status"></div>
+            <p>Cargando reseñas...</p>
+          </div>`;
 
         try {
-          // 🔍 Obtener reseñas de la colección global /userResenas
           const q = query(collection(db, "userResenas"), where("userId", "==", user.uid));
           const snap = await getDocs(q);
 
           if (snap.empty) {
-            userReviewsEl.innerHTML = `<p class="text-muted">Aún no has hecho reseñas.</p>`;
+            userReviewsEl.innerHTML = `
+              <div class="text-center py-5 text-muted">
+                <i class="bi bi-journal-x fs-1 mb-3"></i>
+                <p class="fs-5">Aún no has hecho reseñas.</p>
+                <p class="text-secondary">Explora el catálogo y deja tu primera opinión.</p>
+              </div>`;
             return;
           }
 
@@ -57,30 +70,33 @@ export function PerfilView() {
           userReviewsEl.innerHTML = reseñas
             .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
             .map(r => `
-              <div class="border rounded p-3 mb-3 bg-dark text-light">
-                <div class="d-flex align-items-center gap-3">
-                  <img src="${resolveImagePath(r.obraImg || '')}" 
-                       alt="${r.obraTitulo || 'Obra'}" 
-                       class="rounded" 
-                       style="width:80px;height:110px;object-fit:cover;">
-                  <div class="flex-grow-1">
-                    <h5 class="mb-1">${r.obraTitulo || 'Sin título'}</h5>
-                    <p class="mb-1 text-warning">${"★".repeat(r.estrellas)}${"☆".repeat(5 - r.estrellas)}</p>
-                    <p class="mb-1">${r.comentario || ''}</p>
-                    <small class="text-secondary">${r.categoria}</small>
-                    <br>
-                    <div class="d-flex gap-2 mt-2">
-                      <button class="btn btn-outline-light btn-sm verObraBtn" 
-                              data-categoria="${r.categoria}" 
-                              data-id="${r.obraId}">
-                        Ver obra
-                      </button>
-                      <button class="btn btn-outline-danger btn-sm eliminarResenaBtn" 
-                              data-categoria="${r.categoria}" 
-                              data-id="${r.obraId}">
-                        Eliminar
-                      </button>
+              <div class="review-card animate-fade-in mb-3 p-3 d-flex align-items-start gap-3">
+                <img src="${resolveImagePath(r.obraImg || '')}" 
+                     alt="${r.obraTitulo || 'Obra'}"
+                     class="review-thumb shadow-sm">
+                <div class="flex-grow-1">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <h5 class="mb-1 fw-semibold text-light">${r.obraTitulo || 'Sin título'}</h5>
+                      <p class="mb-1 text-warning small">
+                        ${"★".repeat(r.estrellas)}${"☆".repeat(5 - r.estrellas)}
+                      </p>
                     </div>
+                    <span class="badge bg-info bg-opacity-25 text-info text-uppercase">${r.categoria}</span>
+                  </div>
+                  <p class="mb-2 text-muted fst-italic">${r.comentario || 'Sin comentario'}</p>
+
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-info verObraBtn"
+                            data-categoria="${r.categoria}" 
+                            data-id="${r.obraId}">
+                      <i class="bi bi-eye"></i> Ver obra
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger eliminarResenaBtn"
+                            data-categoria="${r.categoria}" 
+                            data-id="${r.obraId}">
+                      <i class="bi bi-trash"></i> Eliminar
+                    </button>
                   </div>
                 </div>
               </div>
@@ -90,9 +106,8 @@ export function PerfilView() {
           // ============================== EVENTOS: Ver obra ==============================
           document.querySelectorAll(".verObraBtn").forEach(btn => {
             btn.addEventListener("click", async (e) => {
-              const categoria = e.target.dataset.categoria;
-              const id = e.target.dataset.id;
-
+              const categoria = e.target.closest("button").dataset.categoria;
+              const id = e.target.closest("button").dataset.id;
               try {
                 const ref = doc(db, categoria, id);
                 const snap = await getDoc(ref);
@@ -103,8 +118,6 @@ export function PerfilView() {
                 }
 
                 const data = snap.data();
-
-                // 🧠 Guardamos el objeto completo para DetalleView
                 sessionStorage.setItem("detalleCategoria", categoria);
                 sessionStorage.setItem("detalleItem", JSON.stringify({
                   id,
@@ -115,7 +128,6 @@ export function PerfilView() {
                   subtitle: data.director || data.autor || ""
                 }));
 
-                // 🔀 Redirigir al DetalleView
                 location.hash = "#/detalle";
               } catch (error) {
                 console.error("❌ Error al cargar la obra seleccionada:", error);
@@ -127,19 +139,15 @@ export function PerfilView() {
           // ============================== EVENTOS: Eliminar reseña ==============================
           document.querySelectorAll(".eliminarResenaBtn").forEach(btn => {
             btn.addEventListener("click", async (e) => {
-              const categoria = e.target.dataset.categoria;
-              const id = e.target.dataset.id;
-
+              const categoria = e.target.closest("button").dataset.categoria;
+              const id = e.target.closest("button").dataset.id;
               if (!confirm("¿Seguro que deseas eliminar esta reseña?")) return;
-
               try {
                 await eliminarReseña(categoria, id);
-                // 🔥 Eliminar también de la colección /userResenas
                 const globalRef = doc(db, "userResenas", `${user.uid}_${categoria}_${id}`);
                 await deleteDoc(globalRef);
-
                 alert("🗑️ Reseña eliminada correctamente.");
-                await renderUserReviews(user); // Refrescar vista
+                await renderUserReviews(user);
               } catch (error) {
                 console.error("❌ Error al eliminar reseña:", error);
                 alert("Error al eliminar reseña.");
@@ -149,25 +157,21 @@ export function PerfilView() {
 
         } catch (error) {
           console.error("❌ Error al cargar reseñas:", error);
-          userReviewsEl.innerHTML = `<p class="text-danger">Error al cargar tus reseñas.</p>`;
+          userReviewsEl.innerHTML = `<p class="text-danger text-center">Error al cargar tus reseñas.</p>`;
         }
       }
 
-      // ============================== CONTROL DE SESIÓN ==============================
+      // ============================== SESIÓN ==============================
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
           window.location.hash = "#/login";
           return;
         }
 
-        // Mostrar datos del usuario
-        document.getElementById("userInitial").textContent = user.displayName
-          ? user.displayName[0].toUpperCase()
-          : "U";
         document.getElementById("userName").textContent = user.displayName || "Usuario";
         document.getElementById("userEmail").textContent = user.email;
+        if (user.photoURL) avatarEl.src = user.photoURL;
 
-        // Cargar reseñas
         await renderUserReviews(user);
       });
 
