@@ -1,26 +1,38 @@
 {
   "superior": [
     {
-      "img": "./src/assets/img/ad-eneba.jpg",
+      "img": "./src/assets/img/ad-eneba.png",
       "alt": "Ofertas Eneba",
       "url": "https://www.eneba.com/?r=tu_ref_eneba"
     },
     {
-      "img": "./src/assets/img/ad-amazon.jpg",
+      "img": "./src/assets/img/ad-amazon.png",
       "alt": "Amazon Prime Video",
       "url": "https://amzn.to/tu_ref_amazon"
-    }
-  ],
-  "inferior": [
+    },
     {
-      "img": "./src/assets/img/ad-spotify.jpg",
+      "img": "./src/assets/img/ad-spotify.png",
       "alt": "Spotify Premium",
       "url": "https://spotify.com/premium?ref=tu_ref_spotify"
     },
     {
-      "img": "./src/assets/img/ad-humble.jpg",
+      "img": "./src/assets/img/ad-humble.png",
       "alt": "Humble Bundle",
       "url": "https://humblebundle.com/?partner=tu_usuario"
+    },
+    {
+      "img": "./src/assets/img/ad-crunchyroll.png",
+      "alt": "Crunchyroll Premium",
+      "url": "https://spotify.com/premium?ref=tu_ref_spotify"
+    },
+    {
+      "img": "./src/assets/img/ad-yt.png",
+      "alt": "Youtube Premium",
+      "url": "https://humblebundle.com/?partner=tu_usuario"
     }
+
+  ],
+  "inferior": [
+    
   ]
 }

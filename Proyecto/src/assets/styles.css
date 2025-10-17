@@ -793,3 +793,50 @@ footer {
   }
 }
 
+/* === PUBLICIDAD - AJUSTE DE COBERTURA === */
+#ad-superior img,
+#ad-bottom-1 img,
+#ad-bottom-2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  display: block;
+}
+#ad-superior,
+#ad-bottom-1,
+#ad-bottom-2 {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+
+/* DetalleView – mejoras visuales sutiles */
+.card.shadow-sm { box-shadow: 0 10px 28px rgba(0,0,0,.35) !important; }
+
+
+#similaresRail .sim-card {
+  flex: 0 0 150px;
+  background: #0f1320;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform .2s;
+}
+#similaresRail .sim-card:hover {
+  transform: translateY(-3px);
+}
+#similaresRail img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+#similaresRail .sim-title {
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

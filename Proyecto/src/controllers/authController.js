@@ -1,9 +1,9 @@
 import { AuthModel } from '../models/authModel.js';
 
-// ✅ Revisa si hay usuario logueado
+// Revisa si hay usuario logueado
 export const authGuard = () => !!AuthModel.getUser();
 
-// ✅ Iniciar sesión con email/contraseña
+// Iniciar sesión con email/contraseña
 export async function login(email, pass) {
   const user = await AuthModel.login(email, pass);
   if (user) {
@@ -12,7 +12,7 @@ export async function login(email, pass) {
   return user;
 }
 
-// ✅ Registro de usuario
+// Registro de usuario
 export async function register(email, pass, displayName) {
   const user = await AuthModel.register(email, pass, displayName);
   if (user) {
@@ -21,7 +21,7 @@ export async function register(email, pass, displayName) {
   return user;
 }
 
-// ✅ Login con Google
+// Login con Google
 export async function loginGoogle() {
   const user = await AuthModel.loginWithGoogle();
   if (user) {
@@ -30,7 +30,7 @@ export async function loginGoogle() {
   return user;
 }
 
-// ✅ Cerrar sesión
+// Cerrar sesión
 export async function logout() {
   await AuthModel.logout();
   location.hash = '#/login'; // redirige al login

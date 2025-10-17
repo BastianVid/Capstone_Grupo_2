@@ -1,23 +1,16 @@
 // ============================== IMPORTS ==============================
-import { Navbar } from './navbar.js';
+import { Navbar, initNavbarSearch } from './navbar.js';
+import { Footer } from './footer.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
 import { signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { guardarReseña, obtenerReseñaUsuario, eliminarReseña } from '../controllers/reseñasController.js';
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-
-// ============================== UTILIDAD: Resolver ruta de imagen ==============================
-function resolveImagePath(input = "") {
-  if (!input) return "src/assets/img/default.jpg";
-  if (input.startsWith("http")) return input;
-  const clean = String(input).split(/[?#]/)[0];
-  const file = clean.split("/").pop();
-  const withExt = /\.(jpg|jpeg|png|gif|webp)$/i.test(file) ? file : `${file}.jpg`;
-  return `src/assets/img/${withExt}`;
-}
+import { resolveImagePath } from './shared/resolve-image-path.js';
 
 // ============================== DETALLE VIEW ==============================
 export function DetalleView(item, categoria) {
+  // Recuperar desde sessionStorage si no llegó por router
   if (!item) {
     const storedItem = sessionStorage.getItem("detalleItem");
     const storedCategoria = sessionStorage.getItem("detalleCategoria");
@@ -37,50 +30,167 @@ export function DetalleView(item, categoria) {
   const html = `
     ${Navbar()}
     <style>
-      #rating i { color:#ccc; transition:color .2s }
+      #rating i { color:#aaa; transition:color .2s, transform .15s }
       #rating i.active, #rating i.hovered { color:#ffc107 }
+      #rating i:hover { transform:translateY(-1px) }
       .review-own { background:rgba(255,255,255,.05); border:1px solid #ffc107 }
+
+      .detalle-hero { position:relative; border-radius:12px; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,.4); margin-bottom:1.25rem; }
+      #detalleHeroBg { position:absolute; inset:0; background-size:cover; background-position:center; filter:blur(18px) brightness(.45); transform:scale(1.1); }
+      .detalle-hero .overlay { position:relative; z-index:2; background:linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.3)); }
+
+      .cx-card { background:#12151f; border:1px solid rgba(255,255,255,.08); border-radius:12px; box-shadow:0 10px 28px rgba(0,0,0,.35); }
+
+      #commentsList { max-height:320px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent; }
+      #commentsList::-webkit-scrollbar { width:6px; }
+      #commentsList::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); border-radius:6px; }
+
+      .integration-rail, #similaresRail { overflow-x:auto; }
+      .integration-rail .int-card, #similaresRail .sim-card {
+        min-width:180px; max-width:180px;
+        background:#0f1320; border:1px solid rgba(255,255,255,.08); border-radius:12px;
+      }
+      .integration-rail img, #similaresRail img {
+        width:100%; height:240px; object-fit:cover;
+        border-top-left-radius:12px; border-top-right-radius:12px;
+      }
+      .integration-rail .int-title, #similaresRail .sim-title {
+        white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      }
+      #similaresRail .sim-card { transition: transform .2s; }
+      #similaresRail .sim-card:hover { transform: translateY(-3px); }
+
+      .fade-rotate { animation: fadeRotate 1s ease; }
+      @keyframes fadeRotate { from { opacity:0; transform:rotateY(90deg); } to { opacity:1; transform:rotateY(0); } }
     </style>
 
-    <div class="container py-4" id="detalleContainer">
-      <h1 id="detalleTitulo" class="mb-1">Cargando...</h1>
-      <p id="promedioGeneral" class="text-warning fs-5 mb-3"></p>
+    <!-- HERO -->
+    <section class="detalle-hero">
+      <div id="detalleHeroBg"></div>
+      <div class="overlay py-4">
+        <div class="container">
+          <div class="row g-4 align-items-center justify-content-between">
+            <!-- Izquierda -->
+            <div class="col-md-7 d-flex align-items-start gap-4">
+              <img id="detalleImg"
+                   src="src/assets/img/default.jpg"
+                   alt="Obra"
+                   class="rounded shadow-lg"
+                   style="width:200px;height:300px;object-fit:cover;">
+              <div class="text-white">
+                <h1 id="detalleTitulo" class="fw-bold mb-1">Cargando...</h1>
+                <p id="detalleSubtitle" class="text-secondary mb-2"></p>
+                <p class="mb-1"><strong>Director:</strong> <span id="detalleDirector">Desconocido</span></p>
+                <p class="mb-1"><strong>Duración:</strong> <span id="detalleDuracion">N/A</span></p>
+                <p class="mb-1"><strong>Año:</strong> <span id="detalleAño">N/A</span></p>
+                <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
+                <p id="promedioGeneral" class="mb-0 text-warning small mt-2"></p>
+              </div>
+            </div>
 
-      <div class="row">
-        <div class="col-md-4">
-          <img id="detalleImg" src="src/assets/img/default.jpg" alt="Obra" class="img-fluid rounded shadow">
+            <!-- Derecha: trailer -->
+            <div class="col-md-5">
+              <div class="ratio ratio-16x9 rounded overflow-hidden shadow-lg border border-secondary border-opacity-25">
+                <iframe
+                  class="trailer"
+                  src="https://www.youtube.com/embed/5PSNL1qE6VY?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
+                  title="Trailer Avatar"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowfullscreen>
+                </iframe>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-8">
-          <p id="detalleSubtitle" class="text-muted"></p>
-          <p><strong>Género:</strong> <span id="detalleGenero"></span></p>
-          <p id="detalleDescripcion"></p>
+      </div>
+    </section>
+
+    <!-- CONTENIDO -->
+    <div class="container pb-5" id="detalleContainer">
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <!-- Sinopsis -->
+          <div class="cx-card mb-4 p-4">
+            <h4 class="text-white mb-3">Sinopsis</h4>
+            <p id="detalleDescripcion" class="text-secondary mb-0"></p>
+          </div>
+
+          <!-- Calificación -->
+          <div id="reseñaSection" class="cx-card p-4 mb-4">
+            <h4 class="text-white mb-3">Tu Calificación</h4>
+            <div id="rating" class="d-flex gap-2 fs-3 mb-2">
+              ${[1,2,3,4,5].map(i => `<i class="bi bi-star" data-value="${i}" style="cursor:pointer;"></i>`).join('')}
+            </div>
+            <textarea id="commentInput" class="form-control bg-dark text-white border-secondary mb-2" placeholder="Escribe un comentario..."></textarea>
+            <div class="d-flex gap-2 flex-wrap">
+              <button id="addComment" class="btn btn-primary">Guardar reseña</button>
+              <button id="deleteComment" class="btn btn-outline-danger d-none">Eliminar reseña</button>
+            </div>
+            <small id="errorMessage" class="text-danger d-block mt-2"></small>
+            <small id="ratingMessage" class="text-muted"></small>
+          </div>
+
+          <!-- Reseñas -->
+          <div class="cx-card p-4 mb-4">
+            <h4 class="text-white mb-3">Reseñas de usuarios</h4>
+            <div id="commentsList" class="mb-3 text-start"></div>
+          </div>
+        </div>
+
+        <!-- Derecha -->
+        <div class="col-lg-4">
+          <!-- Integraciones -->
+          <div class="cx-card p-4 mb-4">
+            <h5 class="text-white mb-3">Integraciones con otras obras</h5>
+            <div class="integration-rail d-flex gap-3 flex-nowrap pb-2">
+              <div class="int-card">
+                <img src="${resolveImagePath('avatar-frontiers.jpg')}" alt="Frontiers of Pandora">
+                <div class="p-2">
+                  <div class="int-title text-white small fw-semibold">Avatar: Frontiers of Pandora</div>
+                  <div class="text-secondary small">Videojuego</div>
+                </div>
+              </div>
+              <div class="int-card">
+                <img src="${resolveImagePath('avatar-book.jpg')}" alt="Libro Avatar">
+                <div class="p-2">
+                  <div class="int-title text-white small fw-semibold">Avatar: The Na’vi Chronicles</div>
+                  <div class="text-secondary small">Libro</div>
+                </div>
+              </div>
+              <div class="int-card">
+                <img src="${resolveImagePath('avatar-ost.jpg')}" alt="OST Avatar">
+                <div class="p-2">
+                  <div class="int-title text-white small fw-semibold">James Horner • Original Score</div>
+                  <div class="text-secondary small">Álbum</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Similares -->
+          <div class="cx-card p-4 mb-4">
+            <h5 class="text-white mb-3">Similares</h5>
+            <div id="similaresRail" class="d-flex gap-3 flex-nowrap overflow-auto pb-2"></div>
+          </div>
+
+          <!-- Publicidad lateral -->
+          <section class="my-4">
+            <div id="ad-right-1" class="card bg-dark border-0 shadow-sm text-center p-3 mb-3 position-relative overflow-hidden" style="min-height:140px;"></div>
+            <div id="ad-right-2" class="card bg-dark border-0 shadow-sm text-center p-3 position-relative overflow-hidden" style="min-height:140px;"></div>
+          </section>
         </div>
       </div>
 
-      <hr>
-
-      <!-- Sección de reseña personal -->
-      <div id="reseñaSection" class="my-4">
-        <h4>Tu Calificación</h4>
-        <div id="rating" class="d-flex gap-2 fs-3 mb-2">
-          ${[1,2,3,4,5].map(i => `<i class="bi bi-star" data-value="${i}" style="cursor:pointer;"></i>`).join('')}
+      <!-- Publicidad inferior -->
+      <section class="my-4">
+        <div class="row g-3">
+          <div class="col-md-6"><div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-3 position-relative overflow-hidden" style="min-height:150px;"></div></div>
+          <div class="col-md-6"><div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-3 position-relative overflow-hidden" style="min-height:150px;"></div></div>
         </div>
-        <textarea id="commentInput" class="form-control mb-2" placeholder="Escribe un comentario..."></textarea>
-        <div class="d-flex gap-2 flex-wrap">
-          <button id="addComment" class="btn btn-dark">Guardar reseña</button>
-          <button id="deleteComment" class="btn btn-outline-danger d-none">Eliminar reseña</button>
-        </div>
-        <small id="errorMessage" class="text-danger d-block mt-2"></small>
-        <small id="ratingMessage" class="text-muted"></small>
-      </div>
-
-      <hr>
-
-      <div class="my-4">
-        <h4>Reseñas de usuarios</h4>
-        <div id="commentsList" class="mb-3 text-start"></div>
-      </div>
+      </section>
     </div>
+
+    ${Footer()}
   `;
 
   return {
@@ -88,37 +198,117 @@ export function DetalleView(item, categoria) {
     async bind() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch();
 
+      // ============================== PUBLICIDAD ROTATIVA ==============================
+      try {
+        const res = await fetch('./src/data/publicidad.json');
+        const ads = await res.json();
+        const rotateAds = (id, list, interval = 8000, maxHeight = '150px') => {
+          const el = document.getElementById(id);
+          if (!el || !list?.length) return;
+          let i = 0;
+          const change = () => {
+            const ad = list[i];
+            el.innerHTML = `
+              <a href="${ad.url}" target="_blank">
+                <img src="${ad.img}" alt="${ad.alt}" class="img-fluid rounded fade-rotate mx-auto d-block" style="max-height:${maxHeight};object-fit:cover;">
+              </a>`;
+            i = (i + 1) % list.length;
+          };
+          change();
+          setInterval(change, interval);
+        };
+        rotateAds('ad-right-1', ads.superior, 8000, '140px');
+        rotateAds('ad-right-2', ads.superior.slice().reverse(), 10000, '140px');
+        rotateAds('ad-bottom-1', ads.inferior, 8000, '150px');
+        rotateAds('ad-bottom-2', ads.inferior.slice().reverse(), 10000, '150px');
+      } catch(e){ console.warn('Error publicidad:', e); }
+
+      // ============================== LOGOUT ==============================
       document.getElementById("logoutBtn")?.addEventListener("click", async () => {
         await signOut(auth);
         location.hash = "#/login";
       });
 
-      // ============================== CARGAR DETALLE DE OBRA ==============================
+      // ============================== CARGAR DETALLE ==============================
       if (!item.titulo && !item.title) {
-        try {
-          const docRef = doc(db, categoria, item.id);
-          const snap = await getDoc(docRef);
-          if (snap.exists()) item = { id: snap.id, ...snap.data() };
-        } catch (e) {
-          console.error("No se pudo cargar el item desde Firestore:", e);
-        }
+        const snap = await getDoc(doc(db, categoria, item.id));
+        if (snap.exists()) item = { id: snap.id, ...snap.data() };
       }
 
       const imgEl   = document.getElementById("detalleImg");
       const titEl   = document.getElementById("detalleTitulo");
       const subEl   = document.getElementById("detalleSubtitle");
+      const dirEl   = document.getElementById("detalleDirector");
+      const durEl   = document.getElementById("detalleDuracion");
+      const anoEl   = document.getElementById("detalleAño");
       const genEl   = document.getElementById("detalleGenero");
       const descEl  = document.getElementById("detalleDescripcion");
+      const heroBg  = document.getElementById("detalleHeroBg");
 
       titEl.textContent  = item.titulo || item.title || "Sin título";
       subEl.textContent  = item.subtitle || "";
+      dirEl.textContent  = item.director || "Desconocido";
+      durEl.textContent  = item.duracion ? `${item.duracion} min` : "N/A";
+      anoEl.textContent  = item.año || item.year || "N/A";
       genEl.textContent  = Array.isArray(item.genero) ? item.genero.join(", ") : (item.genero || item.genres || "");
       descEl.textContent = item.descripcion || item.description || "";
       imgEl.src = resolveImagePath(item.img || item.imagen);
-      imgEl.onerror = () => (imgEl.src = "src/assets/img/default.jpg");
+      heroBg.style.backgroundImage = `url('${imgEl.src}')`;
 
-      // ============================== VARIABLES ==============================
+      // ============================== SIMILARES ==============================
+      const renderSimilares = async () => {
+        try {
+          const rail = document.getElementById("similaresRail");
+          rail.innerHTML = `<p class="text-secondary small">Buscando obras similares...</p>`;
+
+          const generosItem = Array.isArray(item.genero)
+            ? item.genero.map(g => g.toLowerCase().trim())
+            : [String(item.genero || "").toLowerCase().trim()];
+
+          if (!generosItem.length || !generosItem[0]) {
+            rail.innerHTML = `<p class="text-secondary small">No hay géneros definidos.</p>`;
+            return;
+          }
+
+          const ref = collection(db, categoria);
+          const snap = await getDocs(ref);
+
+          const similares = [];
+          snap.forEach(d => {
+            const data = d.data();
+            const generosData = Array.isArray(data.genero)
+              ? data.genero.map(g => g.toLowerCase().trim())
+              : [String(data.genero || "").toLowerCase().trim()];
+
+            const match = generosData.some(g => generosItem.includes(g));
+            if (match && d.id !== item.id) {
+              similares.push({ id: d.id, ...data });
+            }
+          });
+
+          if (!similares.length) {
+            rail.innerHTML = `<p class="text-secondary small">No se encontraron obras similares.</p>`;
+            return;
+          }
+
+          rail.innerHTML = similares.slice(0, 10).map(s => `
+            <div class="sim-card">
+              <a href="#/detalle" class="text-decoration-none text-white"
+                 onclick="sessionStorage.setItem('detalleItem', JSON.stringify(${JSON.stringify(s)})); sessionStorage.setItem('detalleCategoria', '${categoria}')">
+                <img src="${resolveImagePath(s.imagen || s.img)}" alt="${s.titulo || s.title}">
+                <div class="sim-title">${s.titulo || s.title}</div>
+              </a>
+            </div>
+          `).join('');
+        } catch (e) {
+          console.error("Error cargando similares:", e);
+        }
+      };
+      await renderSimilares();
+
+      // ============================== RESEÑAS / RATING ==============================
       const stars = document.querySelectorAll("#rating i");
       const msg = document.getElementById("ratingMessage");
       const errorEl = document.getElementById("errorMessage");
@@ -129,7 +319,6 @@ export function DetalleView(item, categoria) {
       const promedioGeneralEl = document.getElementById("promedioGeneral");
       let currentRating = 0;
 
-      // ============================== PINTAR ESTRELLAS ==============================
       const pintarEstrellas = (v) => {
         stars.forEach((s, i) => {
           s.classList.remove("bi-star-fill", "active");
@@ -152,60 +341,51 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      // ============================== PROMEDIO GENERAL ==============================
-      const renderPromedioGeneral = async () => {
-        try {
-          const itemRef = doc(db, categoria, item.id);
-          const snap = await getDoc(itemRef);
-          if (!snap.exists()) { promedioGeneralEl.textContent = "⭐ Sin calificaciones aún"; return; }
-
-          const data = snap.data();
-          const promedio = data.calificacionPromedio || 0;
-          const votos = data.totalVotos || 0;
-
-          if (!votos) {
-            promedioGeneralEl.textContent = "⭐ Sin calificaciones aún";
-          } else {
-            const est = Math.round(promedio);
-            promedioGeneralEl.innerHTML = `
-              <span class="text-warning">${"★".repeat(est)}${"☆".repeat(5-est)}</span>
-              <span class="text-light fw-semibold ms-2">${promedio.toFixed(1)} / 5</span>
-              <span class="text-secondary">(${votos} votos)</span>
-            `;
-          }
-        } catch (e) {
-          console.error("Error promedio:", e);
+      const renderPromedio = async () => {
+        const snap = await getDoc(doc(db, categoria, item.id));
+        if (!snap.exists()) {
+          promedioGeneralEl.textContent = "⭐ Sin calificaciones aún";
+          return;
         }
+        const data = snap.data();
+        const p = data.calificacionPromedio || 0;
+        const v = data.totalVotos || 0;
+        if (!v) {
+          promedioGeneralEl.textContent = "⭐ Sin calificaciones aún";
+          return;
+        }
+        const est = Math.round(p);
+        promedioGeneralEl.innerHTML = `
+          <span class="text-warning">${"★".repeat(est)}${"☆".repeat(5-est)}</span>
+          <span class="text-light fw-semibold ms-2">${p.toFixed(1)} / 5</span>
+          <span class="text-secondary">(${v} votos)</span>`;
       };
 
-      // ============================== RENDER RESEÑAS ==============================
       const renderReseñas = async (user) => {
-        try {
-          const ref = collection(db, categoria, item.id, "resenas");
-          const snap = await getDocs(ref);
-          if (snap.empty) { commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`; return; }
-
-          let html = "";
-          snap.forEach(d => {
-            const r = d.data();
-            const own = user && r.userId === user.uid;
-            html += `
-              <div class="border rounded p-3 mb-3 ${own ? "review-own" : ""}">
-                <strong>${r.userEmail || "Usuario anónimo"} ${own ? "(Tu reseña)" : ""}</strong>
-                <p class="mb-1 text-warning">${"★".repeat(r.estrellas)}${"☆".repeat(5 - r.estrellas)}</p>
-                <p class="mb-0">${r.comentario}</p>
-              </div>`;
-          });
-          commentsList.innerHTML = html;
-        } catch (e) {
-          console.error("Error reseñas:", e);
-          commentsList.innerHTML = `<p class="text-danger">Error al cargar reseñas.</p>`;
+        const snap = await getDocs(collection(db, categoria, item.id, "resenas"));
+        if (snap.empty) {
+          commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`;
+          return;
         }
+        let html = "";
+        let count = 0;
+        snap.forEach(d => {
+          if (count >= 5) return;
+          const r = d.data();
+          const own = user && r.userId === user.uid;
+          html += `
+            <div class="border-bottom border-secondary pb-2 mb-2 ${own ? "review-own" : ""}">
+              <strong>${r.userEmail || "Usuario anónimo"} ${own ? "(Tu reseña)" : ""}</strong>
+              <p class="mb-1 text-warning small">${"★".repeat(r.estrellas)}${"☆".repeat(5 - r.estrellas)}</p>
+              <p class="mb-0 small">${r.comentario}</p>
+            </div>`;
+          count++;
+        });
+        commentsList.innerHTML = html;
       };
 
-      // ============================== SESIÓN DE USUARIO ==============================
       onAuthStateChanged(auth, async (user) => {
-        await renderPromedioGeneral();
+        await renderPromedio();
         await renderReseñas(user);
 
         if (user) {
@@ -214,31 +394,36 @@ export function DetalleView(item, categoria) {
             currentRating = r.estrellas;
             comentarioEl.value = r.comentario;
             pintarEstrellas(currentRating);
-            msg.textContent = "Ya habías calificado esta obra. Puedes editar o eliminar tu reseña.";
+            msg.textContent = "Ya calificaste esta obra. Puedes editar o eliminar tu reseña.";
             delBtn.classList.remove("d-none");
+          } else {
+            msg.textContent = "";
+            delBtn.classList.add("d-none");
           }
         } else {
           msg.textContent = "Inicia sesión para dejar una reseña.";
+          delBtn.classList.add("d-none");
         }
 
-        // ============================== GUARDAR RESEÑA ==============================
+        // Guardar reseña
         addBtn.addEventListener("click", async () => {
           errorEl.textContent = "";
           const comentario = comentarioEl.value.trim();
-          if (!user) { errorEl.textContent = "⚠️ Debes iniciar sesión para comentar."; return; }
+          if (!user) { errorEl.textContent = "⚠️ Debes iniciar sesión."; return; }
           if (!currentRating) { errorEl.textContent = "⚠️ Debes calificar con estrellas."; return; }
           if (!comentario) { errorEl.textContent = "⚠️ El comentario no puede estar vacío."; return; }
 
           await guardarReseña(categoria, item.id, currentRating, comentario);
-          msg.textContent = "✅ Reseña guardada correctamente.";
-          await renderReseñas(user);
-          await renderPromedioGeneral();
+          msg.textContent = "✅ Reseña guardada.";
           delBtn.classList.remove("d-none");
+          await renderReseñas(user);
+          await renderPromedio();
         });
 
-        // ============================== ELIMINAR RESEÑA ACTUAL ==============================
+        // Eliminar reseña
         delBtn.addEventListener("click", async () => {
-          if (confirm("¿Seguro que deseas eliminar tu reseña?")) {
+          if (!user) return;
+          if (confirm("¿Eliminar tu reseña?")) {
             await eliminarReseña(categoria, item.id);
             comentarioEl.value = "";
             currentRating = 0;
@@ -246,7 +431,7 @@ export function DetalleView(item, categoria) {
             msg.textContent = "🗑️ Reseña eliminada.";
             delBtn.classList.add("d-none");
             await renderReseñas(user);
-            await renderPromedioGeneral();
+            await renderPromedio();
           }
         });
       });

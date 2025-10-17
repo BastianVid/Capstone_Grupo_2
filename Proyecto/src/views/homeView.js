@@ -91,14 +91,10 @@ export function HomeView() {
     <section class="container my-5">
       <div class="row g-3">
         <div class="col-md-6">
-          <div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-3 h-100 position-relative overflow-hidden" style="min-height:150px;">
-            <img src="./src/assets/img/ad-banner-bottom1.jpg" alt="Publicidad inferior 1" class="img-fluid rounded fade-rotate mx-auto d-block" style="max-height:150px;object-fit:cover;">
-          </div>
+          <div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-3 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
         </div>
         <div class="col-md-6">
-          <div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-3 h-100 position-relative overflow-hidden" style="min-height:150px;">
-            <img src="./src/assets/img/ad-banner-bottom2.jpg" alt="Publicidad inferior 2" class="img-fluid rounded fade-rotate mx-auto d-block" style="max-height:150px;object-fit:cover;">
-          </div>
+          <div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-3 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
         </div>
       </div>
     </section>
@@ -109,6 +105,7 @@ export function HomeView() {
   return {
     html,
     async bind() {
+      // Navbar (sesión + buscador)
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
@@ -130,17 +127,17 @@ export function HomeView() {
         description: x.descripcion ?? x.description ?? '',
         kind,
       });
-      const pelis = (pelisRaw || []).map(x => norm(x, 'peliculas', 'inception.jpg', 'Película'));
+      const pelis  = (pelisRaw  || []).map(x => norm(x, 'peliculas', 'inception.jpg', 'Película'));
       const series = (seriesRaw || []).map(x => norm(x, 'series', 'stranger-things.jpg', 'Serie'));
-      const anime = (animeRaw || []).map(x => norm(x, 'anime', 'naruto.jpg', 'Anime'));
+      const anime  = (animeRaw  || []).map(x => norm(x, 'anime', 'naruto.jpg', 'Anime'));
       const musica = (musicaRaw || []).map(x => norm(x, 'musica', 'avatar.jpg', 'Música'));
 
       // --- HERO ---
       const picks = [...pelis.slice(0, 3), ...series.slice(0, 2)];
       const defaults = [
-        { img: 'avengers.jpg', title: 'Avengers: Endgame', tag: 'Acción', description: 'Los héroes del universo se unen...' },
-        { img: 'inception.jpg', title: 'Inception', tag: 'Ciencia Ficción', description: 'Sueños dentro de sueños.' },
-        { img: 'avatar.jpg', title: 'Avatar', tag: 'Ciencia Ficción', description: 'Aventura épica en Pandora.' }
+        { img: 'avengers.jpg',  title: 'Avengers: Endgame', tag: 'Acción',          description: 'Los héroes del universo se unen...' },
+        { img: 'inception.jpg', title: 'Inception',         tag: 'Ciencia Ficción', description: 'Sueños dentro de sueños.' },
+        { img: 'avatar.jpg',    title: 'Avatar',            tag: 'Ciencia Ficción', description: 'Aventura épica en Pandora.' },
       ];
       const slides = (picks.length ? picks : defaults).map((s, i) => `
         <div class="carousel-item ${i === 0 ? 'active' : ''} h-100 position-relative">
@@ -156,18 +153,17 @@ export function HomeView() {
       applyImgFallback(document, 'img.img-with-fallback');
 
       // --- PRÓXIMAMENTE ---
-      const hoy = new Date();
       const fallbackUpcoming = [
-        { titulo: 'Avengers', img: 'avengers.jpg', genero: ['Acción'] },
+        { titulo: 'Avengers',           img: 'avengers.jpg',        genero: ['Acción'] },
         { titulo: 'Stranger Things T5', img: 'stranger-things.jpg', genero: ['Ciencia Ficción'] },
-        { titulo: 'Dragon Ball Z', img: 'dragon-ball-z.jpg', genero: ['Anime'] },
-        { titulo: 'Chainsaw Man', img: 'chainsaw-man.jpg', genero: ['Shonen'] },
-        { titulo: 'Bleach', img: 'bleach.jpg', genero: ['Shonen'] }
+        { titulo: 'Dragon Ball Z',      img: 'dragon-ball-z.jpg',   genero: ['Anime'] },
+        { titulo: 'Chainsaw Man',       img: 'chainsaw-man.jpg',    genero: ['Shonen'] },
+        { titulo: 'Bleach',             img: 'bleach.jpg',          genero: ['Shonen'] },
       ];
       const upcoming = fallbackUpcoming.map(x => ({
         title: x.titulo,
         img: resolveImagePath(x.img),
-        tag: x.genero[0]
+        tag: x.genero[0],
       }));
       const uhost = document.getElementById('upcoming-list');
       uhost.innerHTML = upcoming.map(u => `
@@ -185,12 +181,10 @@ export function HomeView() {
         const res = await fetch('./src/data/publicidad.json');
         const ads = await res.json();
 
-        // Función de rotación animada
         const rotateAds = (elementId, list, interval = 8000, maxHeight = '150px') => {
           const el = document.getElementById(elementId);
           if (!el || !list?.length) return;
           let index = 0;
-
           const changeAd = () => {
             const ad = list[index];
             const img = document.createElement('img');
@@ -198,13 +192,10 @@ export function HomeView() {
             img.alt = ad.alt;
             img.className = 'img-fluid rounded fade-rotate mx-auto d-block';
             img.style = `max-height:${maxHeight};object-fit:cover;`;
-
             el.innerHTML = `<a href="${ad.url}" target="_blank"></a>`;
             el.querySelector('a').appendChild(img);
-
             index = (index + 1) % list.length;
           };
-
           changeAd();
           setInterval(changeAd, interval);
         };
@@ -217,13 +208,85 @@ export function HomeView() {
       }
 
       // --- RAILS ---
-      const onCard = (item) => alert(`Próximamente detalle de: ${item.title}`);
+      const onCard = (item) => {
+        sessionStorage.setItem('detalleItem', JSON.stringify(item));
+        sessionStorage.setItem('detalleCategoria', item.kind);
+        location.hash = '#/detalle';
+      };
       renderRail('#rail-destacados', [...pelis, ...series].slice(0, 12), { onItemClick: onCard });
-      renderRail('#rail-peliculas', pelis.slice(0, 12), { onItemClick: onCard });
-      renderRail('#rail-series', series.slice(0, 12), { onItemClick: onCard });
-      renderRail('#rail-anime', anime.slice(0, 12), { onItemClick: onCard });
-      renderRail('#rail-musica', musica.slice(0, 12), { onItemClick: onCard });
+      renderRail('#rail-peliculas',  pelis.slice(0, 12),  { onItemClick: onCard });
+      renderRail('#rail-series',     series.slice(0, 12), { onItemClick: onCard });
+      renderRail('#rail-anime',      anime.slice(0, 12),  { onItemClick: onCard });
+      renderRail('#rail-musica',     musica.slice(0, 12), { onItemClick: onCard });
 
+      // === Ajustes visuales y autoscroll ===
+      const style = document.createElement("style");
+      style.innerHTML = `
+        [id^="rail-"] > div {
+          display: flex !important;
+          gap: 1rem !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          scroll-behavior: smooth;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(160,160,160,0.4) transparent;
+          padding-bottom: 6px;
+        }
+        [id^="rail-"] > div::-webkit-scrollbar {
+          height: 6px;
+        }
+        [id^="rail-"] > div::-webkit-scrollbar-thumb {
+          background: rgba(160,160,160,0.4);
+          border-radius: 4px;
+        }
+        [id^="rail-"] > div::-webkit-scrollbar-thumb:hover {
+          background: rgba(200,200,200,0.6);
+        }
+        [id^="rail-"] > div::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.05);
+        }
+
+        /* Botón Ver todo moderno */
+        a.btn.btn-link.btn-sm {
+          color: #8cc7ff !important;
+          text-decoration: none !important;
+          border: 1px solid rgba(140,200,255,0.5);
+          border-radius: 20px;
+          padding: 2px 12px;
+          transition: all .25s ease;
+        }
+        a.btn.btn-link.btn-sm:hover {
+          background-color: rgba(140,200,255,0.2);
+          color: #fff !important;
+          transform: scale(1.03);
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Autoscroll funcional
+      const setupAutoScroll = (selector, step = 1, everyMs = 25) => {
+        const el = document.querySelector(selector + ' > div');
+        if (!el) return;
+        let dir = 1, paused = false;
+        const tick = () => {
+          if (paused || el.scrollWidth <= el.clientWidth) return;
+          el.scrollLeft += step * dir;
+          if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) dir = -1;
+          if (el.scrollLeft <= 0) dir = 1;
+        };
+        const t = setInterval(tick, everyMs);
+        el.addEventListener('mouseenter', () => paused = true);
+        el.addEventListener('mouseleave', () => paused = false);
+        window.addEventListener('hashchange', () => clearInterval(t), { once: true });
+      };
+
+      setupAutoScroll('#rail-destacados');
+      setupAutoScroll('#rail-peliculas');
+      setupAutoScroll('#rail-series');
+      setupAutoScroll('#rail-anime');
+      setupAutoScroll('#rail-musica');
+
+      // Logout
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
