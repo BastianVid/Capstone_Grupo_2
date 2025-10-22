@@ -3,7 +3,7 @@ import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { collection, query, where, getDocs, doc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { collection, query, where, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { eliminarReseña } from '../controllers/reseñasController.js';
 
@@ -18,15 +18,15 @@ export function PerfilView() {
           <img src="src/assets/img/default-avatar.png" alt="Avatar" id="userAvatar" class="perfil-avatar border-gradient">
           <div class="perfil-userinfo">
             <p class="perfil-line mb-1">
-              <i class="bi bi-person-fill text-accent"></i> 
+              <i class="bi bi-person-fill text-accent"></i>
               <span id="userName">Usuario</span>
             </p>
             <p class="perfil-line mb-1">
-              <i class="bi bi-envelope-fill text-accent"></i> 
+              <i class="bi bi-envelope-fill text-accent"></i>
               <span id="userEmail">correo@ejemplo.com</span>
             </p>
             <p class="perfil-line mb-0">
-              <i class="bi bi-calendar-event text-accent"></i> 
+              <i class="bi bi-calendar-event text-accent"></i>
               Registrado: <span id="userCreated">—</span>
             </p>
           </div>
@@ -50,10 +50,9 @@ export function PerfilView() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
-      const userReviewsEl = document.getElementById("userReviews");
-      const avatarEl = document.getElementById("userAvatar");
+      const userReviewsEl = document.getElementById('userReviews');
+      const avatarEl = document.getElementById('userAvatar');
 
-      // ============================== FUNCIÓN: Renderizar reseñas ==============================
       async function renderUserReviews(user) {
         userReviewsEl.innerHTML = `
           <div class="text-center py-4 text-secondary">
@@ -62,7 +61,7 @@ export function PerfilView() {
           </div>`;
 
         try {
-          const q = query(collection(db, "userResenas"), where("userId", "==", user.uid));
+          const q = query(collection(db, 'userResenas'), where('userId', '==', user.uid));
           const snap = await getDocs(q);
 
           if (snap.empty) {
@@ -81,7 +80,7 @@ export function PerfilView() {
             .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
             .map(r => `
               <div class="review-card animate-fade-in mb-3 p-3 d-flex align-items-start gap-3">
-                <img src="${resolveImagePath(r.obraImg || '')}" 
+                <img src="${resolveImagePath(r.obraImg || '')}"
                      alt="${r.obraTitulo || 'Obra'}"
                      class="review-thumb shadow-sm">
                 <div class="flex-grow-1">
@@ -89,7 +88,7 @@ export function PerfilView() {
                     <div>
                       <h5 class="mb-1 fw-semibold text-light">${r.obraTitulo || 'Sin título'}</h5>
                       <p class="mb-1 text-warning small">
-                        ${"★".repeat(r.estrellas)}${"☆".repeat(5 - r.estrellas)}
+                        ${'★'.repeat(r.estrellas)}${'☆'.repeat(5 - r.estrellas)}
                       </p>
                     </div>
                     <span class="badge bg-info bg-opacity-25 text-info text-uppercase">${r.categoria}</span>
@@ -98,12 +97,12 @@ export function PerfilView() {
 
                   <div class="d-flex gap-2">
                     <button class="btn btn-sm btn-outline-info verObraBtn"
-                            data-categoria="${r.categoria}" 
+                            data-categoria="${r.categoria}"
                             data-id="${r.obraId}">
                       <i class="bi bi-eye"></i> Ver obra
                     </button>
                     <button class="btn btn-sm btn-outline-danger eliminarResenaBtn"
-                            data-categoria="${r.categoria}" 
+                            data-categoria="${r.categoria}"
                             data-id="${r.obraId}">
                       <i class="bi bi-trash"></i> Eliminar
                     </button>
@@ -111,93 +110,83 @@ export function PerfilView() {
                 </div>
               </div>
             `)
-            .join("");
+            .join('');
 
-          // ============================== EVENTOS: Ver obra ==============================
-          document.querySelectorAll(".verObraBtn").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
-              const categoria = e.target.closest("button").dataset.categoria;
-              const id = e.target.closest("button").dataset.id;
-
+          // Ver obra
+          document.querySelectorAll('.verObraBtn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              const el = e.currentTarget;
+              const categoria = el.dataset.categoria;
+              const id = el.dataset.id;
               try {
                 const ref = doc(db, categoria, id);
                 const snap = await getDoc(ref);
-
                 if (!snap.exists()) {
-                  alert("❌ No se encontró la obra en la base de datos.");
+                  alert('No se encontró la obra en la base de datos.');
                   return;
                 }
-
                 const data = snap.data();
-                sessionStorage.setItem("detalleCategoria", categoria);
-                sessionStorage.setItem("detalleItem", JSON.stringify({
+                sessionStorage.setItem('detalleCategoria', categoria);
+                sessionStorage.setItem('detalleItem', JSON.stringify({
                   id,
-                  titulo: data.titulo || data.title || "Sin título",
-                  img: data.imagen || data.img || "",
+                  titulo: data.titulo || data.title || 'Sin título',
+                  img: data.imagen || data.img || '',
                   genero: data.genero || data.genres || [],
-                  descripcion: data.descripcion || data.description || "",
-                  subtitle: data.director || data.autor || ""
+                  descripcion: data.descripcion || data.description || '',
+                  subtitle: data.director || data.autor || ''
                 }));
-
-                location.hash = "#/detalle";
-              } catch (error) {
-                console.error("❌ Error al cargar la obra seleccionada:", error);
-                alert("Error al intentar abrir la obra.");
+                location.hash = '#/detalle';
+              } catch (err) {
+                console.error('Error al abrir la obra:', err);
+                alert('Error al intentar abrir la obra.');
               }
             });
           });
 
-          // ============================== EVENTOS: Eliminar reseña ==============================
-          document.querySelectorAll(".eliminarResenaBtn").forEach(btn => {
-            btn.addEventListener("click", async (e) => {
-              const categoria = e.target.closest("button").dataset.categoria;
-              const id = e.target.closest("button").dataset.id;
-              if (!confirm("¿Seguro que deseas eliminar esta reseña?")) return;
-
+          // Eliminar reseña
+          document.querySelectorAll('.eliminarResenaBtn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+              const el = e.currentTarget;
+              const categoria = el.dataset.categoria;
+              const id = el.dataset.id;
+              if (!confirm('¿Seguro que deseas eliminar esta reseña?')) return;
               try {
                 await eliminarReseña(categoria, id);
-                const globalRef = doc(db, "userResenas", `${user.uid}_${categoria}_${id}`);
-                await deleteDoc(globalRef);
-                alert("🗑️ Reseña eliminada correctamente.");
+                alert('Reseña eliminada correctamente.');
                 await renderUserReviews(user);
-              } catch (error) {
-                console.error("❌ Error al eliminar reseña:", error);
-                alert("Error al eliminar reseña.");
+              } catch (err) {
+                console.error('Error al eliminar reseña:', err);
+                alert('Error al eliminar reseña.');
               }
             });
           });
-
         } catch (error) {
-          console.error("❌ Error al cargar reseñas:", error);
+          console.error('Error al cargar reseñas:', error);
           userReviewsEl.innerHTML = `<p class="text-danger text-center">Error al cargar tus reseñas.</p>`;
         }
       }
 
-      // ============================== SESIÓN ==============================
+      // Sesión
       onAuthStateChanged(auth, async (user) => {
         if (!user) {
-          window.location.hash = "#/login";
+          window.location.hash = '#/login';
           return;
         }
-
-        document.getElementById("userName").textContent = user.displayName || "Usuario";
-        document.getElementById("userEmail").textContent = user.email;
-
-        document.getElementById("userCreated").textContent =
-          new Date(user.metadata.creationTime).toLocaleDateString("es-ES", {
-            year: "numeric", month: "short", day: "numeric"
-          });
-
+        document.getElementById('userName').textContent = user.displayName || 'Usuario';
+        document.getElementById('userEmail').textContent = user.email || '';
+        document.getElementById('userCreated').textContent =
+          new Date(user.metadata.creationTime).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
         if (user.photoURL) avatarEl.src = user.photoURL;
 
         await renderUserReviews(user);
       });
 
-      // ============================== LOGOUT ==============================
-      document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+      // Logout
+      document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         await signOut(auth);
-        window.location.hash = "#/login";
+        window.location.hash = '#/login';
       });
     },
   };
 }
+

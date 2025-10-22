@@ -3,6 +3,7 @@ import { Navbar, initNavbarSearch } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
+import { Footer } from './footer.js';
 
 export function PeliculasView() {
   const html = `
@@ -26,6 +27,7 @@ export function PeliculasView() {
 
       <div id="grid"></div>
     </div>
+    ${Footer()}
   `;
 
   return {

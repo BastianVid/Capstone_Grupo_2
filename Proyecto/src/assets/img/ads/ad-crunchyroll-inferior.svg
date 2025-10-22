@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="150" viewBox="0 0 1200 150">
+  <defs>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF7A00"/>
+      <stop offset="100%" stop-color="#FF9C40"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="150" fill="url(#g2)"/>
+  <text x="36" y="92" font-size="44" font-family="Inter, Arial, sans-serif" fill="#2b1600" font-weight="800">Crunchyroll</text>
+  <text x="1180" y="92" font-size="20" font-family="Inter, Arial, sans-serif" fill="#2b1600" text-anchor="end">Miles de episodios</text>
+</svg>

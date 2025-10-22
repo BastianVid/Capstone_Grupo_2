@@ -368,6 +368,10 @@ footer {
   background: #0f172a;
 }
 
+/* Publicidad lateral e inferior: alturas fijas */
+.ad-side   { height: 140px; object-fit: cover; border-radius: 8px; width: 100%; display: block; }
+.ad-bottom { height: 150px; object-fit: cover; border-radius: 8px; width: 100%; display: block; }
+
 /* =========================================================
    Rails (tarjetas uniformes y simétricas)
    ========================================================= */

@@ -25,6 +25,8 @@ export const db   = getFirestore(app);
 // ============================== GOOGLE PROVIDER ==============================
 export const googleProvider = new GoogleAuthProvider();
 
+// (Facebook deshabilitado)
+
 // ============================== ESTADO GLOBAL ==============================
 export let currentUser = null;
 onAuthStateChanged(auth, (u) => {

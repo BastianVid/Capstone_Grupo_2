@@ -1,4 +1,4 @@
-// ============================== IMPORTS ==============================
+﻿// ============================== IMPORTS ==============================
 import { Navbar, initNavbarSearch } from './navbar.js';
 import { Footer } from './footer.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
@@ -91,10 +91,10 @@ export function HomeView() {
     <section class="container my-5">
       <div class="row g-3">
         <div class="col-md-6">
-          <div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-3 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
+          <div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-0 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
         </div>
         <div class="col-md-6">
-          <div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-3 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
+          <div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-0 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
         </div>
       </div>
     </section>
@@ -191,7 +191,7 @@ export function HomeView() {
             img.src = ad.img;
             img.alt = ad.alt;
             img.className = 'img-fluid rounded fade-rotate mx-auto d-block';
-            img.style = `max-height:${maxHeight};object-fit:cover;`;
+            img.style = `max-height:${maxHeight};object-fit:cover;width:100%;`;
             el.innerHTML = `<a href="${ad.url}" target="_blank"></a>`;
             el.querySelector('a').appendChild(img);
             index = (index + 1) % list.length;

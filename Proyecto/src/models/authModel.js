@@ -8,7 +8,10 @@ import {
   signInWithPopup,
   signOut,
   updateProfile,
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  fetchSignInMethodsForEmail,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
 export const AuthModel = {
   // Retorna el usuario actual (o null si no hay sesión)
@@ -20,6 +23,7 @@ export const AuthModel = {
     if (displayName) {
       await updateProfile(cred.user, { displayName });
     }
+    try { await sendEmailVerification(cred.user); } catch (e) {}
     return cred.user;
   },
 
@@ -38,5 +42,20 @@ export const AuthModel = {
   // Logout
   async logout() {
     await signOut(auth);
+  },
+
+  // Send verification email to a logged-in user
+  async sendVerificationEmail(user) {
+    await sendEmailVerification(user);
+  },
+
+  // Reset password by email
+  async resetPassword(email) {
+    await sendPasswordResetEmail(auth, email);
+  },
+
+  // Get sign-in methods for an email (useful for duplicate/account linking UX)
+  async getSignInMethods(email) {
+    return fetchSignInMethodsForEmail(auth, email);
   },
 };

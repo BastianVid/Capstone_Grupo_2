@@ -1,6 +1,7 @@
 // src/views/buscarView.js
 import { Navbar } from './navbar.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
+import { Footer } from './footer.js';
 import { renderCards } from './shared/renderCards.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 
@@ -16,6 +17,7 @@ export function BuscarView() {
       <div class="mb-3 text-secondary small" id="searchMeta"></div>
       <div id="resultsHost"></div>
     </div>
+    ${Footer()}
   `;
 
   return {

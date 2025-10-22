@@ -1,6 +1,6 @@
 // src/views/navbarSession.js
 import { auth } from '../lib/firebase.js';
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
 let subscribed = false;
 
