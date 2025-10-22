@@ -29,31 +29,6 @@ export function DetalleView(item, categoria) {
 
   const html = `
     ${Navbar()}
-    <style>
-      #rating i { color:#aaa; transition:color .2s, transform .15s }
-      #rating i.active, #rating i.hovered { color:#ffc107 }
-      #rating i:hover { transform:translateY(-1px) }
-      .review-own { background:rgba(255,255,255,.05); border:1px solid #ffc107 }
-
-      .detalle-hero { position:relative; border-radius:12px; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,.4); margin-bottom:1.25rem; }
-      #detalleHeroBg { position:absolute; inset:0; background-size:cover; background-position:center; filter:blur(18px) brightness(.45); transform:scale(1.1); }
-      .detalle-hero .overlay { position:relative; z-index:2; background:linear-gradient(to top, rgba(0,0,0,.85), rgba(0,0,0,.3)); }
-
-      .cx-card { background:#12151f; border:1px solid rgba(255,255,255,.08); border-radius:12px; box-shadow:0 10px 28px rgba(0,0,0,.35); }
-
-      #commentsList { max-height:320px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent; }
-      #commentsList::-webkit-scrollbar { width:6px; }
-      #commentsList::-webkit-scrollbar-thumb { background:rgba(255,255,255,.15); border-radius:6px; }
-
-      .integration-rail, #similaresRail { overflow-x:auto; }
-      .integration-rail .int-card, #similaresRail .sim-card { min-width:180px; max-width:180px; background:#0f1320; border:1px solid rgba(255,255,255,.08); border-radius:12px; }
-      .integration-rail img, #similaresRail img { width:100%; height:240px; object-fit:cover; border-top-left-radius:12px; border-top-right-radius:12px; }
-      .integration-rail .int-title, #similaresRail .sim-title { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-      #similaresRail .sim-card { transition: transform .2s; }
-      #similaresRail .sim-card:hover { transform: translateY(-3px); }
-      .fade-rotate { animation: fadeRotate 1s ease; }
-      @keyframes fadeRotate { from { opacity:0; transform:rotateY(90deg); } to { opacity:1; transform:rotateY(0); } }
-    </style>
 
     <!-- HERO -->
     <section class="detalle-hero">
@@ -180,21 +155,21 @@ export function DetalleView(item, categoria) {
         if (snap.exists()) item = { id: snap.id, ...snap.data() };
       }
 
-      const imgEl   = document.getElementById('detalleImg');
-      const titEl   = document.getElementById('detalleTitulo');
-      const dirEl   = document.getElementById('detalleDirector');
-      const durEl   = document.getElementById('detalleDuracion');
-      const anioEl  = document.getElementById('detalleAnio');
-      const genEl   = document.getElementById('detalleGenero');
-      const descEl  = document.getElementById('detalleDescripcion');
-      const heroBg  = document.getElementById('detalleHeroBg');
+      const imgEl = document.getElementById('detalleImg');
+      const titEl = document.getElementById('detalleTitulo');
+      const dirEl = document.getElementById('detalleDirector');
+      const durEl = document.getElementById('detalleDuracion');
+      const anioEl = document.getElementById('detalleAnio');
+      const genEl = document.getElementById('detalleGenero');
+      const descEl = document.getElementById('detalleDescripcion');
+      const heroBg = document.getElementById('detalleHeroBg');
       const promedioGeneralEl = document.getElementById('promedioGeneral');
 
-      titEl.textContent  = item.titulo || item.title || 'Sin título';
-      dirEl.textContent  = item.director || 'Desconocido';
-      durEl.textContent  = item.duracion || 'N/A';
+      titEl.textContent = item.titulo || item.title || 'Sin título';
+      dirEl.textContent = item.director || 'Desconocido';
+      durEl.textContent = item.duracion || 'N/A';
       anioEl.textContent = item["año"] || item.year || 'N/A';
-      genEl.textContent  = Array.isArray(item.genero) ? item.genero.join(', ') : (item.genero || '');
+      genEl.textContent = Array.isArray(item.genero) ? item.genero.join(', ') : (item.genero || '');
       descEl.textContent = item.descripcion || item.description || '';
       imgEl.src = resolveImagePath(item.img || item.imagen);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
@@ -300,7 +275,7 @@ export function DetalleView(item, categoria) {
           const own = user && r.userId === user.uid;
           html += `
             <div class="border-bottom border-secondary pb-2 mb-2 ${own ? 'review-own' : ''}">
-              <strong>${r.userEmail || 'Usuario anónimo'} ${own ? '(Tu reseña)' : ''}</strong>
+              <strong>${r.userEmail || 'Usuario anónimo'} ${own ? ' (Tu reseña)' : ''}</strong>
               <p class="mb-1 text-warning small">${'★'.repeat(r.estrellas)}${'☆'.repeat(5 - r.estrellas)}</p>
               <p class="mb-0 small">${r.comentario}</p>
             </div>`;

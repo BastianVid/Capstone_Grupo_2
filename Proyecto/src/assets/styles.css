@@ -1,29 +1,53 @@
 /* =========================================================
-   Reset básico
+   ÍNDICE GENERAL DEL STYLESHEET - CULTURAX
+   =========================================================
+   [1] Reset básico
+   [2] Paleta y tema (Bootstrap mapping)
+   [3] Navbar (Bootstrap)
+   [4] Header & Navbar legacy
+   [5] Tipografía y cuerpo
+   [6] Secciones genéricas
+   [7] Botones propios
+   [8] Footer
+   [9] Responsive global
+   [10] Catálogo de películas
+   [11] Formularios
+   [12] Grid genérico
+   [13] Slider antiguo
+   [14] Hero (carrusel principal)
+   [15] Sidebar (publicidad y próximos estrenos)
+   [16] Utilidades (truncado multilínea)
+   [17] Rails (tarjetas uniformes)
+   [18] Perfil (nuevo diseño)
+   [19] Reseñas (tema oscuro)
+   [20] Animaciones / efectos
+   [21] Publicidad (ajustes de cobertura)
+   [22] DetalleView – vista de detalle de obras
    ========================================================= */
+
+/* 
+   [1] Reset básico
+*/
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* =========================================================
-   Paleta y tema (compatible con Bootstrap)
-   ========================================================= */
+/* 
+   [2] Paleta y tema (compatible con Bootstrap)
+*/
 :root {
-  --bg: #0f172a;        /* fondo general */
-  --card: #1e293b;      /* paneles / cards */
-  --accent: #38bdf8;    /* acento */
-  --text: #f1f5f9;      /* texto principal */
-  --muted: #94a3b8;     /* texto secundario */
-
-  /* Rails (ancho y separación de tarjetas) */
-  --rail-card-w: clamp(170px, 18vw, 210px); /* compacto */
-  --rail-body-h: 150px;                     /* alto del bloque texto+botón */
+  --bg: #0f172a;
+  --card: #1e293b;
+  --accent: #38bdf8;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --rail-card-w: clamp(170px, 18vw, 210px);
+  --rail-body-h: 150px;
   --rail-gap: 14px;
 }
 
-/* Tema Bootstrap oscuro mapeado a la paleta */
 :root,
 html[data-bs-theme="dark"] {
   --bs-body-bg: var(--bg);
@@ -39,23 +63,12 @@ html[data-bs-theme="dark"] {
   --bs-primary-rgb: 56,189,248;
 }
 
-/* Compatibilidad si alguien fuerza data-bs-theme="light" */
 html[data-bs-theme="light"] body { background: var(--bg); color: var(--text); }
 html[data-bs-theme="dark"]  body { background: var(--bg); color: var(--text); }
 
-/* =========================================================
-   Tipografía y cuerpo
-   ========================================================= */
-body {
-  font-family: "Inter", system-ui, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-}
-
-/* =========================================================
-   Navbar (Bootstrap)
-   ========================================================= */
+/* 
+   [3] Navbar (Bootstrap)
+*/
 .cx-header {
   position: sticky;
   top: 0;
@@ -63,13 +76,9 @@ body {
   background: var(--card);
   border-bottom: 1px solid var(--bs-border-color);
 }
-
-/* Links del navbar */
 .cx-header .nav-link { color: rgba(241,245,249,.7); }
 .cx-header .nav-link:hover,
 .cx-header .nav-link:focus { color: var(--accent) !important; }
-
-/* Dropdown en tema oscuro */
 .cx-header .dropdown-menu {
   background-color: var(--card);
   color: var(--text);
@@ -81,8 +90,6 @@ body {
   background-color: #243244;
   color: var(--text);
 }
-
-/* Inputs y selects en el header (buscador) */
 .cx-header .form-control,
 .cx-header .form-select {
   background-color: #0f172a;
@@ -90,8 +97,6 @@ body {
   border-color: #475569;
 }
 .cx-header .form-control::placeholder { color: var(--muted); }
-
-/* Botones primarios en la cabecera */
 .cx-header .btn-primary {
   background-color: var(--accent);
   border-color: var(--accent);
@@ -102,9 +107,9 @@ body {
   border-color: #0ea5e9;
 }
 
-/* =========================================================
-   (Legacy) Header & Navbar simple – compatibilidad
-   ========================================================= */
+/* 
+   [4] Header & Navbar legacy
+*/
 header {
   background: var(--card);
   padding: 16px 24px;
@@ -132,15 +137,23 @@ nav a {
 }
 nav a:hover { color: var(--accent); }
 
-/* =========================================================
-   Secciones genéricas
-   ========================================================= */
+/* 
+   [5] Tipografía y cuerpo
+*/
+body {
+  font-family: "Inter", system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+/* 
+   [6] Secciones genéricas
+*/
 main {
   max-width: 1000px;
   margin: 40px auto;
   padding: 0 20px;
 }
-
 .bienvenida,
 .cx-hero {
   text-align: center;
@@ -158,9 +171,9 @@ main {
 .bienvenida p,
 .cx-hero p { color: var(--muted); margin-bottom: 24px; }
 
-/* =========================================================
-   Botones propios (no Bootstrap)
-   ========================================================= */
+/* 
+   [7] Botones propios
+*/
 .cx-btn {
   display: inline-block;
   background: var(--accent);
@@ -174,9 +187,9 @@ main {
 }
 .cx-btn:hover { background: #0ea5e9; }
 
-/* =========================================================
-   Footer
-   ========================================================= */
+/* 
+   [8] Footer
+*/
 footer {
   text-align: center;
   padding: 20px;
@@ -185,9 +198,9 @@ footer {
   margin-top: 40px;
 }
 
-/* =========================================================
-   Responsive global
-   ========================================================= */
+/* 
+   [9] Responsive global
+*/
 @media (max-width: 768px) {
   nav { gap: 8px; }
   nav ul { flex-direction: column; gap: 12px; }
@@ -195,9 +208,9 @@ footer {
   .bienvenida, .cx-hero { padding: 40px 16px; }
 }
 
-/* =========================================================
-   Catálogo de películas
-   ========================================================= */
+/* 
+   [10] Catálogo de películas
+*/
 .peliculas { text-align: center; margin: 40px 20px; }
 .peliculas h2 { margin-bottom: 24px; color: var(--accent); }
 
@@ -225,9 +238,9 @@ footer {
 .pelicula-card h3 { margin-bottom: 8px; color: var(--text); }
 .pelicula-card p { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; }
 
-/* =========================================================
-   Formularios (registro / login)
-   ========================================================= */
+/* 
+   [11] Formularios (registro / login)
+*/
 .form-card {
   background: var(--card);
   max-width: 400px;
@@ -238,7 +251,12 @@ footer {
   text-align: center;
 }
 .form-card h2 { margin-bottom: 24px; color: var(--accent); }
-.form-card form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+.form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
 .form-card label { font-weight: 500; color: var(--text); }
 .form-card input {
   width: 100%;
@@ -250,17 +268,24 @@ footer {
 }
 .form-card input::placeholder { color: var(--muted); }
 .form-card button { margin-top: 8px; }
-
-/* =========================================================
-   Secciones genéricas (grid reutilizable)
-   ========================================================= */
+/* 
+   [12] Secciones genéricas (grid reutilizable)
+*/
 .seccion {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
 }
-.seccion h2 { text-align: center; margin-bottom: 24px; color: var(--accent); }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.seccion h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--accent);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
 .item-card {
   background: var(--card);
   border-radius: 12px;
@@ -273,9 +298,9 @@ footer {
 .item-card h3 { margin-bottom: 12px; color: var(--accent); }
 .item-card p { color: var(--muted); }
 
-/* =========================================================
-   Slider antiguo (si aún se usa en alguna vista)
-   ========================================================= */
+/* 
+   [13] Slider antiguo (si aún se usa en alguna vista)
+*/
 .slider {
   position: relative;
   max-width: 1000px;
@@ -318,9 +343,9 @@ footer {
 }
 .dot.active { background: var(--accent); }
 
-/* =========================================================
-   HERO (carrusel principal)
-   ========================================================= */
+/* 
+   [14] Hero (carrusel principal)
+*/
 .cx-hero {
   height: 668px;
   border-radius: 12px;
@@ -338,18 +363,31 @@ footer {
   display: block;
 }
 
-/* =========================================================
-   Sidebar (publicidad y próximos estrenos)
-   ========================================================= */
-.ad-billboard { height: 160px; object-fit: cover; border-radius: 8px; }
-@media (min-width: 1200px) { .ad-billboard { height: 200px; } }
+/* 
+   [15] Sidebar (publicidad y próximos estrenos)
+*/
+.ad-billboard {
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+@media (min-width: 1200px) {
+  .ad-billboard { height: 200px; }
+}
+.upcoming-card .list-group {
+  max-height: 360px;
+  overflow: auto;
+}
+.upcoming-thumb {
+  width: 56px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 6px;
+}
 
-.upcoming-card .list-group { max-height: 360px; overflow: auto; }
-.upcoming-thumb { width: 56px; height: 84px; object-fit: cover; border-radius: 6px; }
-
-/* =========================================================
-   Utilidades: truncado multilínea
-   ========================================================= */
+/* 
+   [16] Utilidades: truncado multilínea
+*/
 .text-truncate-1,
 .text-truncate-2,
 .text-truncate-3 {
@@ -362,35 +400,36 @@ footer {
 .text-truncate-2 { -webkit-line-clamp: 2; line-clamp: 2; }
 .text-truncate-3 { -webkit-line-clamp: 3; line-clamp: 3; }
 
-/* Placeholder aplicado por image-fallback.js */
 .is-fallback {
   filter: none;
   background: #0f172a;
 }
 
-/* Publicidad lateral e inferior: alturas fijas */
-.ad-side   { height: 140px; object-fit: cover; border-radius: 8px; width: 100%; display: block; }
-.ad-bottom { height: 150px; object-fit: cover; border-radius: 8px; width: 100%; display: block; }
-
-/* =========================================================
-   Rails (tarjetas uniformes y simétricas)
-   ========================================================= */
-
-/* Contenedor desplazable horizontal (sin barra visible) */
+/* Publicidad lateral e inferior */
+.ad-side,
+.ad-bottom {
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  width: 100%;
+  display: block;
+}
+/* 
+   [17] Rails (tarjetas uniformes y simétricas)
+*/
 .cx-rail {
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 0;              /* sin espacio extra debajo */
-  scrollbar-width: none;          /* Firefox: oculta scrollbar */
-  -ms-overflow-style: none;       /* IE/Edge Legacy */
+  padding-bottom: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.cx-rail::-webkit-scrollbar {      /* Chrome/Safari/Edge: oculta scrollbar */
+.cx-rail::-webkit-scrollbar {
   height: 0 !important;
   background: transparent;
 }
 
-/* Pista en columnas de ancho fijo para cada tarjeta */
 .cx-rail-track {
   display: grid;
   grid-auto-flow: column;
@@ -400,7 +439,6 @@ footer {
   scroll-snap-type: x mandatory;
 }
 
-/* Cada tarjeta: altura TOTAL fija = alto de imagen (relación 2:3) + cuerpo */
 .cx-rail-card {
   scroll-snap-align: start;
   background: var(--card);
@@ -408,95 +446,57 @@ footer {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: calc((var(--rail-card-w) * 1.5) + var(--rail-body-h)); /* 1.5 = 3/2 */
+  height: calc((var(--rail-card-w) * 1.5) + var(--rail-body-h));
   box-shadow: 0 6px 14px rgba(0,0,0,.25);
   border: 1px solid var(--bs-border-color);
 }
 
-/* El thumb mantiene relación 2:3 y no altera la altura */
 .cx-rail-thumb {
   width: 100%;
-  aspect-ratio: 2 / 3;            /* asegura alto = 1.5 * ancho */
+  aspect-ratio: 2 / 3;
   object-fit: cover;
   display: block;
   background: #0b1220;
 }
 
-/* Cuerpo con altura fija y botón pegado al fondo */
 .cx-rail-body {
-  height: var(--rail-body-h);     /* fuerza igual alto en todas */
+  height: var(--rail-body-h);
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow: hidden;               /* evita que textos hagan crecer la tarjeta */
+  overflow: hidden;
 }
 
-/* Meta, título y descripción (truncadas) */
 .cx-rail-meta { font-size: .8rem; color: var(--muted); }
 
-/* Título más pequeño */
 .cx-rail-title {
   font-weight: 600;
   line-height: 1.2;
-  font-size: 0.95rem;             /* reducido */
+  font-size: 0.95rem;
 }
 .cx-rail-title.text-truncate-2 { -webkit-line-clamp: 2; line-clamp: 2; }
 
 .cx-rail-desc { font-size: .9rem; color: var(--muted); }
 .cx-rail-desc.text-truncate-3 { -webkit-line-clamp: 3; line-clamp: 3; }
 
-/* CTA idéntico en todas las tarjetas */
 .cx-rail-actions { margin-top: auto; }
 .cx-rail-actions .btn {
   width: 100%;
-  height: 38px;                   /* mismo alto en todo */
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
 }
 
-/* Ajuste extra en móviles para títulos */
 @media (max-width: 576px) {
   .cx-rail-title { font-size: 0.9rem; }
 }
 
-/* =========================================================
-   Footer (CulturaX)
-   ========================================================= */
-.cx-footer {
-  text-align: initial;                 /* evita centrado global del tag footer */
-  background: var(--card);
-  border-top: 1px solid var(--bs-border-color);
-  color: var(--muted);
-}
-
-.cx-footer .cx-footer-link {
-  color: rgba(241,245,249,.85);
-  text-decoration: none;
-}
-.cx-footer .cx-footer-link:hover {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.cx-footer h6 { letter-spacing: .02em; }
-
-.cx-footer .btn-primary {
-  background-color: var(--accent);
-  border-color: var(--accent);
-  color: #0b1220;
-}
-.cx-footer .btn-primary:hover {
-  background-color: #0ea5e9;
-  border-color: #0ea5e9;
-}
-
-/* =========================================================
-   PERFIL - NUEVO DISEÑO MODERNO MEJORADO (ALINEADO IZQ)
-   ========================================================= */
-
+/* 
+   [18] Perfil — Nuevo diseño moderno alineado a la izquierda
+*/
 .perfil-container {
   background: linear-gradient(180deg, #0a0f1c 0%, #0d1424 100%);
   color: #fff;
@@ -506,7 +506,6 @@ footer {
   justify-content: space-between;
 }
 
-/* ---------- ENCABEZADO DEL PERFIL ---------- */
 .perfil-hero {
   position: relative;
   background: linear-gradient(180deg, #0c1220 0%, #0a0f1c 100%);
@@ -521,13 +520,12 @@ footer {
   gap: 1.8rem;
   padding: 2rem 5%;
   z-index: 1;
-  justify-content: flex-start; /* 👉 alinea a la izquierda */
+  justify-content: flex-start;
 }
 
-/* ---------- AVATAR LIMPIO Y PROFESIONAL ---------- */
 .perfil-avatar {
-  width: 120px;
-  height: 120px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   object-fit: cover;
   background-color: #111726;
@@ -537,7 +535,6 @@ footer {
     0 2px 4px rgba(0, 0, 0, 0.4) inset;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-
 .perfil-avatar:hover {
   transform: scale(1.03);
   box-shadow:
@@ -546,44 +543,6 @@ footer {
   border-color: rgba(255, 255, 255, 0.15);
 }
 
-/* ---------- CONTENIDO DEL HEADER ---------- */
-.perfil-content {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 1.5rem;
-  position: relative;
-  z-index: 1;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 0 1rem;
-  text-align: left;
-}
-
-/* ---------- AVATAR PROFESIONAL (SIN ILUMINACIÓN BRILLANTE) ---------- */
-.perfil-avatar {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  object-fit: cover;
-  background-color: #111726; /* tono oscuro coherente con el fondo */
-  border: 2px solid rgba(255, 255, 255, 0.1); /* borde sutil */
-  box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.5),
-    0 2px 4px rgba(0, 0, 0, 0.4) inset; /* profundidad interna */
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Hover sutil, sin brillos */
-.perfil-avatar:hover {
-  transform: scale(1.03);
-  box-shadow:
-    0 6px 14px rgba(0, 0, 0, 0.6),
-    0 2px 6px rgba(0, 0, 0, 0.45) inset;
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* ---------- BORDE GRADIENTE ---------- */
 .border-gradient {
   border: 3px solid transparent;
   background-image: linear-gradient(#0a0f1c, #0a0f1c),
@@ -592,34 +551,27 @@ footer {
   background-clip: content-box, border-box;
   transition: transform 0.3s ease;
 }
+.border-gradient:hover { transform: scale(1.05); }
 
-.border-gradient:hover {
-  transform: scale(1.05);
-}
-
-/* ---------- NOMBRE Y CORREO ---------- */
 .perfil-nombre {
   font-weight: 700;
   font-size: 1.6rem;
   color: #fff;
   margin-bottom: 0.25rem;
 }
-
 .perfil-correo {
   color: #9ca3af;
   font-size: 0.95rem;
   margin: 0;
 }
 
-/* ---------- LÍNEA DIVISORIA ---------- */
 .perfil-divider {
   width: 100%;
   height: 1px;
   margin: 2rem 0;
-  background: linear-gradient(to right, transparent, rgba(0, 255, 255, 0.2), transparent);
+  background: linear-gradient(to right, transparent, rgba(0,255,255,0.2), transparent);
 }
 
-/* ---------- SUBTÍTULO ---------- */
 .perfil-subtitulo {
   color: #38bdf8;
   font-weight: 600;
@@ -629,19 +581,17 @@ footer {
   font-size: 1.2rem;
 }
 
-/* ---------- RESEÑAS ---------- */
+/* Reseñas del perfil */
 .review-card {
   background: rgba(20, 26, 40, 0.85);
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: all 0.3s ease;
 }
-
 .review-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
 }
-
 .review-thumb {
   width: 80px;
   height: 115px;
@@ -650,20 +600,14 @@ footer {
   flex-shrink: 0;
 }
 
-/* ---------- ANIMACIÓN ---------- */
 .animate-fade-in {
   animation: fadeIn 0.6s ease forwards;
   opacity: 0;
 }
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-/* =========================================================
-   RESPONSIVE DESIGN
-   ========================================================= */
 
 @media (max-width: 768px) {
   .perfil-content {
@@ -672,65 +616,34 @@ footer {
     text-align: center;
     gap: 1rem;
   }
-
   .perfil-avatar {
     width: 100px;
     height: 100px;
   }
-
-  .perfil-nombre {
-    font-size: 1.4rem;
-  }
-
-  .perfil-subtitulo {
-    justify-content: center;
-  }
-
+  .perfil-nombre { font-size: 1.4rem; }
+  .perfil-subtitulo { justify-content: center; }
   .review-card {
     flex-direction: column;
     align-items: center;
     text-align: center;
   }
-
-  .review-thumb {
-    margin-bottom: 1rem;
-  }
-
-  .perfil-divider {
-    margin: 1.5rem 0;
-  }
+  .review-thumb { margin-bottom: 1rem; }
+  .perfil-divider { margin: 1.5rem 0; }
 }
 
-#stars span {
-  cursor: pointer;
-  transition: color 0.2s ease;
-  color: gray;
-}
-
-#stars span:hover {
-  color: gold;
-}
-.bg-light.border-2.border-dark {
-  background-color: #f8f9fa !important;
-  border-color: #212529 !important;
-  box-shadow: 0 0 6px rgba(0,0,0,0.1);
-}
-#promedioGeneral {
-  transition: transform 0.3s ease;
-}
-/* =========================================================
-   Reseñas (tema oscuro coherente con CulturaX)
-   ========================================================= */
+/* 
+   [19] Reseñas (tema oscuro coherente con CulturaX)
+*/
 .review-own {
   background-color: rgba(56, 189, 248, 0.15);
   border: 1px solid var(--accent);
   border-radius: 8px;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  box-shadow: 0 0 12px rgba(56,189,248,0.25);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .review-own:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 16px rgba(56, 189, 248, 0.35);
+  box-shadow: 0 0 16px rgba(56,189,248,0.35);
 }
 
 .review-other {
@@ -741,31 +654,21 @@ footer {
 }
 .review-other:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 10px rgba(56,189,248,0.15);
 }
 
-.text-accent {
-  color: var(--accent);
-}
-
-/* ============================== PERFIL - INFORMACIÓN DEL USUARIO ============================== */
+.text-accent { color: var(--accent); }
 
 .perfil-userinfo {
   font-size: 1.1rem;
   line-height: 1.6;
   color: #f1f5f9;
 }
-
-.perfil-line i {
-  margin-right: 6px;
-  color: var(--accent);
-}
-
-.perfil-line span {
-  font-weight: 500;
-  color: #e2e8f0;
-}
-
+.perfil-line i { margin-right: 6px; color: var(--accent); }
+.perfil-line span { font-weight: 500; color: #e2e8f0; }
+/* 
+   [20] Header avanzado + animaciones globales
+*/
 .cx-header {
   backdrop-filter: blur(10px);
   background-color: rgba(20, 25, 40, 0.9) !important;
@@ -774,7 +677,6 @@ footer {
 .cx-header .dropdown-menu-dark {
   background-color: #1e2233 !important;
 }
-
 .cx-header .dropdown-item:hover {
   background-color: #2a3045 !important;
   color: #f5c518 !important;
@@ -785,7 +687,6 @@ footer {
   transform: scale(1.02);
   animation: fadeSlide 1s ease forwards;
 }
-
 @keyframes fadeSlide {
   from {
     opacity: 0;
@@ -797,7 +698,9 @@ footer {
   }
 }
 
-/* === PUBLICIDAD - AJUSTE DE COBERTURA === */
+/* 
+   [21] Publicidad y DetalleView – ajustes visuales
+*/
 #ad-superior img,
 #ad-bottom-1 img,
 #ad-bottom-2 img {
@@ -815,22 +718,21 @@ footer {
   overflow: hidden;
 }
 
+/* Mejoras visuales DetalleView */
+.card.shadow-sm {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .35) !important;
+}
 
-/* DetalleView – mejoras visuales sutiles */
-.card.shadow-sm { box-shadow: 0 10px 28px rgba(0,0,0,.35) !important; }
-
-
+/* Similares */
 #similaresRail .sim-card {
   flex: 0 0 150px;
   background: #0f1320;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 10px;
   overflow: hidden;
   transition: transform .2s;
 }
-#similaresRail .sim-card:hover {
-  transform: translateY(-3px);
-}
+#similaresRail .sim-card:hover { transform: translateY(-3px); }
 #similaresRail img {
   width: 100%;
   height: 220px;
@@ -844,3 +746,164 @@ footer {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Stars rating hover */
+#stars span {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  color: gray;
+}
+#stars span:hover { color: gold; }
+
+/* Efecto hover en promedio general */
+#promedioGeneral { transition: transform 0.3s ease; }
+
+/* Light border cards */
+.bg-light.border-2.border-dark {
+  background-color: #f8f9fa !important;
+  border-color: #212529 !important;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+/* 
+   [22] DetalleView – vista de detalle de obras
+ */
+
+/* Rating stars */
+#rating i {
+  color: #aaa;
+  transition: color 0.2s, transform 0.15s;
+}
+#rating i.active,
+#rating i.hovered {
+  color: #ffc107;
+}
+#rating i:hover {
+  transform: translateY(-1px);
+}
+.review-own {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #ffc107;
+}
+
+/* Hero superior con blur y overlay */
+.detalle-hero {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  margin-bottom: 1.25rem;
+}
+#detalleHeroBg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(18px) brightness(0.45);
+  transform: scale(1.1);
+}
+.detalle-hero .overlay {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3));
+}
+
+/* Tarjetas del detalle */
+.cx-card {
+  background: #12151f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Lista de reseñas con scroll */
+#commentsList {
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+#commentsList::-webkit-scrollbar {
+  width: 6px;
+}
+#commentsList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+/* Integración y rail de similares */
+.integration-rail,
+#similaresRail {
+  overflow-x: auto;
+}
+.integration-rail .int-card,
+#similaresRail .sim-card {
+  min-width: 180px;
+  max-width: 180px;
+  background: #0f1320;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+.integration-rail img,
+#similaresRail img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.integration-rail .int-title,
+#similaresRail .sim-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#similaresRail .sim-card {
+  transition: transform 0.2s;
+}
+#similaresRail .sim-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Animación de entrada */
+.fade-rotate {
+  animation: fadeRotate 1s ease;
+}
+@keyframes fadeRotate {
+  from {
+    opacity: 0;
+    transform: rotateY(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0);
+  }
+}
+
+#similaresRail {
+  display: flex !important;
+  gap: 1rem !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160,160,160,0.4) transparent;
+  padding-bottom: 6px;
+}
+/* Rail de DetalleView para que coincida con los rails de HomeView*/
+#similaresRail::-webkit-scrollbar {
+  height: 6px;
+}
+
+#similaresRail::-webkit-scrollbar-thumb {
+  background: rgba(160,160,160,0.4);
+  border-radius: 4px;
+}
+
+#similaresRail::-webkit-scrollbar-thumb:hover {
+  background: rgba(200,200,200,0.6);
+}
+
+#similaresRail::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+}
+
