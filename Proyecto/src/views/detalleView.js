@@ -21,7 +21,10 @@ export function DetalleView(item, categoria) {
   }
 
   if (!item || !categoria) {
-    return { html: `<div class="container py-5"><h2>No se encontró la obra seleccionada.</h2></div>`, bind() {} };
+    return {
+      html: `<div class="container py-5"><h2>No se encontró la obra seleccionada.</h2></div>`,
+      bind() {}
+    };
   }
 
   const html = `
@@ -60,14 +63,17 @@ export function DetalleView(item, categoria) {
           <div class="row g-4 align-items-center justify-content-between">
             <!-- Izquierda -->
             <div class="col-md-7 d-flex align-items-start gap-4">
-              <img id="detalleImg" src="src/assets/img/default.jpg" alt="Obra" class="rounded shadow-lg" style="width:200px;height:300px;object-fit:cover;">
+              <img id="detalleImg" src="src/assets/img/default.jpg" alt="Obra"
+                   class="rounded shadow-lg" style="width:200px;height:300px;object-fit:cover;">
               <div class="text-white">
-                <h1 id="detalleTitulo" class="fw-bold mb-1">Cargando...</h1>
-                <p id="detalleSubtitle" class="text-secondary mb-2"></p>
+                <h1 id="detalleTitulo" class="fw-bold mb-2">Cargando...</h1>
+
+                <!-- Ficha técnica -->
                 <p class="mb-1"><strong>Director:</strong> <span id="detalleDirector">Desconocido</span></p>
-                <p class="mb-1"><strong>Duración:</strong> <span id="detalleDuracion">N/A</span></p>
+                <p class="mb-1"><strong>Duración:</strong> <span id="detalleDuracion">N/A</span> min</p>
                 <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
                 <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
+
                 <p id="promedioGeneral" class="mb-0 text-warning small mt-2"></p>
               </div>
             </div>
@@ -75,7 +81,12 @@ export function DetalleView(item, categoria) {
             <!-- Derecha: trailer -->
             <div class="col-md-5">
               <div class="ratio ratio-16x9 rounded overflow-hidden shadow-lg border border-secondary border-opacity-25">
-                <iframe class="trailer" src="https://www.youtube.com/embed/5PSNL1qE6VY?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1" title="Trailer" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                <iframe class="trailer"
+                  src="https://www.youtube.com/embed/5PSNL1qE6VY?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
+                  title="Trailer"
+                  allow="autoplay; encrypted-media; picture-in-picture"
+                  allowfullscreen>
+                </iframe>
               </div>
             </div>
           </div>
@@ -83,15 +94,17 @@ export function DetalleView(item, categoria) {
       </div>
     </section>
 
+    <!-- CONTENIDO -->
     <div class="container">
       <div class="row g-4">
         <div class="col-lg-8">
+          <!-- Sinopsis -->
           <div class="cx-card p-4 mb-4">
             <h5 class="text-white mb-3">Sinopsis</h5>
             <p id="detalleDescripcion" class="mb-0 text-secondary"></p>
           </div>
 
-          <!-- calificación -->
+          <!-- Tu calificación -->
           <div id="reseñaSection" class="cx-card p-4 mb-4">
             <h4 class="text-white mb-3">Tu calificación</h4>
             <div id="rating" class="mb-2" style="font-size:1.4rem;">
@@ -102,12 +115,12 @@ export function DetalleView(item, categoria) {
               <i class="bi bi-star" data-value="5" role="button"></i>
             </div>
             <div id="ratingMessage" class="small text-secondary mb-2"></div>
-            <div class="input-group mb-2">
-              <input id="commentInput" type="text" class="form-control" placeholder="Escribe un comentario" />
+            <input id="commentInput" type="text" class="form-control" placeholder="Escribe un comentario" />
+            <div class="mt-2 d-flex gap-2">
               <button id="addComment" class="btn btn-primary">Guardar reseña</button>
               <button id="deleteComment" class="btn btn-outline-danger d-none">Eliminar reseña</button>
             </div>
-            <div id="errorMessage" class="text-danger small"></div>
+            <div id="errorMessage" class="text-danger small mt-2"></div>
           </div>
 
           <!-- Reseñas -->
@@ -151,28 +164,37 @@ export function DetalleView(item, categoria) {
       updateNavbarSessionUI();
       initNavbarSearch();
 
-      // ============================== CARGAR DETALLE ==============================
-      if (!item.titulo && !item.title) {
+      // Logout desde el navbar (dropdown)
+      document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        try {
+          const { logout } = await import('../controllers/authController.js');
+          await logout();
+        } catch (e) {
+          console.warn('Error al cerrar sesión:', e);
+        }
+      });
+
+      // 🔧 Corrección: volver a cargar datos si faltan campos clave
+      if (!item.director || !item.duracion || !item["año"] || !item.genero) {
         const snap = await getDoc(doc(db, categoria, item.id));
         if (snap.exists()) item = { id: snap.id, ...snap.data() };
       }
 
       const imgEl   = document.getElementById('detalleImg');
       const titEl   = document.getElementById('detalleTitulo');
-      const subEl   = document.getElementById('detalleSubtitle');
       const dirEl   = document.getElementById('detalleDirector');
       const durEl   = document.getElementById('detalleDuracion');
-      const anoEl   = document.getElementById('detalleAnio');
+      const anioEl  = document.getElementById('detalleAnio');
       const genEl   = document.getElementById('detalleGenero');
       const descEl  = document.getElementById('detalleDescripcion');
       const heroBg  = document.getElementById('detalleHeroBg');
+      const promedioGeneralEl = document.getElementById('promedioGeneral');
 
       titEl.textContent  = item.titulo || item.title || 'Sin título';
-      subEl.textContent  = item.subtitle || '';
       dirEl.textContent  = item.director || 'Desconocido';
-      durEl.textContent  = item.duracion ? `${item.duracion} min` : 'N/A';
-      anoEl.textContent  = (item['año'] || item.year || 'N/A');
-      genEl.textContent  = Array.isArray(item.genero) ? item.genero.join(', ') : (item.genero || item.genres || '');
+      durEl.textContent  = item.duracion || 'N/A';
+      anioEl.textContent = item["año"] || item.year || 'N/A';
+      genEl.textContent  = Array.isArray(item.genero) ? item.genero.join(', ') : (item.genero || '');
       descEl.textContent = item.descripcion || item.description || '';
       imgEl.src = resolveImagePath(item.img || item.imagen);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
@@ -182,27 +204,23 @@ export function DetalleView(item, categoria) {
         try {
           const rail = document.getElementById('similaresRail');
           rail.innerHTML = `<p class="text-secondary small">Buscando obras similares...</p>`;
-
           const generosItem = Array.isArray(item.genero) ? item.genero.map(g => String(g).toLowerCase().trim()) : [];
           if (!generosItem.length) {
             rail.innerHTML = `<p class="text-secondary small">No hay géneros definidos.</p>`;
             return;
           }
-
           const snap = await getDocs(collection(db, categoria));
           const similares = [];
           snap.forEach(d => {
             const data = d.data();
             const generosData = Array.isArray(data.genero) ? data.genero.map(g => String(g).toLowerCase().trim()) : [];
-            const match = generosData.some(g => generosItem.includes(g));
-            if (match && d.id !== item.id) similares.push({ id: d.id, ...data });
+            if (generosData.some(g => generosItem.includes(g)) && d.id !== item.id)
+              similares.push({ id: d.id, ...data });
           });
-
           if (!similares.length) {
             rail.innerHTML = `<p class="text-secondary small">No se encontraron obras similares.</p>`;
             return;
           }
-
           rail.innerHTML = similares.slice(0, 10).map(s => `
             <div class="sim-card">
               <a href="#/detalle" class="text-decoration-none text-white"
@@ -212,13 +230,31 @@ export function DetalleView(item, categoria) {
               </a>
             </div>
           `).join('');
-        } catch (e) {
-          console.error('Error cargando similares:', e);
-        }
+        } catch (e) { console.error('Error cargando similares:', e); }
       };
       await renderSimilares();
 
-      // ============================== RESEÑAS / RATING ==============================
+      // ============================== PROMEDIO Y RESEÑAS ==============================
+      const renderPromedio = async () => {
+        const snap = await getDoc(doc(db, categoria, item.id));
+        if (!snap.exists()) {
+          promedioGeneralEl.textContent = '★ Sin calificaciones aún';
+          return;
+        }
+        const data = snap.data();
+        const p = data.calificacionPromedio || 0;
+        const v = data.totalVotos || 0;
+        if (!v) {
+          promedioGeneralEl.textContent = '★ Sin calificaciones aún';
+          return;
+        }
+        const est = Math.round(p);
+        promedioGeneralEl.innerHTML = `
+          <span class="text-warning">${'★'.repeat(est)}${'☆'.repeat(5 - est)}</span>
+          <span class="text-light fw-semibold ms-2">${p.toFixed(1)} / 5</span>
+          <span class="text-secondary">(${v} votos)</span>`;
+      };
+
       const stars = document.querySelectorAll('#rating i');
       const msg = document.getElementById('ratingMessage');
       const errorEl = document.getElementById('errorMessage');
@@ -226,10 +262,9 @@ export function DetalleView(item, categoria) {
       const addBtn = document.getElementById('addComment');
       const delBtn = document.getElementById('deleteComment');
       const commentsList = document.getElementById('commentsList');
-      const promedioGeneralEl = document.getElementById('promedioGeneral');
       let currentRating = 0;
 
-      const pintarEstrellas = (v) => {
+      const pintarEstrellas = v => {
         stars.forEach((s, i) => {
           s.classList.remove('bi-star-fill', 'active');
           s.classList.add(i < v ? 'bi-star-fill' : 'bi-star');
@@ -251,23 +286,12 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      const renderPromedio = async () => {
-        const snap = await getDoc(doc(db, categoria, item.id));
-        if (!snap.exists()) { promedioGeneralEl.textContent = '★ Sin calificaciones aún'; return; }
-        const data = snap.data();
-        const p = data.calificacionPromedio || 0;
-        const v = data.totalVotos || 0;
-        if (!v) { promedioGeneralEl.textContent = '★ Sin calificaciones aún'; return; }
-        const est = Math.round(p);
-        promedioGeneralEl.innerHTML = `
-          <span class="text-warning">${'★'.repeat(est)}${'☆'.repeat(5-est)}</span>
-          <span class="text-light fw-semibold ms-2">${p.toFixed(1)} / 5</span>
-          <span class="text-secondary">(${v} votos)</span>`;
-      };
-
-      const renderResenas = async (user) => {
+      const renderResenas = async user => {
         const snap = await getDocs(collection(db, categoria, item.id, 'resenas'));
-        if (snap.empty) { commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`; return; }
+        if (snap.empty) {
+          commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`;
+          return;
+        }
         let html = '';
         let count = 0;
         snap.forEach(d => {
@@ -285,7 +309,7 @@ export function DetalleView(item, categoria) {
         commentsList.innerHTML = html;
       };
 
-      onAuthStateChanged(auth, async (user) => {
+      onAuthStateChanged(auth, async user => {
         await renderPromedio();
         await renderResenas(user);
 
@@ -339,4 +363,3 @@ export function DetalleView(item, categoria) {
     },
   };
 }
-
