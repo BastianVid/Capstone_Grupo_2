@@ -40,20 +40,30 @@ export function MusicaView() {
 
       const normalize = (arr) =>
         (arr || []).map((x) => {
-          const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
-          const year = x.año ?? x.year ?? '';
-          const artist = x.director ?? x.artist ?? '';
-          return {
-            id: x.id ?? x.slug ?? null,
-            title: x.titulo ?? x.title ?? x.nombre ?? 'Sin título',
-            img: resolveImagePath(x.imagen ?? x.img ?? x.image ?? 'concierto.jpg'),
-            tag: genres[0] ?? (artist || 'Música'),
-            genres,
-            subtitle: [artist, year].filter(Boolean).join(' • '),
-            year: year ? String(year) : '',
-            description: x.descripcion ?? x.description ?? '',
-          };
-        });
+        const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
+        const year = x.año ?? x.year ?? '';
+        const artist = x.director ?? x.artist ?? '';
+        const totalCanciones = x.totalCanciones ?? x.total_canciones ?? null;
+
+        // Construir subtítulo (artista • año • canciones)
+        const subtitleParts = [artist, year];
+        if (totalCanciones) subtitleParts.push(`${totalCanciones} canciones`);
+
+        return {
+          id: x.id ?? x.slug ?? null,
+          title: x.titulo ?? x.title ?? x.nombre ?? 'Sin título',
+          img: resolveImagePath(x.imagen ?? x.img ?? x.image ?? 'concierto.jpg'),
+          tag: genres[0] ?? (artist || 'Música'),
+          genres,
+          subtitle: subtitleParts.filter(Boolean).join(' • '),
+          year: year ? String(year) : '',
+          description:
+            x.descripcion ??
+            x.description ??
+            (totalCanciones ? `Este álbum contiene ${totalCanciones} canciones.` : ''),
+        };
+      });
+
 
       let data = normalize(raw);
 

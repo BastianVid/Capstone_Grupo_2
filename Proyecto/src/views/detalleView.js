@@ -46,6 +46,7 @@ export function DetalleView(item, categoria) {
                 <!-- Ficha técnica -->
                 <p class="mb-1"><strong>Director:</strong> <span id="detalleDirector">Desconocido</span></p>
                 <p class="mb-1"><strong>Duración:</strong> <span id="detalleDuracion">N/A</span> min</p>
+                <p class="mb-1 d-none" id="detalleCanciones"><strong>Total de canciones:</strong> <span></span></p>
                 <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
                 <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
 
@@ -149,7 +150,7 @@ export function DetalleView(item, categoria) {
         }
       });
 
-      // 🔧 Corrección: volver a cargar datos si faltan campos clave
+      // 🔧 Recarga de datos si faltan campos
       if (!item.director || !item.duracion || !item["año"] || !item.genero) {
         const snap = await getDoc(doc(db, categoria, item.id));
         if (snap.exists()) item = { id: snap.id, ...snap.data() };
@@ -159,6 +160,7 @@ export function DetalleView(item, categoria) {
       const titEl = document.getElementById('detalleTitulo');
       const dirEl = document.getElementById('detalleDirector');
       const durEl = document.getElementById('detalleDuracion');
+      const cancionesEl = document.getElementById('detalleCanciones');
       const anioEl = document.getElementById('detalleAnio');
       const genEl = document.getElementById('detalleGenero');
       const descEl = document.getElementById('detalleDescripcion');
@@ -173,6 +175,14 @@ export function DetalleView(item, categoria) {
       descEl.textContent = item.descripcion || item.description || '';
       imgEl.src = resolveImagePath(item.img || item.imagen);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
+
+      // 🎵 Mostrar "totalCanciones" solo si es música
+      if (categoria === 'musica' && item.totalCanciones) {
+        cancionesEl.classList.remove('d-none');
+        cancionesEl.querySelector('span').textContent = `${item.totalCanciones} canciones`;
+      } else {
+        cancionesEl.classList.add('d-none');
+      }
 
       // ============================== SIMILARES ==============================
       const renderSimilares = async () => {
@@ -230,6 +240,7 @@ export function DetalleView(item, categoria) {
           <span class="text-secondary">(${v} votos)</span>`;
       };
 
+      // ============================== RESEÑAS ==============================
       const stars = document.querySelectorAll('#rating i');
       const msg = document.getElementById('ratingMessage');
       const errorEl = document.getElementById('errorMessage');
@@ -284,6 +295,7 @@ export function DetalleView(item, categoria) {
         commentsList.innerHTML = html;
       };
 
+      // ============================== AUTENTICACIÓN ==============================
       onAuthStateChanged(auth, async user => {
         await renderPromedio();
         await renderResenas(user);
