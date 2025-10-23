@@ -83,12 +83,17 @@ export function initNavbarSearch() {
     if (cache || building) return;
     building = true;
     const { ContentModel } = await import('../models/contentModel.js');
-    const [pelis, series, anime, musica] = await Promise.all([
+    const [pelis,series,anime,musica,videojuegos,libros,manga,documentales] = await Promise.all([
       ContentModel.listPeliculas().catch(() => []),
       ContentModel.listSeries().catch(() => []),
       ContentModel.listAnime().catch(() => []),
       ContentModel.listMusica().catch(() => []),
+      ContentModel.listVideojuegos?.().catch(() => []),
+      ContentModel.listLibros?.().catch(() => []),
+      ContentModel.listManga?.().catch(() => []),
+      ContentModel.listDocumentales?.().catch(() => []),
     ]);
+
 
     const norm = (x, categoria, def) => ({
       ...x,
@@ -102,8 +107,13 @@ export function initNavbarSearch() {
       ...pelis.map(p => norm(p, "peliculas", { img: "inception.jpg", tag: "Película" })),
       ...series.map(p => norm(p, "series", { img: "stranger-things.jpg", tag: "Serie" })),
       ...anime.map(p => norm(p, "anime", { img: "naruto.jpg", tag: "Anime" })),
-      ...musica.map(p => norm(p, "musica", { img: "avatar.jpg", tag: "Música" })),
+      ...musica.map(p => norm(p, "musica", { img: "beatles.jpg", tag: "Música" })),
+      ...videojuegos.map(p => norm(p, "videojuegos", { img: "zelda.jpg", tag: "Videojuego" })),
+      ...libros.map(p => norm(p, "libros", { img: "book.jpg", tag: "Libro" })),
+      ...manga.map(p => norm(p, "manga", { img: "chainsaw-man.jpg", tag: "Manga" })),
+      ...documentales.map(p => norm(p, "documentales", { img: "doc.jpg", tag: "Documental" })),
     ];
+
     building = false;
   }
 
