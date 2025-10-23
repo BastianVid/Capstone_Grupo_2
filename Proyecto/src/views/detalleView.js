@@ -51,9 +51,10 @@ export function DetalleView(item, categoria) {
                   <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
                   <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
 
-                  <!-- Campos adicionales dinámicos (solo manga) -->
+                  <!-- Campos adicionales dinámicos -->
                   <p class="mb-1 d-none" id="detalleTomos"><strong>Tomos:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleEditorial"><strong>Editorial:</strong> <span></span></p>
+                  <p class="mb-1 d-none" id="detalleTemporadas"><strong>Temporadas:</strong> <span></span></p>
                 </div>
 
                 <p id="promedioGeneral" class="mb-0 text-warning small mt-2"></p>
@@ -175,6 +176,7 @@ export function DetalleView(item, categoria) {
       const promedioGeneralEl = document.getElementById('promedioGeneral');
       const tomosEl = document.getElementById('detalleTomos');
       const editorialEl = document.getElementById('detalleEditorial');
+      const temporadasEl = document.getElementById('detalleTemporadas');
 
       // Asignación de datos base
       titEl.textContent = item.titulo || item.title || 'Sin título';
@@ -206,12 +208,20 @@ export function DetalleView(item, categoria) {
         }
       }
 
+      // 📺 Mostrar "Temporadas" solo si es serie
+      if (categoria === 'series' && item.temporadas) {
+        temporadasEl.classList.remove('d-none');
+        temporadasEl.querySelector('span').textContent = item.temporadas;
+      }
+
       // ============================== SIMILARES ==============================
       const renderSimilares = async () => {
         try {
           const rail = document.getElementById('similaresRail');
           rail.innerHTML = `<p class="text-secondary small">Buscando obras similares...</p>`;
-          const generosItem = Array.isArray(item.genero) ? item.genero.map(g => String(g).toLowerCase().trim()) : [];
+          const generosItem = Array.isArray(item.genero)
+            ? item.genero.map(g => String(g).toLowerCase().trim())
+            : [];
           if (!generosItem.length) {
             rail.innerHTML = `<p class="text-secondary small">No hay géneros definidos.</p>`;
             return;
@@ -220,7 +230,9 @@ export function DetalleView(item, categoria) {
           const similares = [];
           snap.forEach(d => {
             const data = d.data();
-            const generosData = Array.isArray(data.genero) ? data.genero.map(g => String(g).toLowerCase().trim()) : [];
+            const generosData = Array.isArray(data.genero)
+              ? data.genero.map(g => String(g).toLowerCase().trim())
+              : [];
             if (generosData.some(g => generosItem.includes(g)) && d.id !== item.id)
               similares.push({ id: d.id, ...data });
           });
@@ -231,7 +243,8 @@ export function DetalleView(item, categoria) {
           rail.innerHTML = similares.slice(0, 10).map(s => `
             <div class="sim-card">
               <a href="#/detalle" class="text-decoration-none text-white"
-                 onclick="sessionStorage.setItem('detalleItem', JSON.stringify(${JSON.stringify(s)})); sessionStorage.setItem('detalleCategoria', '${categoria}')">
+                 onclick="sessionStorage.setItem('detalleItem', JSON.stringify(${JSON.stringify(s)}));
+                          sessionStorage.setItem('detalleCategoria', '${categoria}')">
                 <img src="${resolveImagePath(s.imagen || s.img)}" alt="${s.titulo || s.title}">
                 <div class="sim-title">${s.titulo || s.title}</div>
               </a>
