@@ -71,13 +71,15 @@ async function listResenasByUser(uid) {
 // ============================== EXPORT ==============================
 export const ContentModel = {
   // Colecciones principales
-  listSeries:      () => readCollection("series"),
-  listPeliculas:   () => readCollection("peliculas"),
-  listAnime:       () => readCollection("anime"),
-  listMusica:      () => readCollection("musica"),
-  listLibros:      () => readCollection("libros"),
-  listVideojuegos: () => readCollection("videojuegos"),
-  listManga: () => readCollection("manga"),
+  listSeries:         () => readCollection("series"),
+  listPeliculas:      () => readCollection("peliculas"),
+  listAnime:          () => readCollection("anime"),
+  listMusica:         () => readCollection("musica"),
+  listLibros:         () => readCollection("libros"),
+  listVideojuegos:    () => readCollection("videojuegos"),
+  listManga:          () => readCollection("manga"),
+  listDocumentales:   () => readCollection("documentales"),
+
 
   // Items individuales
   getPelicula: (id) => readItem("peliculas", id),

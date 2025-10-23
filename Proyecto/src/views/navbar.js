@@ -15,13 +15,15 @@ export function Navbar() {
 
         <!-- Nav -->
         <ul class="nav d-none d-md-flex">
-          <li class="nav-item"><a href="#/peliculas" class="nav-link text-white-50 px-2">Películas</a></li>
-          <li class="nav-item"><a href="#/series"    class="nav-link text-white-50 px-2">Series</a></li>
-          <li class="nav-item"><a href="#/anime"     class="nav-link text-white-50 px-2">Anime</a></li>
-          <li class="nav-item"><a href="#/musica"    class="nav-link text-white-50 px-2">Música</a></li>
-          <li class="nav-item"><a href="#/videojuegos" class="nav-link text-white-50 px-2">Videojuegos</a></li>
-          <li class="nav-item"><a href="#/libros"      class="nav-link text-white-50 px-2">Libros</a></li>
-          <li class="nav-item"><a href="#/manga"      class="nav-link text-white-50 px-2">Mangas</a></li>
+          <li class="nav-item"><a href="#/peliculas"        class="nav-link text-white-50 px-2">Películas</a></li>
+          <li class="nav-item"><a href="#/series"           class="nav-link text-white-50 px-2">Series</a></li>
+          <li class="nav-item"><a href="#/anime"            class="nav-link text-white-50 px-2">Anime</a></li>
+          <li class="nav-item"><a href="#/musica"           class="nav-link text-white-50 px-2">Música</a></li>
+          <li class="nav-item"><a href="#/videojuegos"      class="nav-link text-white-50 px-2">Videojuegos</a></li>
+          <li class="nav-item"><a href="#/libros"           class="nav-link text-white-50 px-2">Libros</a></li>
+          <li class="nav-item"><a href="#/manga"            class="nav-link text-white-50 px-2">Mangas</a></li>
+          <li class="nav-item"><a href="#/documentales"     class="nav-link text-white-50 px-2">Documentales</a></li>
+
         </ul>
 
         <!-- Search -->
