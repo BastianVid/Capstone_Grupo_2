@@ -44,11 +44,17 @@ export function DetalleView(item, categoria) {
                 <h1 id="detalleTitulo" class="fw-bold mb-2">Cargando...</h1>
 
                 <!-- Ficha técnica -->
-                <p class="mb-1"><strong>Director:</strong> <span id="detalleDirector">Desconocido</span></p>
-                <p class="mb-1"><strong>Duración:</strong> <span id="detalleDuracion">N/A</span> min</p>
-                <p class="mb-1 d-none" id="detalleCanciones"><strong>Total de canciones:</strong> <span></span></p>
-                <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
-                <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
+                <div id="fichaTecnica">
+                  <p class="mb-1"><strong>Director:</strong> <span id="detalleDirector">Desconocido</span></p>
+                  <p class="mb-1"><strong>Duración:</strong> <span id="detalleDuracion">N/A</span> min</p>
+                  <p class="mb-1 d-none" id="detalleCanciones"><strong>Total de canciones:</strong> <span></span></p>
+                  <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
+                  <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
+
+                  <!-- Campos adicionales dinámicos (solo manga) -->
+                  <p class="mb-1 d-none" id="detalleTomos"><strong>Tomos:</strong> <span></span></p>
+                  <p class="mb-1 d-none" id="detalleEditorial"><strong>Editorial:</strong> <span></span></p>
+                </div>
 
                 <p id="promedioGeneral" class="mb-0 text-warning small mt-2"></p>
               </div>
@@ -116,7 +122,7 @@ export function DetalleView(item, categoria) {
           <!-- Publicidad lateral -->
           <section class="my-4">
             <div id="ad-right-1" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="min-height:140px;"></div>
-            <div id="ad-right-2" class="card bg-dark border-0 shadow-sm text-center p-0 position-relative overflow-hidden" style="min-height:140px;"></div>
+            <div id="ad-right-2" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="min-height:140px;"></div>
           </section>
         </div>
       </div>
@@ -140,7 +146,7 @@ export function DetalleView(item, categoria) {
       updateNavbarSessionUI();
       initNavbarSearch();
 
-      // Logout desde el navbar (dropdown)
+      // Logout desde el navbar
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         try {
           const { logout } = await import('../controllers/authController.js');
@@ -151,11 +157,12 @@ export function DetalleView(item, categoria) {
       });
 
       // 🔧 Recarga de datos si faltan campos
-      if (!item.director || !item.duracion || !item["año"] || !item.genero) {
+      if (!item["año"] || !item.genero) {
         const snap = await getDoc(doc(db, categoria, item.id));
         if (snap.exists()) item = { id: snap.id, ...snap.data() };
       }
 
+      // Referencias de DOM
       const imgEl = document.getElementById('detalleImg');
       const titEl = document.getElementById('detalleTitulo');
       const dirEl = document.getElementById('detalleDirector');
@@ -166,7 +173,10 @@ export function DetalleView(item, categoria) {
       const descEl = document.getElementById('detalleDescripcion');
       const heroBg = document.getElementById('detalleHeroBg');
       const promedioGeneralEl = document.getElementById('promedioGeneral');
+      const tomosEl = document.getElementById('detalleTomos');
+      const editorialEl = document.getElementById('detalleEditorial');
 
+      // Asignación de datos base
       titEl.textContent = item.titulo || item.title || 'Sin título';
       dirEl.textContent = item.director || 'Desconocido';
       durEl.textContent = item.duracion || 'N/A';
@@ -182,6 +192,18 @@ export function DetalleView(item, categoria) {
         cancionesEl.querySelector('span').textContent = `${item.totalCanciones} canciones`;
       } else {
         cancionesEl.classList.add('d-none');
+      }
+
+      // 📚 Mostrar "Tomos" y "Editorial" solo si es manga
+      if (categoria === 'manga') {
+        if (item.tomos) {
+          tomosEl.classList.remove('d-none');
+          tomosEl.querySelector('span').textContent = item.tomos;
+        }
+        if (item.editorial) {
+          editorialEl.classList.remove('d-none');
+          editorialEl.querySelector('span').textContent = item.editorial;
+        }
       }
 
       // ============================== SIMILARES ==============================

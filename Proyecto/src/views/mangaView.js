@@ -31,20 +31,27 @@ export function MangaView() {
   return {
     html,
     async bind() {
+      // Inicializar navegación y sesión
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
 
+      // Import dinámico del modelo
       const { ContentModel } = await import('../models/contentModel.js');
       let dataRaw = await ContentModel.listManga();
 
+      // Normalización de datos
       const normalize = (arr) =>
         (arr || []).map((x) => {
           const genres = Array.isArray(x.genero)
             ? x.genero
             : (x.genero ? String(x.genero).split(',').map(s => s.trim()) : []);
           const year = x.año ?? x.year ?? '';
-          const meta = [x.autor ?? x.author, year].filter(Boolean).join(' • ');
+          const tomos = x.tomos ? `${x.tomos} tomo${x.tomos > 1 ? 's' : ''}` : '';
+          const editorial = x.editorial ?? '';
+          // autor • año • tomos • editorial
+          const metaParts = [x.autor ?? x.author, year, tomos, editorial].filter(Boolean);
+          const meta = metaParts.join(' • ');
 
           return {
             id: x.id ?? x.slug ?? null,
@@ -60,11 +67,12 @@ export function MangaView() {
 
       let data = normalize(dataRaw);
 
-      // Poblar géneros
+      // Poblar géneros únicos en el filtro
       const gEl = document.getElementById('genre');
       const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
       gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
+      // Función de renderizado de la grilla
       const draw = (arr) =>
         renderCards('#grid', arr, {
           showDescription: false,
@@ -78,7 +86,7 @@ export function MangaView() {
 
       draw(data);
 
-      // Filtros
+      // Filtros de género, año y texto
       const yEl = document.getElementById('year');
       const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
@@ -97,14 +105,16 @@ export function MangaView() {
         draw(filtered);
       };
 
+      // Listeners de los filtros
       gEl?.addEventListener('change', () => applyFilters());
       yEl?.addEventListener('change', () => applyFilters());
 
-      // 🔹 Escucha el buscador global
+      // Escucha del buscador global (navbar)
       window.addEventListener("globalSearch", (e) => {
         applyFilters(e.detail.query);
       });
 
+      // Logout desde el botón del navbar
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
