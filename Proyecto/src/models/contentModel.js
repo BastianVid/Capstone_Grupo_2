@@ -77,6 +77,7 @@ export const ContentModel = {
   listMusica:      () => readCollection("musica"),
   listLibros:      () => readCollection("libros"),
   listVideojuegos: () => readCollection("videojuegos"),
+  listManga: () => readCollection("manga"),
 
   // Items individuales
   getPelicula: (id) => readItem("peliculas", id),

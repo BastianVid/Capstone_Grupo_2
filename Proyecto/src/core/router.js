@@ -13,7 +13,8 @@ import { VideojuegosView } from '../views/videojuegosView.js';
 import { LibrosView } from '../views/librosView.js';
 import { DetalleView } from '../views/detalleView.js';
 import { PerfilView } from '../views/perfilView.js';
-import { BuscarView } from '../views/buscarView.js'; // 🔍 NUEVA VISTA
+import { BuscarView } from '../views/buscarView.js'; 
+import { MangaView } from '../views/mangaView.js';
 
 // (Opcional) Vista 404
 const NotFoundView = () => ({
@@ -41,7 +42,8 @@ const routes = {
   '/registro':    { view: RegistroView,    secure: false, title: 'Registro • CulturaX' },
   '/detalle':     { view: DetalleView,     secure: false, title: 'Detalle • CulturaX' },
   '/perfil':      { view: PerfilView,      secure: true,  title: 'Perfil • CulturaX' },
-  '/buscar':      { view: BuscarView,      secure: false, title: 'Buscar • CulturaX' }, // 👈 agregado
+  '/buscar':      { view: BuscarView,      secure: false, title: 'Buscar • CulturaX' },
+  '/manga': { view: MangaView, secure: false, title: 'Manga • CulturaX' },
   '/404':         { view: NotFoundView,    secure: false, title: 'No encontrado • CulturaX' },
 };
 

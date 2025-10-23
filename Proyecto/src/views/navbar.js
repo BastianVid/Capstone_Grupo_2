@@ -21,6 +21,7 @@ export function Navbar() {
           <li class="nav-item"><a href="#/musica"    class="nav-link text-white-50 px-2">Música</a></li>
           <li class="nav-item"><a href="#/videojuegos" class="nav-link text-white-50 px-2">Videojuegos</a></li>
           <li class="nav-item"><a href="#/libros"      class="nav-link text-white-50 px-2">Libros</a></li>
+          <li class="nav-item"><a href="#/manga"      class="nav-link text-white-50 px-2">Mangas</a></li>
         </ul>
 
         <!-- Search -->
