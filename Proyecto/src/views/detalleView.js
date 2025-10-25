@@ -64,9 +64,9 @@ export function DetalleView(item, categoria) {
             <!-- Derecha: trailer -->
             <div class="col-md-5">
               <div class="ratio ratio-16x9 rounded overflow-hidden shadow-lg border border-secondary border-opacity-25">
-                <iframe class="trailer"
-                  src="https://www.youtube.com/embed/5PSNL1qE6VY?autoplay=1&mute=1&controls=1&rel=0&modestbranding=1"
-                  title="Trailer"
+                <iframe id="detalleTrailer"
+                  src=""
+                  title="Tráiler"
                   allow="autoplay; encrypted-media; picture-in-picture"
                   allowfullscreen>
                 </iframe>
@@ -177,8 +177,9 @@ export function DetalleView(item, categoria) {
       const tomosEl = document.getElementById('detalleTomos');
       const editorialEl = document.getElementById('detalleEditorial');
       const temporadasEl = document.getElementById('detalleTemporadas');
+      const trailerEl = document.getElementById('detalleTrailer');
 
-      // Asignación de datos base
+      // ============================== ASIGNACIÓN DE DATOS ==============================
       titEl.textContent = item.titulo || item.title || 'Sin título';
       dirEl.textContent = item.director || 'Desconocido';
       durEl.textContent = item.duracion || 'N/A';
@@ -188,12 +189,18 @@ export function DetalleView(item, categoria) {
       imgEl.src = resolveImagePath(item.img || item.imagen);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
 
+      // 🎬 Tráiler dinámico
+      if (item.trailer) {
+        const embedURL = item.trailer.replace("watch?v=", "embed/");
+        trailerEl.src = `${embedURL}?autoplay=0&mute=0&controls=1&rel=0&modestbranding=1`;
+      } else {
+        trailerEl.src = "";
+      }
+
       // 🎵 Mostrar "totalCanciones" solo si es música
       if (categoria === 'musica' && item.totalCanciones) {
         cancionesEl.classList.remove('d-none');
         cancionesEl.querySelector('span').textContent = `${item.totalCanciones} canciones`;
-      } else {
-        cancionesEl.classList.add('d-none');
       }
 
       // 📚 Mostrar "Tomos" y "Editorial" solo si es manga
