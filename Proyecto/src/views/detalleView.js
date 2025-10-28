@@ -147,7 +147,7 @@ export function DetalleView(item, categoria) {
       updateNavbarSessionUI();
       initNavbarSearch();
 
-      // Logout desde el navbar
+      // Logout
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         try {
           const { logout } = await import('../controllers/authController.js');
@@ -157,13 +157,13 @@ export function DetalleView(item, categoria) {
         }
       });
 
-      // 🔧 Recarga de datos si faltan campos
+      // 🔧 Si faltan campos, los recargamos desde Firestore
       if (!item["año"] || !item.genero) {
         const snap = await getDoc(doc(db, categoria, item.id));
         if (snap.exists()) item = { id: snap.id, ...snap.data() };
       }
 
-      // Referencias de DOM
+      // Referencias DOM
       const imgEl = document.getElementById('detalleImg');
       const titEl = document.getElementById('detalleTitulo');
       const dirEl = document.getElementById('detalleDirector');
@@ -179,7 +179,7 @@ export function DetalleView(item, categoria) {
       const temporadasEl = document.getElementById('detalleTemporadas');
       const trailerEl = document.getElementById('detalleTrailer');
 
-      // ============================== ASIGNACIÓN DE DATOS ==============================
+      // Asignar datos
       titEl.textContent = item.titulo || item.title || 'Sin título';
       dirEl.textContent = item.director || 'Desconocido';
       durEl.textContent = item.duracion || 'N/A';
@@ -189,21 +189,18 @@ export function DetalleView(item, categoria) {
       imgEl.src = resolveImagePath(item.img || item.imagen);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
 
-      // 🎬 Tráiler dinámico
+      // 🎬 Tráiler
       if (item.trailer) {
         const embedURL = item.trailer.replace("watch?v=", "embed/");
         trailerEl.src = `${embedURL}?autoplay=0&mute=0&controls=1&rel=0&modestbranding=1`;
-      } else {
-        trailerEl.src = "";
       }
 
-      // 🎵 Mostrar "totalCanciones" solo si es música
+      // Campos condicionales
       if (categoria === 'musica' && item.totalCanciones) {
         cancionesEl.classList.remove('d-none');
         cancionesEl.querySelector('span').textContent = `${item.totalCanciones} canciones`;
       }
 
-      // 📚 Mostrar "Tomos" y "Editorial" solo si es manga
       if (categoria === 'manga') {
         if (item.tomos) {
           tomosEl.classList.remove('d-none');
@@ -215,7 +212,6 @@ export function DetalleView(item, categoria) {
         }
       }
 
-      // 📺 Mostrar "Temporadas" solo si es serie
       if (categoria === 'series' && item.temporadas) {
         temporadasEl.classList.remove('d-none');
         temporadasEl.querySelector('span').textContent = item.temporadas;
@@ -226,38 +222,80 @@ export function DetalleView(item, categoria) {
         try {
           const rail = document.getElementById('similaresRail');
           rail.innerHTML = `<p class="text-secondary small">Buscando obras similares...</p>`;
-          const generosItem = Array.isArray(item.genero)
-            ? item.genero.map(g => String(g).toLowerCase().trim())
-            : [];
-          if (!generosItem.length) {
-            rail.innerHTML = `<p class="text-secondary small">No hay géneros definidos.</p>`;
+
+          const franquicia = item.franquicia?.toLowerCase()?.trim();
+          if (!franquicia) {
+            rail.innerHTML = `<p class="text-secondary small">No hay franquicia definida para esta obra.</p>`;
             return;
           }
-          const snap = await getDocs(collection(db, categoria));
-          const similares = [];
-          snap.forEach(d => {
-            const data = d.data();
-            const generosData = Array.isArray(data.genero)
-              ? data.genero.map(g => String(g).toLowerCase().trim())
-              : [];
-            if (generosData.some(g => generosItem.includes(g)) && d.id !== item.id)
-              similares.push({ id: d.id, ...data });
-          });
+
+          const { ContentModel } = await import('../models/contentModel.js');
+          const [
+            peliculas, series, anime, musica, videojuegos, libros, manga, documentales
+          ] = await Promise.all([
+            ContentModel.listPeliculas().catch(() => []),
+            ContentModel.listSeries().catch(() => []),
+            ContentModel.listAnime().catch(() => []),
+            ContentModel.listMusica().catch(() => []),
+            ContentModel.listVideojuegos().catch(() => []),
+            ContentModel.listLibros().catch(() => []),
+            ContentModel.listManga().catch(() => []),
+            ContentModel.listDocumentales().catch(() => [])
+          ]);
+
+          const allData = [
+            ...peliculas.map(d => ({ ...d, categoria: "peliculas" })),
+            ...series.map(d => ({ ...d, categoria: "series" })),
+            ...anime.map(d => ({ ...d, categoria: "anime" })),
+            ...musica.map(d => ({ ...d, categoria: "musica" })),
+            ...videojuegos.map(d => ({ ...d, categoria: "videojuegos" })),
+            ...libros.map(d => ({ ...d, categoria: "libros" })),
+            ...manga.map(d => ({ ...d, categoria: "manga" })),
+            ...documentales.map(d => ({ ...d, categoria: "documentales" })),
+          ];
+
+          const similares = allData.filter(d =>
+            d.franquicia?.toLowerCase()?.trim() === franquicia && d.id !== item.id
+          );
+
           if (!similares.length) {
-            rail.innerHTML = `<p class="text-secondary small">No se encontraron obras similares.</p>`;
+            rail.innerHTML = `<p class="text-secondary small">No se encontraron obras relacionadas en la misma franquicia.</p>`;
             return;
           }
+
           rail.innerHTML = similares.slice(0, 10).map(s => `
-            <div class="sim-card">
-              <a href="#/detalle" class="text-decoration-none text-white"
-                 onclick="sessionStorage.setItem('detalleItem', JSON.stringify(${JSON.stringify(s)}));
-                          sessionStorage.setItem('detalleCategoria', '${categoria}')">
-                <img src="${resolveImagePath(s.imagen || s.img)}" alt="${s.titulo || s.title}">
-                <div class="sim-title">${s.titulo || s.title}</div>
-              </a>
+            <div class="sim-card bg-dark rounded overflow-hidden shadow-sm border border-secondary border-opacity-25" 
+                 data-id="${s.id}" data-categoria="${s.categoria}" 
+                 style="min-width:140px; cursor:pointer;">
+              <img src="${resolveImagePath(s.imagen || s.img)}" 
+                   alt="${s.titulo || s.title}" 
+                   class="w-100" 
+                   style="height:200px; object-fit:cover;">
+              <div class="p-2">
+                <div class="sim-title small text-white fw-semibold">${s.titulo || s.title}</div>
+                <div class="text-secondary small">${s.categoria}</div>
+              </div>
             </div>
           `).join('');
-        } catch (e) { console.error('Error cargando similares:', e); }
+
+          // 🔹 Click dinámico → redirección
+          rail.querySelectorAll('.sim-card').forEach(card => {
+            card.addEventListener('click', () => {
+              const id = card.dataset.id;
+              const cat = card.dataset.categoria;
+              const itemData = similares.find(x => x.id === id);
+              if (itemData) {
+                sessionStorage.setItem('detalleItem', JSON.stringify(itemData));
+                sessionStorage.setItem('detalleCategoria', cat);
+                location.hash = '#/detalle';
+              }
+            });
+          });
+
+        } catch (e) {
+          console.error('Error cargando similares:', e);
+          document.getElementById('similaresRail').innerHTML = `<p class="text-danger small">Error al cargar obras similares.</p>`;
+        }
       };
       await renderSimilares();
 
