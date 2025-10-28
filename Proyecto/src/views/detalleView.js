@@ -7,6 +7,7 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/f
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { guardarReseña, obtenerReseñaUsuario, eliminarReseña } from '../controllers/reseñasController.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
+import { navigate } from '../core/router.js';
 
 // ============================== DETALLE VIEW ==============================
 export function DetalleView(item, categoria) {
@@ -50,8 +51,6 @@ export function DetalleView(item, categoria) {
                   <p class="mb-1 d-none" id="detalleCanciones"><strong>Total de canciones:</strong> <span></span></p>
                   <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
                   <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
-
-                  <!-- Campos adicionales dinámicos -->
                   <p class="mb-1 d-none" id="detalleTomos"><strong>Tomos:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleEditorial"><strong>Editorial:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleTemporadas"><strong>Temporadas:</strong> <span></span></p>
@@ -149,15 +148,11 @@ export function DetalleView(item, categoria) {
 
       // Logout
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-        try {
-          const { logout } = await import('../controllers/authController.js');
-          await logout();
-        } catch (e) {
-          console.warn('Error al cerrar sesión:', e);
-        }
+        const { logout } = await import('../controllers/authController.js');
+        await logout();
       });
 
-      // 🔧 Si faltan campos, los recargamos desde Firestore
+      // Cargar datos faltantes si es necesario
       if (!item["año"] || !item.genero) {
         const snap = await getDoc(doc(db, categoria, item.id));
         if (snap.exists()) item = { id: snap.id, ...snap.data() };
@@ -179,14 +174,14 @@ export function DetalleView(item, categoria) {
       const temporadasEl = document.getElementById('detalleTemporadas');
       const trailerEl = document.getElementById('detalleTrailer');
 
-      // Asignar datos
-      titEl.textContent = item.titulo || item.title || 'Sin título';
+      // ============================== ASIGNACIÓN DE DATOS ==============================
+      titEl.textContent = item.titulo || 'Sin título';
       dirEl.textContent = item.director || 'Desconocido';
       durEl.textContent = item.duracion || 'N/A';
-      anioEl.textContent = item["año"] || item.year || 'N/A';
+      anioEl.textContent = item["año"] || 'N/A';
       genEl.textContent = Array.isArray(item.genero) ? item.genero.join(', ') : (item.genero || '');
-      descEl.textContent = item.descripcion || item.description || '';
-      imgEl.src = resolveImagePath(item.img || item.imagen);
+      descEl.textContent = item.descripcion || '';
+      imgEl.src = resolveImagePath(item.imagen || item.img);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
 
       // 🎬 Tráiler
@@ -200,7 +195,6 @@ export function DetalleView(item, categoria) {
         cancionesEl.classList.remove('d-none');
         cancionesEl.querySelector('span').textContent = `${item.totalCanciones} canciones`;
       }
-
       if (categoria === 'manga') {
         if (item.tomos) {
           tomosEl.classList.remove('d-none');
@@ -211,7 +205,6 @@ export function DetalleView(item, categoria) {
           editorialEl.querySelector('span').textContent = item.editorial;
         }
       }
-
       if (categoria === 'series' && item.temporadas) {
         temporadasEl.classList.remove('d-none');
         temporadasEl.querySelector('span').textContent = item.temporadas;
@@ -219,10 +212,10 @@ export function DetalleView(item, categoria) {
 
       // ============================== SIMILARES ==============================
       const renderSimilares = async () => {
-        try {
-          const rail = document.getElementById('similaresRail');
-          rail.innerHTML = `<p class="text-secondary small">Buscando obras similares...</p>`;
+        const rail = document.getElementById('similaresRail');
+        rail.innerHTML = `<p class="text-secondary small">Buscando obras similares...</p>`;
 
+        try {
           const franquicia = item.franquicia?.toLowerCase()?.trim();
           if (!franquicia) {
             rail.innerHTML = `<p class="text-secondary small">No hay franquicia definida para esta obra.</p>`;
@@ -230,71 +223,54 @@ export function DetalleView(item, categoria) {
           }
 
           const { ContentModel } = await import('../models/contentModel.js');
-          const [
-            peliculas, series, anime, musica, videojuegos, libros, manga, documentales
-          ] = await Promise.all([
-            ContentModel.listPeliculas().catch(() => []),
-            ContentModel.listSeries().catch(() => []),
-            ContentModel.listAnime().catch(() => []),
-            ContentModel.listMusica().catch(() => []),
-            ContentModel.listVideojuegos().catch(() => []),
-            ContentModel.listLibros().catch(() => []),
-            ContentModel.listManga().catch(() => []),
-            ContentModel.listDocumentales().catch(() => [])
-          ]);
-
-          const allData = [
-            ...peliculas.map(d => ({ ...d, categoria: "peliculas" })),
-            ...series.map(d => ({ ...d, categoria: "series" })),
-            ...anime.map(d => ({ ...d, categoria: "anime" })),
-            ...musica.map(d => ({ ...d, categoria: "musica" })),
-            ...videojuegos.map(d => ({ ...d, categoria: "videojuegos" })),
-            ...libros.map(d => ({ ...d, categoria: "libros" })),
-            ...manga.map(d => ({ ...d, categoria: "manga" })),
-            ...documentales.map(d => ({ ...d, categoria: "documentales" })),
+          const colecciones = [
+            "Peliculas", "Series", "Anime", "Musica", "Videojuegos", "Libros", "Manga", "Documentales"
           ];
+          const promesas = colecciones.map(c =>
+            ContentModel[`list${c}`]().catch(() => [])
+          );
+          const data = (await Promise.all(promesas)).flatMap((arr, i) =>
+            arr.map(d => ({ ...d, categoria: colecciones[i].toLowerCase() }))
+          );
 
-          const similares = allData.filter(d =>
-            d.franquicia?.toLowerCase()?.trim() === franquicia && d.id !== item.id
+          const similares = data.filter(
+            d => d.franquicia?.toLowerCase()?.trim() === franquicia && d.id !== item.id
           );
 
           if (!similares.length) {
-            rail.innerHTML = `<p class="text-secondary small">No se encontraron obras relacionadas en la misma franquicia.</p>`;
+            rail.innerHTML = `<p class="text-secondary small">No se encontraron obras relacionadas.</p>`;
             return;
           }
 
-          rail.innerHTML = similares.slice(0, 10).map(s => `
-            <div class="sim-card bg-dark rounded overflow-hidden shadow-sm border border-secondary border-opacity-25" 
-                 data-id="${s.id}" data-categoria="${s.categoria}" 
-                 style="min-width:140px; cursor:pointer;">
-              <img src="${resolveImagePath(s.imagen || s.img)}" 
-                   alt="${s.titulo || s.title}" 
-                   class="w-100" 
-                   style="height:200px; object-fit:cover;">
-              <div class="p-2">
-                <div class="sim-title small text-white fw-semibold">${s.titulo || s.title}</div>
-                <div class="text-secondary small">${s.categoria}</div>
+          rail.innerHTML = similares
+            .map(s => `
+              <div class="sim-card bg-dark rounded overflow-hidden shadow-sm border border-secondary border-opacity-25" 
+                  data-id="${s.id}" data-categoria="${s.categoria}" 
+                  style="min-width:140px; cursor:pointer;">
+                <img src="${resolveImagePath(s.imagen || s.img)}" 
+                    alt="${s.titulo}" class="w-100" style="height:200px; object-fit:cover;">
+                <div class="p-2">
+                  <div class="small text-white fw-semibold">${s.titulo}</div>
+                  <div class="text-secondary small">${s.categoria}</div>
+                </div>
               </div>
-            </div>
-          `).join('');
+            `).join('');
 
-          // 🔹 Click dinámico → redirección
+          // 🔹 Click funcional con navigate()
           rail.querySelectorAll('.sim-card').forEach(card => {
             card.addEventListener('click', () => {
               const id = card.dataset.id;
               const cat = card.dataset.categoria;
-              const itemData = similares.find(x => x.id === id);
-              if (itemData) {
-                sessionStorage.setItem('detalleItem', JSON.stringify(itemData));
-                sessionStorage.setItem('detalleCategoria', cat);
-                location.hash = '#/detalle';
-              }
+              const selected = similares.find(x => x.id === id);
+              if (!selected) return;
+              sessionStorage.setItem('detalleItem', JSON.stringify(selected));
+              sessionStorage.setItem('detalleCategoria', cat);
+              navigate('/detalle'); // Usa el router sin recargar
             });
           });
-
-        } catch (e) {
-          console.error('Error cargando similares:', e);
-          document.getElementById('similaresRail').innerHTML = `<p class="text-danger small">Error al cargar obras similares.</p>`;
+        } catch (err) {
+          console.error('Error cargando similares:', err);
+          rail.innerHTML = `<p class="text-danger small">Error al cargar similares.</p>`;
         }
       };
       await renderSimilares();
@@ -302,22 +278,12 @@ export function DetalleView(item, categoria) {
       // ============================== PROMEDIO Y RESEÑAS ==============================
       const renderPromedio = async () => {
         const snap = await getDoc(doc(db, categoria, item.id));
-        if (!snap.exists()) {
-          promedioGeneralEl.textContent = '★ Sin calificaciones aún';
-          return;
-        }
-        const data = snap.data();
+        const data = snap.data() || {};
         const p = data.calificacionPromedio || 0;
         const v = data.totalVotos || 0;
-        if (!v) {
-          promedioGeneralEl.textContent = '★ Sin calificaciones aún';
-          return;
-        }
-        const est = Math.round(p);
-        promedioGeneralEl.innerHTML = `
-          <span class="text-warning">${'★'.repeat(est)}${'☆'.repeat(5 - est)}</span>
-          <span class="text-light fw-semibold ms-2">${p.toFixed(1)} / 5</span>
-          <span class="text-secondary">(${v} votos)</span>`;
+        promedioGeneralEl.textContent = v
+          ? `★ ${p.toFixed(1)} / 5 (${v} votos)`
+          : '★ Sin calificaciones aún';
       };
 
       // ============================== RESEÑAS ==============================
