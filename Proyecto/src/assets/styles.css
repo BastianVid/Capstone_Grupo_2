@@ -23,6 +23,7 @@
    [20] Animaciones / efectos
    [21] Publicidad (ajustes de cobertura)
    [22] DetalleView – vista de detalle de obras
+   [23] PerfilView 
    ========================================================= */
 
 /* 
@@ -907,3 +908,71 @@ footer {
   background: rgba(255,255,255,0.05);
 }
 
+/* 
+   [23] DetalleView – vista de detalle de obras
+ */
+
+/* === PERFIL PRO === */
+.perfil-hero-pro {
+  position: relative;
+  height: 280px;
+  background: linear-gradient(135deg, #0a1124, #111a33);
+  border-radius: 0 0 20px 20px;
+  overflow: hidden;
+}
+.perfil-cover {
+  position: absolute;
+  inset: 0;
+  background: url('src/assets/img/cover-dark.jpg') center/cover no-repeat;
+  filter: brightness(0.4) blur(2px);
+}
+.perfil-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 140px;
+}
+.perfil-avatar-pro {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 25px rgba(56,189,248,.3);
+}
+.perfil-nombre-pro {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.perfil-email-pro {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.stat-card {
+  background: linear-gradient(145deg, #121826, #0e1422);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 15px rgba(56,189,248,0.2);
+}
+.stat-card i {
+  font-size: 1.8rem;
+  color: var(--accent);
+}
+.nav-pills .nav-link.active {
+  background-color: var(--accent);
+  color: #0a0f1c !important;
+  font-weight: 600;
+}
+.nav-pills .nav-link {
+  color: var(--text);
+}

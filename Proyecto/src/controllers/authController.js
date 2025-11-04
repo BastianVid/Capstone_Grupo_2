@@ -47,12 +47,10 @@ export async function loginGoogle() {
   }
 }
 
-// (Facebook eliminado)
-
 // Cerrar sesión
 export async function logout() {
   await AuthModel.logout();
-  location.hash = '#/login'; // redirige al login
+  location.hash = '#/'; // redirige al login
 }
 
 // Restablecer contraseña por email
