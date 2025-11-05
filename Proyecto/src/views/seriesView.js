@@ -26,6 +26,13 @@ export function SeriesView() {
       </div>
 
       <div id="grid"></div>
+
+      <!-- 🔹 Controles de paginación -->
+      <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+        <button id="prevPage" class="btn btn-outline-light btn-sm" disabled>Anterior</button>
+        <span id="pageInfo" class="text-light small"></span>
+        <button id="nextPage" class="btn btn-outline-light btn-sm" disabled>Siguiente</button>
+      </div>
     </div>
     ${Footer()}
   `;
@@ -33,39 +40,62 @@ export function SeriesView() {
   return {
     html,
     async bind() {
-      // 🔹 Inicialización de sesión y buscador global
+      // === Inicialización ===
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
-      initNavbarSearch(); // <<--- se activa el buscador global del navbar aquí
+      initNavbarSearch();
 
-      const { ContentModel } = await import('../models/contentModel.js');
-      let raw = await ContentModel.listSeries();
+      // === Cargar datos con caché para reducir lecturas ===
+      let data;
+      const cached = sessionStorage.getItem('seriesData');
 
-      const normalize = (arr) =>
-        (arr || []).map((x) => {
-          const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
-          const year = x.año ?? x.year ?? '';
-          const director = x.director ?? '';
-          return {
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? null,
-            title: x.titulo ?? x.title ?? 'Sin título',
-            img: resolveImagePath(x.imagen ?? x.img ?? 'stranger-things.jpg'),
-            tag: genres[0] ?? 'Serie',
-            genres,
-            subtitle: [director, year].filter(Boolean).join(' • '),
-            year: year ? String(year) : '',
-            description: x.descripcion ?? x.description ?? '',
-          };
-        });
+      if (cached) {
+        data = JSON.parse(cached);
+      } else {
+        const { ContentModel } = await import('../models/contentModel.js');
+        const rawData = await ContentModel.listSeries();
 
-      let data = normalize(raw);
+        const normalize = (arr) =>
+          (arr || []).map((x) => {
+            const genres = Array.isArray(x.genero)
+              ? x.genero
+              : (x.genre ? [x.genre] : []);
+            const year = x.año ?? x.year ?? '';
+            const director = x.director ?? '';
+            return {
+              id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? null,
+              title: x.titulo ?? x.title ?? 'Sin título',
+              img: resolveImagePath(x.imagen ?? x.img ?? 'stranger-things.jpg'),
+              tag: genres[0] ?? 'Serie',
+              genres,
+              subtitle: [director, year].filter(Boolean).join(' • '),
+              year: year ? String(year) : '',
+              description: x.descripcion ?? x.description ?? '',
+            };
+          });
 
-      // Poblar géneros dinámicamente
-      const gEl = document.getElementById('genre');
-      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
-      gEl.innerHTML =
-        `<option value="">Género</option>` +
-        uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+        data = normalize(rawData);
+        sessionStorage.setItem('seriesData', JSON.stringify(data));
+      }
+
+      // === Paginación ===
+      let currentPage = 1;
+      const itemsPerPage = 20;
+      let filteredData = [...data];
+      const totalPages = () => Math.ceil(filteredData.length / itemsPerPage);
+
+      const getPaginatedData = () => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return filteredData.slice(start, end);
+      };
+
+      const updatePaginationControls = () => {
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages();
+        document.getElementById('pageInfo').textContent =
+          `Página ${currentPage} de ${totalPages() || 1}`;
+      };
 
       const draw = (arr) =>
         renderCards('#grid', arr, {
@@ -78,40 +108,69 @@ export function SeriesView() {
           },
         });
 
-      draw(data);
+      const renderPage = () => {
+        draw(getPaginatedData());
+        updatePaginationControls();
+      };
 
-      // Función de filtros
+      // === Filtros ===
+      const gEl = document.getElementById('genre');
       const yEl = document.getElementById('year');
+      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
+      gEl.innerHTML =
+        `<option value="">Género</option>` +
+        uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+
       const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
-        const filtered = data.filter((x) => {
+        filteredData = data.filter((x) => {
           const textoOk =
             !q ||
             [x.title, x.subtitle, x.description, ...(x.genres || [])]
               .some((f) => String(f).toLowerCase().includes(q));
-
-          const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
+          const generoOk =
+            !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
           const yearOk = !y || x.year === y;
 
           return textoOk && generoOk && yearOk;
         });
 
-        draw(filtered);
+        currentPage = 1;
+        renderPage();
       };
 
       gEl?.addEventListener('change', () => applyFilters());
       yEl?.addEventListener('change', () => applyFilters());
 
-      // 🔹 escuchar buscador global del navbar
+      // 🔹 Escuchar el buscador global del navbar
       window.addEventListener("globalSearch", (e) => {
         const q = e.detail.query;
         applyFilters(q);
       });
 
-      // Logout
+      // 🔹 Controles de paginación
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderPage();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage < totalPages()) {
+          currentPage++;
+          renderPage();
+        }
+      });
+
+      // Render inicial
+      renderPage();
+
+      // === Logout ===
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        sessionStorage.removeItem('seriesData');
         const { logout } = await import('../controllers/authController.js');
         logout();
       });

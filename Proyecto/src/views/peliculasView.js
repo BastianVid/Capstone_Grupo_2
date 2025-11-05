@@ -26,6 +26,13 @@ export function PeliculasView() {
       </div>
 
       <div id="grid"></div>
+
+      <!-- 🔹 Controles de paginación -->
+      <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+        <button id="prevPage" class="btn btn-outline-light btn-sm" disabled>Anterior</button>
+        <span id="pageInfo" class="text-light small"></span>
+        <button id="nextPage" class="btn btn-outline-light btn-sm" disabled>Siguiente</button>
+      </div>
     </div>
     ${Footer()}
   `;
@@ -33,45 +40,67 @@ export function PeliculasView() {
   return {
     html,
     async bind() {
-      // 🔹 Inicialización de sesión y buscador global
+      // === Inicialización de sesión y buscador global ===
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
-      initNavbarSearch(); // <<--- se activa el buscador del navbar aquí
+      initNavbarSearch();
 
-      const { ContentModel } = await import('../models/contentModel.js');
-      let data = await ContentModel.listPeliculas();
+      // === Cargar datos con caching para reducir lecturas ===
+      let data;
+      const cached = sessionStorage.getItem('peliculasData');
 
-      // Normaliza los datos a un formato estándar
-      const normalize = (arr) =>
-        (arr || []).map((x) => {
-          const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
-          const year = x.año ?? x.year ?? '';
-          const director = x.director ?? '';
-          const imgCandidate = x.imagen ?? x.img ?? x.image ?? 'inception.jpg';
-          const img = resolveImagePath(imgCandidate);
+      if (cached) {
+        data = JSON.parse(cached);
+      } else {
+        const { ContentModel } = await import('../models/contentModel.js');
+        const rawData = await ContentModel.listPeliculas();
 
-          return {
-            id: x.id,
-            title: x.titulo ?? x.title ?? 'Sin título',
-            img,
-            tag: genres[0] ?? 'Película',
-            genres,
-            subtitle: [director, year].filter(Boolean).join(' • '),
-            year: year ? String(year) : '',
-            description: x.descripcion ?? x.description ?? '',
-          };
-        });
+        const normalize = (arr) =>
+          (arr || []).map((x) => {
+            const genres = Array.isArray(x.genero)
+              ? x.genero
+              : (x.genre ? [x.genre] : []);
+            const year = x.año ?? x.year ?? '';
+            const director = x.director ?? '';
+            const imgCandidate =
+              x.imagen ?? x.img ?? x.image ?? 'inception.jpg';
+            const img = resolveImagePath(imgCandidate);
 
-      data = normalize(data);
+            return {
+              id: x.id,
+              title: x.titulo ?? x.title ?? 'Sin título',
+              img,
+              tag: genres[0] ?? 'Película',
+              genres,
+              subtitle: [director, year].filter(Boolean).join(' • '),
+              year: year ? String(year) : '',
+              description: x.descripcion ?? x.description ?? '',
+            };
+          });
 
-      // Poblar géneros en el <select>
-      const gEl = document.getElementById('genre');
-      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
-      gEl.innerHTML =
-        `<option value="">Género</option>` +
-        uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+        data = normalize(rawData);
+        sessionStorage.setItem('peliculasData', JSON.stringify(data));
+      }
 
-      // Render inicial de tarjetas
+      // === Paginación ===
+      let currentPage = 1;
+      const itemsPerPage = 20;
+      let filteredData = [...data]; // dataset actual filtrado
+      const totalPages = () => Math.ceil(filteredData.length / itemsPerPage);
+
+      const getPaginatedData = () => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return filteredData.slice(start, end);
+      };
+
+      const updatePaginationControls = () => {
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages();
+        document.getElementById('pageInfo').textContent =
+          `Página ${currentPage} de ${totalPages() || 1}`;
+      };
+
       const draw = (arr) =>
         renderCards('#grid', arr, {
           showDescription: true,
@@ -83,44 +112,67 @@ export function PeliculasView() {
           },
         });
 
-      draw(data);
+      // === Render inicial ===
+      const renderPage = () => {
+        draw(getPaginatedData());
+        updatePaginationControls();
+      };
 
-      // Filtros locales
+      // === Filtros ===
+      const gEl = document.getElementById('genre');
       const yEl = document.getElementById('year');
+      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
+      gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
       const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
-        const filtered = data.filter((x) => {
+        filteredData = data.filter((x) => {
           const hayTexto =
             !q ||
             [x.title, x.subtitle, x.description, ...(x.genres || [])]
               .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
-
-          const hayGenero =
-            !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
-
+          const hayGenero = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
           const hayAnio = !y || x.year === y;
-
           return hayTexto && hayGenero && hayAnio;
         });
 
-        draw(filtered);
+        currentPage = 1;
+        renderPage();
       };
 
       gEl?.addEventListener('change', () => applyFilters());
       yEl?.addEventListener('change', () => applyFilters());
 
-      // 🔹 Escuchar el buscador global del Navbar
+      // 🔹 Escuchar buscador global del navbar
       window.addEventListener("globalSearch", (e) => {
         const q = e.detail.query;
         applyFilters(q);
       });
 
-      // Logout
+      // 🔹 Controles de paginación
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderPage();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage < totalPages()) {
+          currentPage++;
+          renderPage();
+        }
+      });
+
+      // Render inicial
+      renderPage();
+
+      // === Logout ===
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        sessionStorage.removeItem('peliculasData');
         const { logout } = await import('../controllers/authController.js');
         logout();
       });

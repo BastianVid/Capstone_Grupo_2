@@ -1,3 +1,4 @@
+// src/views/librosView.js
 import { Navbar, initNavbarSearch } from './navbar.js';
 import { renderCards } from './shared/renderCards.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
@@ -18,12 +19,20 @@ export function LibrosView() {
           <select id="year" class="form-select form-select-sm w-auto">
             <option value="">Año</option>
             ${Array.from({ length: 60 }, (_, i) => new Date().getFullYear() - i)
-              .map((y) => `<option>${y}</option>`).join('')}
+              .map((y) => `<option>${y}</option>`)
+              .join('')}
           </select>
         </div>
       </div>
 
       <div id="grid"></div>
+
+      <!-- 🔹 Controles de paginación -->
+      <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+        <button id="prevPage" class="btn btn-outline-light btn-sm" disabled>Anterior</button>
+        <span id="pageInfo" class="text-light small"></span>
+        <button id="nextPage" class="btn btn-outline-light btn-sm" disabled>Siguiente</button>
+      </div>
     </div>
     ${Footer()}
   `;
@@ -31,39 +40,63 @@ export function LibrosView() {
   return {
     html,
     async bind() {
+      // === Inicialización ===
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
 
-      const { ContentModel } = await import('../models/contentModel.js');
-      let dataRaw = await ContentModel.listLibros();
+      // === Cargar datos con caché para reducir lecturas ===
+      let data;
+      const cached = sessionStorage.getItem('librosData');
 
-      const normalize = (arr) =>
-        (arr || []).map((x) => {
-          const genres = Array.isArray(x.genero)
-            ? x.genero
-            : (x.genero ? String(x.genero).split(',').map(s => s.trim()) : []);
-          const year = x.año ?? x.year ?? '';
-          const meta = [x.autor ?? x.author, year].filter(Boolean).join(' • ');
+      if (cached) {
+        data = JSON.parse(cached);
+      } else {
+        const { ContentModel } = await import('../models/contentModel.js');
+        const rawData = await ContentModel.listLibros();
 
-          return {
-            id: x.id ?? x.slug ?? null,
-            title: x.titulo ?? x.title ?? 'Sin título',
-            img: resolveImagePath(x.imagen ?? x.img ?? 'placeholder.jpg'),
-            tag: genres[0] ?? 'Libro',
-            genres,
-            subtitle: meta,
-            year: year ? String(year) : '',
-            description: x.descripcion ?? x.description ?? '',
-          };
-        });
+        const normalize = (arr) =>
+          (arr || []).map((x) => {
+            const genres = Array.isArray(x.genero)
+              ? x.genero
+              : (x.genero ? String(x.genero).split(',').map(s => s.trim()) : []);
+            const year = x.año ?? x.year ?? '';
+            const meta = [x.autor ?? x.author, year].filter(Boolean).join(' • ');
 
-      let data = normalize(dataRaw);
+            return {
+              id: x.id ?? x.slug ?? null,
+              title: x.titulo ?? x.title ?? 'Sin título',
+              img: resolveImagePath(x.imagen ?? x.img ?? 'placeholder.jpg'),
+              tag: genres[0] ?? 'Libro',
+              genres,
+              subtitle: meta,
+              year: year ? String(year) : '',
+              description: x.descripcion ?? x.description ?? '',
+            };
+          });
 
-      // Poblar géneros
-      const gEl = document.getElementById('genre');
-      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
-      gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+        data = normalize(rawData);
+        sessionStorage.setItem('librosData', JSON.stringify(data));
+      }
+
+      // === Paginación ===
+      let currentPage = 1;
+      const itemsPerPage = 20;
+      let filteredData = [...data];
+      const totalPages = () => Math.ceil(filteredData.length / itemsPerPage);
+
+      const getPaginatedData = () => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return filteredData.slice(start, end);
+      };
+
+      const updatePaginationControls = () => {
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages();
+        document.getElementById('pageInfo').textContent =
+          `Página ${currentPage} de ${totalPages() || 1}`;
+      };
 
       const draw = (arr) =>
         renderCards('#grid', arr, {
@@ -76,17 +109,24 @@ export function LibrosView() {
           },
         });
 
-      draw(data);
+      const renderPage = () => {
+        draw(getPaginatedData());
+        updatePaginationControls();
+      };
 
-      // Filtros
+      // === Filtros ===
+      const gEl = document.getElementById('genre');
       const yEl = document.getElementById('year');
+      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
+      gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+
       const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
-        const filtered = data.filter((x) => {
+        filteredData = data.filter((x) => {
           const textoOk = !q ||
-            [x.title, x.subtitle, ...(x.genres || [])]
+            [x.title, x.subtitle, x.description, ...(x.genres || [])]
               .some((f) => String(f).toLowerCase().includes(q));
           const generoOk = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
           const yearOk = !y || x.year === y;
@@ -94,18 +134,40 @@ export function LibrosView() {
           return textoOk && generoOk && yearOk;
         });
 
-        draw(filtered);
+        currentPage = 1;
+        renderPage();
       };
 
       gEl?.addEventListener('change', () => applyFilters());
       yEl?.addEventListener('change', () => applyFilters());
 
-      // 🔹 Escucha el buscador global
+      // 🔹 Búsqueda global
       window.addEventListener("globalSearch", (e) => {
-        applyFilters(e.detail.query);
+        const q = e.detail.query;
+        applyFilters(q);
       });
 
+      // 🔹 Paginación
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderPage();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage < totalPages()) {
+          currentPage++;
+          renderPage();
+        }
+      });
+
+      // Render inicial
+      renderPage();
+
+      // === Logout ===
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        sessionStorage.removeItem('librosData');
         const { logout } = await import('../controllers/authController.js');
         logout();
       });
