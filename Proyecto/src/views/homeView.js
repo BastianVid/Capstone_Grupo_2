@@ -11,11 +11,11 @@ export function HomeView() {
   const html = `
     ${Navbar()}
 
-    <!-- BLOQUE SUPERIOR: Sidebar (izq) + Carrusel (der) -->
+    <!-- BLOQUE SUPERIOR -->
     <div class="container mt-3">
       <div class="row g-3 align-items-start">
 
-        <!-- Izquierda: Publicidad + Próximamente -->
+        <!-- Izquierda -->
         <aside class="col-lg-4 col-xl-3">
           <div id="ad-superior" class="card bg-dark border-0 shadow-sm mb-3 text-center p-2 position-relative overflow-hidden" style="min-height:250px;">
             <img src="./src/assets/img/ad.jpg" class="ad-billboard fade-rotate" alt="Publicidad" style="max-height:250px;object-fit:cover;width:100%;">
@@ -30,7 +30,7 @@ export function HomeView() {
           </div>
         </aside>
 
-        <!-- Derecha: Carrusel -->
+        <!-- Derecha -->
         <div class="col-lg-8 col-xl-9">
           <div id="hero" class="carousel slide cx-hero position-relative shadow-sm" data-bs-ride="carousel" data-bs-interval="5000">
             <div class="carousel-inner h-100" id="hero-slides"></div>
@@ -81,13 +81,13 @@ export function HomeView() {
 
     <section class="container my-4 mb-5">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2 class="h5 mb-0">Lanzamientos musicales</h2>
+        <h2 class="h5 mb-0">Lo más escuchado</h2>
         <a href="#/musica" class="btn btn-link btn-sm">Ver todo</a>
       </div>
       <div id="rail-musica"></div>
     </section>
 
-    <!-- PUBLICIDAD INFERIOR DOBLE ROTATIVA -->
+    <!-- PUBLICIDAD INFERIOR -->
     <section class="container my-5">
       <div class="row g-3">
         <div class="col-md-6">
@@ -99,13 +99,13 @@ export function HomeView() {
       </div>
     </section>
 
-    ${Footer()} 
+    ${Footer()}
   `;
 
   return {
     html,
     async bind() {
-      // Navbar (sesión + buscador)
+      // === Navbar y sesión ===
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
@@ -118,28 +118,47 @@ export function HomeView() {
         ContentModel.listMusica(),
       ]);
 
-      // --- Normalización ---
+      // === Normalización ===
       const norm = (x, kind, defImg, defTag) => ({
         id: x.id ?? null,
         title: x.titulo ?? x.title ?? 'Sin título',
         img: resolveImagePath(x.imagen ?? x.img ?? defImg),
         tag: Array.isArray(x.genero) ? x.genero[0] : (x.genero ?? x.genre ?? defTag),
         description: x.descripcion ?? x.description ?? '',
+        rating: x.calificacionPromedio ?? x.rating ?? 0,
         kind,
       });
-      const pelis  = (pelisRaw  || []).map(x => norm(x, 'peliculas', 'inception.jpg', 'Película'));
+
+      const pelis = (pelisRaw || []).map(x => norm(x, 'peliculas', 'inception.jpg', 'Película'));
       const series = (seriesRaw || []).map(x => norm(x, 'series', 'stranger-things.jpg', 'Serie'));
-      const anime  = (animeRaw  || []).map(x => norm(x, 'anime', 'naruto.jpg', 'Anime'));
+      const anime = (animeRaw || []).map(x => norm(x, 'anime', 'naruto.jpg', 'Anime'));
       const musica = (musicaRaw || []).map(x => norm(x, 'musica', 'avatar.jpg', 'Música'));
 
-      // --- HERO ---
-      const picks = [...pelis.slice(0, 3), ...series.slice(0, 2)];
-      const defaults = [
-        { img: 'avengers.jpg',  title: 'Avengers: Endgame', tag: 'Acción',          description: 'Los héroes del universo se unen...' },
-        { img: 'inception.jpg', title: 'Inception',         tag: 'Ciencia Ficción', description: 'Sueños dentro de sueños.' },
-        { img: 'avatar.jpg',    title: 'Avatar',            tag: 'Ciencia Ficción', description: 'Aventura épica en Pandora.' },
-      ];
-      const slides = (picks.length ? picks : defaults).map((s, i) => `
+      // === Top dinámico y seguro ===
+      const getTopRated = (arr) => {
+        const rated = arr.filter((x) => x.rating && x.rating > 0);
+        if (rated.length > 0) return rated.sort((a, b) => b.rating - a.rating).slice(0, 10);
+        // fallback: mostrar primeros registros si no hay calificados
+        return arr.slice(0, 10);
+      };
+
+      const topPelis = getTopRated(pelis);
+      const topSeries = getTopRated(series);
+      const topAnime = getTopRated(anime);
+      const topMusica = getTopRated(musica);
+
+      // === Destacados aleatorios (si no hay rating, usa mezcla básica)
+      const shuffle = (arr) => arr.sort(() => Math.random() - 0.5);
+      const destacados = shuffle([
+        ...topPelis.slice(0, 3),
+        ...topSeries.slice(0, 3),
+        ...topAnime.slice(0, 3),
+        ...topMusica.slice(0, 3),
+      ]).slice(0, 10);
+
+      // === HERO ===
+      const heroPicks = [...topPelis.slice(0, 2), ...topSeries.slice(0, 2)];
+      const slides = heroPicks.map((s, i) => `
         <div class="carousel-item ${i === 0 ? 'active' : ''} h-100 position-relative">
           <img src="${resolveImagePath(s.img)}" alt="${s.title}" class="w-100 h-100 img-with-fallback" style="object-fit:cover;">
           <div class="position-absolute start-0 end-0 bottom-0 p-3" style="background:linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,0));">
@@ -152,118 +171,37 @@ export function HomeView() {
       document.getElementById('hero-slides').innerHTML = slides;
       applyImgFallback(document, 'img.img-with-fallback');
 
-      // --- PRÓXIMAMENTE ---
-      const fallbackUpcoming = [
-        { titulo: 'Avengers',           img: 'avengers.jpg',        genero: ['Acción'] },
+      // === Próximamente ===
+      const upcomingFallback = [
+        { titulo: 'Avengers', img: 'avengers.jpg', genero: ['Acción'] },
         { titulo: 'Stranger Things T5', img: 'stranger-things.jpg', genero: ['Ciencia Ficción'] },
-        { titulo: 'Dragon Ball Z',      img: 'dragon-ball-z.jpg',   genero: ['Anime'] },
-        { titulo: 'Chainsaw Man',       img: 'chainsaw-man.jpg',    genero: ['Shonen'] },
-        { titulo: 'Bleach',             img: 'bleach.jpg',          genero: ['Shonen'] },
+        { titulo: 'Dragon Ball Z', img: 'dragon-ball-z.jpg', genero: ['Anime'] },
+        { titulo: 'Chainsaw Man', img: 'chainsaw-man.jpg', genero: ['Shonen'] },
+        { titulo: 'Bleach', img: 'bleach.jpg', genero: ['Shonen'] },
       ];
-      const upcoming = fallbackUpcoming.map(x => ({
-        title: x.titulo,
-        img: resolveImagePath(x.img),
-        tag: x.genero[0],
-      }));
-      const uhost = document.getElementById('upcoming-list');
-      uhost.innerHTML = upcoming.map(u => `
+      document.getElementById('upcoming-list').innerHTML = upcomingFallback.map(x => `
         <a class="list-group-item list-group-item-action bg-transparent text-white d-flex gap-2 align-items-start">
-          <img src="${u.img}" class="upcoming-thumb img-with-fallback" alt="${u.title}" style="width:70px;height:100px;object-fit:cover;">
+          <img src="${resolveImagePath(x.img)}" style="width:70px;height:100px;object-fit:cover;">
           <div class="flex-grow-1">
-            <div class="small fw-semibold text-truncate">${u.title}</div>
-            <div class="small text-secondary">${u.tag}</div>
+            <div class="small fw-semibold text-truncate">${x.titulo}</div>
+            <div class="small text-secondary">${x.genero[0]}</div>
           </div>
-        </a>
-      `).join('');
+        </a>`).join('');
 
-      // --- PUBLICIDAD ROTATIVA ---
-      try {
-        const res = await fetch('./src/data/publicidad.json');
-        const ads = await res.json();
-
-        const rotateAds = (elementId, list, interval = 8000, maxHeight = '150px') => {
-          const el = document.getElementById(elementId);
-          if (!el || !list?.length) return;
-          let index = 0;
-          const changeAd = () => {
-            const ad = list[index];
-            const img = document.createElement('img');
-            img.src = ad.img;
-            img.alt = ad.alt;
-            img.className = 'img-fluid rounded fade-rotate mx-auto d-block';
-            img.style = `max-height:${maxHeight};object-fit:cover;width:100%;`;
-            el.innerHTML = `<a href="${ad.url}" target="_blank"></a>`;
-            el.querySelector('a').appendChild(img);
-            index = (index + 1) % list.length;
-          };
-          changeAd();
-          setInterval(changeAd, interval);
-        };
-
-        rotateAds('ad-superior', ads.superior, 8000, '250px');
-        rotateAds('ad-bottom-1', ads.inferior, 8000, '150px');
-        rotateAds('ad-bottom-2', ads.inferior.slice().reverse(), 10000, '150px');
-      } catch (err) {
-        console.warn('Error cargando publicidad:', err);
-      }
-
-      // --- RAILS ---
+      // === Render Rails ===
       const onCard = (item) => {
         sessionStorage.setItem('detalleItem', JSON.stringify(item));
         sessionStorage.setItem('detalleCategoria', item.kind);
         location.hash = '#/detalle';
       };
-      renderRail('#rail-destacados', [...pelis, ...series].slice(0, 12), { onItemClick: onCard });
-      renderRail('#rail-peliculas',  pelis.slice(0, 12),  { onItemClick: onCard });
-      renderRail('#rail-series',     series.slice(0, 12), { onItemClick: onCard });
-      renderRail('#rail-anime',      anime.slice(0, 12),  { onItemClick: onCard });
-      renderRail('#rail-musica',     musica.slice(0, 12), { onItemClick: onCard });
 
-      // === Ajustes visuales y autoscroll ===
-      const style = document.createElement("style");
-      style.innerHTML = `
-        [id^="rail-"] > div {
-          display: flex !important;
-          gap: 1rem !important;
-          overflow-x: auto !important;
-          overflow-y: hidden !important;
-          scroll-behavior: smooth;
-          scrollbar-width: thin;
-          scrollbar-color: rgba(160,160,160,0.4) transparent;
-          padding-bottom: 6px;
-        }
-        [id^="rail-"] > div::-webkit-scrollbar {
-          height: 6px;
-        }
-        [id^="rail-"] > div::-webkit-scrollbar-thumb {
-          background: rgba(160,160,160,0.4);
-          border-radius: 4px;
-        }
-        [id^="rail-"] > div::-webkit-scrollbar-thumb:hover {
-          background: rgba(200,200,200,0.6);
-        }
-        [id^="rail-"] > div::-webkit-scrollbar-track {
-          background: rgba(255,255,255,0.05);
-        }
+      renderRail('#rail-destacados', destacados, { onItemClick: onCard });
+      renderRail('#rail-peliculas', topPelis, { onItemClick: onCard });
+      renderRail('#rail-series', topSeries, { onItemClick: onCard });
+      renderRail('#rail-anime', topAnime, { onItemClick: onCard });
+      renderRail('#rail-musica', topMusica, { onItemClick: onCard });
 
-        /* Botón Ver todo moderno */
-        a.btn.btn-link.btn-sm {
-          color: #8cc7ff !important;
-          text-decoration: none !important;
-          border: 1px solid rgba(140,200,255,0.5);
-          border-radius: 20px;
-          padding: 2px 12px;
-          transition: all .25s ease;
-        }
-        a.btn.btn-link.btn-sm:hover {
-          background-color: rgba(140,200,255,0.2);
-          color: #fff !important;
-          transform: scale(1.03);
-        }
-      `;
-      document.head.appendChild(style);
-
-      // Autoscroll funcional
+      // === Autoscroll ===
       const setupAutoScroll = (selector, step = 1, everyMs = 25) => {
         const el = document.querySelector(selector + ' > div');
         if (!el) return;
@@ -280,13 +218,10 @@ export function HomeView() {
         window.addEventListener('hashchange', () => clearInterval(t), { once: true });
       };
 
-      setupAutoScroll('#rail-destacados');
-      setupAutoScroll('#rail-peliculas');
-      setupAutoScroll('#rail-series');
-      setupAutoScroll('#rail-anime');
-      setupAutoScroll('#rail-musica');
+      ['#rail-destacados', '#rail-peliculas', '#rail-series', '#rail-anime', '#rail-musica']
+        .forEach((sel) => setupAutoScroll(sel));
 
-      // Logout
+      // === Logout ===
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
