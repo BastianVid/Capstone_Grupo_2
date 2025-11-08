@@ -113,6 +113,12 @@ export function DetalleView(item, categoria) {
         </div>
 
         <div class="col-lg-4">
+          <!-- Integraciones -->
+          <div class="cx-card p-4 mb-4">
+            <h5 class="text-white mb-3">Integraciones</h5>
+            <div id="integrationRail" class="d-flex gap-3 flex-nowrap overflow-auto pb-2"></div>
+          </div>
+
           <!-- Similares -->
           <div class="cx-card p-4 mb-4">
             <h5 class="text-white mb-3">Similares</h5>
@@ -210,18 +216,80 @@ export function DetalleView(item, categoria) {
         temporadasEl.querySelector('span').textContent = item.temporadas;
       }
 
-      // ============================== SIMILARES ==============================
+      // ============================== INTEGRACIONES (misma franquicia) ==============================
+      const renderIntegraciones = async () => {
+        const rail = document.getElementById("integrationRail");
+        if (!rail) return;
+
+        rail.innerHTML = `<p class="text-secondary small">Buscando integraciones relacionadas...</p>`;
+
+        try {
+          const { ContentModel } = await import("../models/contentModel.js");
+          const colecciones = [
+            "Peliculas", "Series", "Anime", "Musica", "Videojuegos", "Libros", "Manga", "Documentales"
+          ];
+          const promesas = colecciones.map(c =>
+            ContentModel[`list${c}`]().catch(() => [])
+          );
+          const data = (await Promise.all(promesas)).flatMap((arr, i) =>
+            arr.map(d => ({ ...d, categoria: colecciones[i].toLowerCase() }))
+          );
+
+          const franquiciaActual = item.franquicia?.toLowerCase()?.trim();
+          if (!franquiciaActual) {
+            rail.innerHTML = `<p class="text-secondary small">No hay franquicia definida para esta obra.</p>`;
+            return;
+          }
+
+          const integraciones = data.filter(d => {
+            const franquiciaObra = d.franquicia?.toLowerCase()?.trim();
+            return franquiciaObra === franquiciaActual && d.id !== item.id;
+          });
+
+          if (!integraciones.length) {
+            rail.innerHTML = `<p class="text-secondary small">No se encontraron integraciones asociadas.</p>`;
+            return;
+          }
+
+          rail.innerHTML = integraciones
+            .map(r => `
+              <div class="int-card bg-dark rounded overflow-hidden shadow-sm border border-secondary border-opacity-25"
+                  data-id="${r.id}" data-categoria="${r.categoria}"
+                  style="min-width:180px; cursor:pointer;">
+                <img src="${resolveImagePath(r.imagen || r.img)}"
+                     alt="${r.titulo}" class="w-100" style="height:240px; object-fit:cover;">
+                <div class="p-2">
+                  <div class="small text-white fw-semibold">${r.titulo}</div>
+                  <div class="text-secondary small text-capitalize">${r.categoria}</div>
+                </div>
+              </div>
+            `)
+            .join("");
+
+          rail.querySelectorAll(".int-card").forEach(card => {
+            card.addEventListener("click", () => {
+              const id = card.dataset.id;
+              const cat = card.dataset.categoria;
+              const selected = integraciones.find(x => x.id === id);
+              if (!selected) return;
+              sessionStorage.setItem("detalleItem", JSON.stringify(selected));
+              sessionStorage.setItem("detalleCategoria", cat);
+              navigate("/detalle");
+            });
+          });
+        } catch (err) {
+          console.error("Error cargando integraciones:", err);
+          rail.innerHTML = `<p class="text-danger small">Error al cargar integraciones.</p>`;
+        }
+      };
+      await renderIntegraciones();
+
+      // ============================== SIMILARES (por tema o género, excluyendo franquicia) ==============================
       const renderSimilares = async () => {
         const rail = document.getElementById('similaresRail');
         rail.innerHTML = `<p class="text-secondary small">Buscando obras similares...</p>`;
 
         try {
-          const franquicia = item.franquicia?.toLowerCase()?.trim();
-          if (!franquicia) {
-            rail.innerHTML = `<p class="text-secondary small">No hay franquicia definida para esta obra.</p>`;
-            return;
-          }
-
           const { ContentModel } = await import('../models/contentModel.js');
           const colecciones = [
             "Peliculas", "Series", "Anime", "Musica", "Videojuegos", "Libros", "Manga", "Documentales"
@@ -233,30 +301,52 @@ export function DetalleView(item, categoria) {
             arr.map(d => ({ ...d, categoria: colecciones[i].toLowerCase() }))
           );
 
-          const similares = data.filter(
-            d => d.franquicia?.toLowerCase()?.trim() === franquicia && d.id !== item.id
+          const franquiciaActual = item.franquicia?.toLowerCase()?.trim() || '';
+          const generosActuales = (item.genero || []).map(g => g.toLowerCase());
+          const descripcionActual = (item.descripcion || '').toLowerCase();
+          const tituloActual = (item.titulo || '').toLowerCase();
+
+          const keywords = [
+            "acción", "aventura", "terror", "fantasía", "superhéroe", "superheroes",
+            "romance", "drama", "ciencia ficción", "espacio", "futurista", "batalla",
+            "carreras", "autos", "misterio", "investigación", "música", "magia", "comedia"
+          ];
+
+          const clavesDetectadas = keywords.filter(k =>
+            tituloActual.includes(k) || descripcionActual.includes(k)
           );
 
+          const similares = data.filter(d => {
+            if (d.id === item.id) return false;
+            const franquiciaObra = d.franquicia?.toLowerCase()?.trim();
+            if (franquiciaActual && franquiciaObra && franquiciaActual === franquiciaObra) return false;
+
+            const matchGenero = d.genero?.some(g => generosActuales.includes(g.toLowerCase()));
+            const texto = `${d.titulo || ''} ${d.descripcion || ''}`.toLowerCase();
+            const matchClave = clavesDetectadas.some(k => texto.includes(k));
+
+            return matchGenero || matchClave;
+          }).slice(0, 10);
+
           if (!similares.length) {
-            rail.innerHTML = `<p class="text-secondary small">No se encontraron obras relacionadas.</p>`;
+            rail.innerHTML = `<p class="text-secondary small">No se encontraron obras similares temáticamente.</p>`;
             return;
           }
 
           rail.innerHTML = similares
             .map(s => `
-              <div class="sim-card bg-dark rounded overflow-hidden shadow-sm border border-secondary border-opacity-25" 
+              <div class="sim-card bg-dark rounded overflow-hidden shadow-sm border border-secondary border-opacity-25"
                   data-id="${s.id}" data-categoria="${s.categoria}" 
                   style="min-width:140px; cursor:pointer;">
                 <img src="${resolveImagePath(s.imagen || s.img)}" 
                     alt="${s.titulo}" class="w-100" style="height:200px; object-fit:cover;">
                 <div class="p-2">
                   <div class="small text-white fw-semibold">${s.titulo}</div>
-                  <div class="text-secondary small">${s.categoria}</div>
+                  <div class="text-secondary small text-capitalize">${s.categoria}</div>
                 </div>
               </div>
             `).join('');
 
-          // 🔹 Click funcional con navigate()
           rail.querySelectorAll('.sim-card').forEach(card => {
             card.addEventListener('click', () => {
               const id = card.dataset.id;
@@ -265,9 +355,10 @@ export function DetalleView(item, categoria) {
               if (!selected) return;
               sessionStorage.setItem('detalleItem', JSON.stringify(selected));
               sessionStorage.setItem('detalleCategoria', cat);
-              navigate('/detalle'); // Usa el router sin recargar
+              navigate('/detalle');
             });
           });
+
         } catch (err) {
           console.error('Error cargando similares:', err);
           rail.innerHTML = `<p class="text-danger small">Error al cargar similares.</p>`;
