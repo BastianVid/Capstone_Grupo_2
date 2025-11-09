@@ -9,6 +9,9 @@ import {
   doc,
   query,
   where,
+  addDoc,
+  updateDoc,
+  deleteDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
 // ============================== FUNCIONES BASE ==============================
@@ -79,6 +82,12 @@ export const ContentModel = {
   listVideojuegos:    () => readCollection("videojuegos"),
   listManga:          () => readCollection("manga"),
   listDocumentales:   () => readCollection("documentales"),
+
+  // Genéricas para admin
+  listCollection:     (name) => readCollection(name),
+  addToCollection:    async (name, data) => { const ref = await addDoc(collection(db, name), data); return ref.id; },
+  updateInCollection: (name, id, data) => updateDoc(doc(db, name, id), data),
+  deleteFromCollection: (name, id) => deleteDoc(doc(db, name, id)),
 
 
   // Items individuales

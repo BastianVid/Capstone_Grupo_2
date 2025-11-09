@@ -1,5 +1,7 @@
 import { render, mount } from './render.js';
 import { authGuard } from '../controllers/authController.js';
+import { adminOnly } from '../controllers/authController.js';
+import { initNavbarSessionWatcher, updateNavbarSessionUI } from '../views/navbarSession.js';
 
 // Importa las vistas
 import { HomeView } from '../views/homeView.js';
@@ -16,6 +18,8 @@ import { PerfilView } from '../views/perfilView.js';
 import { BuscarView } from '../views/buscarView.js'; 
 import { MangaView } from '../views/mangaView.js';
 import { DocumentalesView } from '../views/documentalesView.js';
+import { AdminView } from "../views/adminView.js";
+
 
 // (Opcional) Vista 404
 const NotFoundView = () => ({
@@ -46,6 +50,7 @@ const routes = {
   '/buscar':          { view: BuscarView,       secure: false, title: 'Buscar • CulturaX' },
   '/manga':           { view: MangaView,        secure: false, title: 'Manga • CulturaX' },
   '/documentales':    { view: DocumentalesView, secure: false, title: 'Documentales • CulturaX' },
+  '/admin': { view: AdminView, secure: true, title: 'Dashboard • CulturaX' },
   '/404':             { view: NotFoundView,     secure: false, title: 'No encontrado • CulturaX' },
 };
 
@@ -57,7 +62,7 @@ function getPathFromHash() {
 }
 
 // Pinta la ruta actual
-function resolve() {
+async function resolve() {
   const path = getPathFromHash();
   let route = routes[path] || routes['/404'];
 
@@ -79,10 +84,28 @@ function resolve() {
     return;
   }
 
+  // Si la ruta es de admin, validar rol antes de renderizar
+  if (path === '/admin') {
+    try {
+      const res = await adminOnly();
+      const ok = typeof res === 'object' ? !!res.ok : !!res;
+      const redirect = typeof res === 'object' ? res.redirect : undefined;
+      if (!ok) {
+        navigate(redirect || '/');
+        return;
+      }
+    } catch (_) {
+      navigate('/');
+      return;
+    }
+  }
+
   // Renderiza la vista
   const { html, bind, title } = route.view();
   render(html);
   mount(bind);
+  // Asegura que el estado de sesión del navbar se sincronicé en cada navegación
+  try { initNavbarSessionWatcher(); updateNavbarSessionUI(); } catch {}
 
   // Título del documento
   document.title = title || route.title || 'CulturaX';
