@@ -1,7 +1,7 @@
 // src/views/buscarView.js
-import { Navbar } from './navbar.js';
-import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
-import { Footer } from './footer.js';
+import { Navbar } from './shared/navbar.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
+import { Footer } from './shared/footer.js';
 import { renderCards } from './shared/renderCards.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 

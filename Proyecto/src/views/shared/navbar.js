@@ -1,5 +1,5 @@
-// src/views/navbar.js
-import { resolveImagePath } from './shared/resolve-image-path.js';
+// src/views/shared/navbar.js
+import { resolveImagePath } from './resolve-image-path.js';
 import { initNavbarSessionWatcher, updateNavbarSessionUI } from './navbarSession.js';
 
 export function Navbar() {
@@ -82,7 +82,7 @@ export function initNavbarSearch() {
   async function buildCache() {
     if (cache || building) return;
     building = true;
-    const { ContentModel } = await import('../models/contentModel.js');
+    const { ContentModel } = await import('../../models/contentModel.js');
     const [pelis,series,anime,musica,videojuegos,libros,manga,documentales] = await Promise.all([
       ContentModel.listPeliculas().catch(() => []),
       ContentModel.listSeries().catch(() => []),

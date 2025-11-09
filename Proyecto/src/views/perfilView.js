@@ -1,8 +1,8 @@
 // ============================== IMPORTS ==============================
-import { Navbar } from './navbar.js';
-import { Footer } from './footer.js';
+import { Navbar } from './shared/navbar.js';
+import { Footer } from './shared/footer.js';
 import { auth } from '../lib/firebase.js';
-import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
 import { collection, getDocs } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { db } from '../lib/firebase.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';

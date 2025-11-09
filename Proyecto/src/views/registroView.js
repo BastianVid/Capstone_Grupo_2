@@ -1,5 +1,5 @@
-import { Navbar } from './navbar.js';
-import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
+import { Navbar } from './shared/navbar.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
 
 export function RegistroView() {
   const html = `
@@ -135,4 +135,3 @@ export function RegistroView() {
     },
   };
 }
-

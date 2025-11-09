@@ -1,3 +1,4 @@
+// Moved to shared: footer component used across views
 export function Footer() {
   return `
   <footer class="bg-dark text-light pt-4 border-top border-secondary">

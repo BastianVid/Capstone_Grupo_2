@@ -1,7 +1,7 @@
 import { render, mount } from './render.js';
 import { authGuard } from '../controllers/authController.js';
 import { adminOnly } from '../controllers/authController.js';
-import { initNavbarSessionWatcher, updateNavbarSessionUI } from '../views/navbarSession.js';
+import { initNavbarSessionWatcher, updateNavbarSessionUI } from '../views/shared/navbarSession.js';
 
 // Importa las vistas
 import { HomeView } from '../views/homeView.js';

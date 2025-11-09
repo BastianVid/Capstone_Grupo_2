@@ -1,9 +1,9 @@
 // src/views/animeView.js
-import { Navbar, initNavbarSearch } from './navbar.js';
+import { Navbar, initNavbarSearch } from './shared/navbar.js';
 import { renderCards } from './shared/renderCards.js';
-import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
-import { Footer } from './footer.js';
+import { Footer } from './shared/footer.js';
 
 export function AnimeView() {
   const html = `

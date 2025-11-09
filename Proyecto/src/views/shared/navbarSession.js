@@ -1,13 +1,11 @@
-// src/views/navbarSession.js
-import { auth } from '../lib/firebase.js';
+// Moved to shared: navbar session helpers
+import { auth } from '../../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { isAdmin, isAdminFlexible } from "../controllers/authController.js"; // 👈 añadimos esto
+import { isAdmin, isAdminFlexible } from "../../controllers/authController.js";
 
 let subscribed = false;
 
-/**
- * Sincroniza el estado de sesión con el navbar actual
- */
+// Sincroniza el estado de sesión con el navbar actual
 export async function updateNavbarSessionUI() {
   const user = auth.currentUser;
 
@@ -16,7 +14,6 @@ export async function updateNavbarSessionUI() {
   const nameEl   = document.getElementById('navUserName');
   const emailEl  = document.getElementById('navUserEmail');
   const menuList = userMenu?.querySelector('.dropdown-menu');
-  // No hagas early return por name/email; permite mostrar el botón Admin aunque falten
   if (!loginBtn || !userMenu) return;
 
   if (user) {
@@ -31,7 +28,7 @@ export async function updateNavbarSessionUI() {
     loginBtn?.classList.add('d-none');
     userMenu?.classList.remove('d-none');
 
-    // Verificamos si el usuario es admin (flexible: por uid o por email)
+    // Verifica si el usuario es admin (flexible: por uid o por email)
     let admin = false;
     try {
       admin = await (typeof isAdminFlexible === 'function' ? isAdminFlexible() : isAdmin());
@@ -56,14 +53,11 @@ export async function updateNavbarSessionUI() {
           menuList.appendChild(li);
         }
       } else if (!admin && existing) {
-        // Eliminar el li contenedor del enlace si existe
         const li = existing.closest('li');
         if (li && li.parentElement === menuList) li.remove();
         else existing.remove();
       }
     }
-
-    // El acceso a Admin se muestra solo dentro del menú (no hay botón aparte)
   } else {
     // Estado no autenticado
     if (nameEl)  nameEl.textContent  = 'Mi cuenta';
@@ -74,20 +68,20 @@ export async function updateNavbarSessionUI() {
   }
 }
 
-/** Llama esto una vez por vista tras renderizar el navbar */
+// Llama esto una vez por vista tras renderizar el navbar
 export function initNavbarSessionWatcher() {
   if (subscribed) return;
   subscribed = true;
   onAuthStateChanged(auth, updateNavbarSessionUI);
 
-  // 🔹 Listener global del buscador del Navbar
-  document.addEventListener("submit", (e) => {
-    if (e.target.id === "siteSearch") {
+  // Listener global del buscador del Navbar
+  document.addEventListener('submit', (e) => {
+    if (e.target.id === 'siteSearch') {
       e.preventDefault();
-      const query = document.getElementById("siteSearchInput").value.trim().toLowerCase();
-      window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
+      const input = document.getElementById('siteSearchInput');
+      const query = (input?.value || '').trim().toLowerCase();
+      window.dispatchEvent(new CustomEvent('globalSearch', { detail: { query } }));
     }
   });
 }
-
 

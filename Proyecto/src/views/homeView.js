@@ -1,7 +1,7 @@
 ﻿// ============================== IMPORTS ==============================
-import { Navbar, initNavbarSearch } from './navbar.js';
-import { Footer } from './footer.js';
-import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
+import { Navbar, initNavbarSearch } from './shared/navbar.js';
+import { Footer } from './shared/footer.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
 import { renderRail } from './shared/renderRail.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { applyImgFallback } from './shared/image-fallback.js';

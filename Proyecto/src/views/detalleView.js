@@ -1,7 +1,7 @@
 // ============================== IMPORTS ==============================
-import { Navbar, initNavbarSearch } from './navbar.js';
-import { Footer } from './footer.js';
-import { updateNavbarSessionUI, initNavbarSessionWatcher } from './navbarSession.js';
+import { Navbar, initNavbarSearch } from './shared/navbar.js';
+import { Footer } from './shared/footer.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";

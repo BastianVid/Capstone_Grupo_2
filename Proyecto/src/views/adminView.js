@@ -1,5 +1,5 @@
-import { Navbar } from "./navbar.js";
-import { initNavbarSessionWatcher, updateNavbarSessionUI } from './navbarSession.js';
+import { Navbar } from "./shared/navbar.js";
+import { initNavbarSessionWatcher, updateNavbarSessionUI } from './shared/navbarSession.js';
 import { isAdmin, isAdminFlexible } from "../controllers/authController.js";
 import { auth } from "../lib/firebase.js";
 
