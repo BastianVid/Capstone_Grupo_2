@@ -1,11 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="150" viewBox="0 0 1200 150">
   <defs>
-    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="hbInf" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#c31432"/>
       <stop offset="100%" stop-color="#240b36"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="150" fill="url(#g2)"/>
-  <text x="36" y="92" font-size="44" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800">Humble Bundle</text>
-  <text x="1180" y="92" font-size="20" font-family="Inter, Arial, sans-serif" fill="#ffd6de" text-anchor="end">Apoya caridad</text>
+  <rect width="1200" height="150" fill="url(#hbInf)"/>
+  <!-- Icono Humble -->
+  <circle cx="150" cy="75" r="22" fill="#ffffff"/>
+  <path d="M150 88c-7-4-13-6-13-13a7 7 0 0 1 13-4a7 7 0 0 1 13 4c0 7-6 9-13 13z" fill="#c31432"/>
+  <!-- Texto -->
+  <text x="210" y="92" font-size="40" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="900">Humble Bundle</text>
+  <text x="210" y="122" font-size="18" font-family="Inter, Arial, sans-serif" fill="#ffd6de">Bundles de juegos y libros al mejor precio</text>
 </svg>

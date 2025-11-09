@@ -1,11 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="150" viewBox="0 0 1200 150">
   <defs>
-    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="enInf" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#7028e4"/>
       <stop offset="100%" stop-color="#e5b2ca"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="150" fill="url(#g2)"/>
-  <text x="36" y="92" font-size="44" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="700">Eneba</text>
-  <text x="1180" y="92" font-size="20" font-family="Inter, Arial, sans-serif" fill="#ffffff" text-anchor="end">Hasta -70%</text>
+  <rect width="1200" height="150" fill="url(#enInf)"/>
+  <!-- Icono Eneba -->
+  <circle cx="150" cy="75" r="22" fill="#ffffff"/>
+  <circle cx="150" cy="75" r="14" fill="#7C3AED"/>
+  <circle cx="156" cy="69" r="4.5" fill="#e5b2ca"/>
+  <!-- Texto -->
+  <text x="210" y="92" font-size="40" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="900">Eneba</text>
+  <text x="210" y="122" font-size="18" font-family="Inter, Arial, sans-serif" fill="#ffffff">Juegos y gift cards con descuento</text>
 </svg>

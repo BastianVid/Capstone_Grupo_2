@@ -719,9 +719,20 @@ footer {
   border-radius: 10px;
   display: block;
 }
+#ad-right-1 img,
+#ad-right-2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  display: block;
+}
 #ad-superior,
 #ad-bottom-1,
-#ad-bottom-2 {
+#ad-bottom-2,
+#ad-right-1,
+#ad-right-2 {
   padding: 0 !important;
   overflow: hidden;
 }

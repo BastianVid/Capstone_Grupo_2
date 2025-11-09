@@ -127,8 +127,8 @@ export function DetalleView(item, categoria) {
 
           <!-- Publicidad lateral -->
           <section class="my-4">
-            <div id="ad-right-1" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="min-height:140px;"></div>
-            <div id="ad-right-2" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="min-height:140px;"></div>
+            <div id="ad-right-1" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="height:140px;"></div>
+            <div id="ad-right-2" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="height:140px;"></div>
           </section>
         </div>
       </div>
@@ -136,8 +136,8 @@ export function DetalleView(item, categoria) {
       <!-- Publicidad inferior -->
       <section class="my-4">
         <div class="row g-3">
-          <div class="col-md-6"><div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-0 position-relative overflow-hidden" style="min-height:150px;"></div></div>
-          <div class="col-md-6"><div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-0 position-relative overflow-hidden" style="min-height:150px;"></div></div>
+          <div class="col-md-6"><div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-0 position-relative overflow-hidden" style="height:150px;"></div></div>
+          <div class="col-md-6"><div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-0 position-relative overflow-hidden" style="height:150px;"></div></div>
         </div>
       </section>
     </div>
@@ -365,6 +365,31 @@ export function DetalleView(item, categoria) {
         }
       };
       await renderSimilares();
+
+      // ============================== PUBLICIDAD ==============================
+      try {
+        const res = await fetch('src/data/publicidad.json');
+        const ads = await res.json();
+        const rnd = (arr, n = 1) => {
+          const pool = [...arr];
+          const out = [];
+          while (pool.length && out.length < n) out.push(pool.splice(Math.floor(Math.random()*pool.length),1)[0]);
+          return n === 1 ? out[0] : out;
+        };
+        const renderAd = (id, ad) => {
+          const el = document.getElementById(id);
+          if (!el || !ad) return;
+          el.innerHTML = `<a href="${ad.url}" target="_blank" rel="noopener" class="d-block w-100 h-100"><img src="${ad.img}" alt="${ad.alt}" /></a>`;
+        };
+        // Laterales: usa formato lateral específico
+        const [rs1, rs2] = rnd(ads.laterales ?? ads.superior, 2);
+        renderAd('ad-right-1', rs1);
+        renderAd('ad-right-2', rs2);
+        // Inferiores: usa formato inferior
+        const [ib1, ib2] = rnd(ads.inferior, 2);
+        renderAd('ad-bottom-1', ib1);
+        renderAd('ad-bottom-2', ib2);
+      } catch {}
 
       // ============================== PROMEDIO Y RESEÑAS ==============================
       const renderPromedio = async () => {

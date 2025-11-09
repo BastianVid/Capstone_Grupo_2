@@ -17,9 +17,7 @@ export function HomeView() {
 
         <!-- Izquierda -->
         <aside class="col-lg-4 col-xl-3">
-          <div id="ad-superior" class="card bg-dark border-0 shadow-sm mb-3 text-center p-2 position-relative overflow-hidden" style="min-height:250px;">
-            <img src="./src/assets/img/ad.jpg" class="ad-billboard fade-rotate" alt="Publicidad" style="max-height:250px;object-fit:cover;width:100%;">
-          </div>
+          <div id="ad-superior" class="card bg-dark border-0 shadow-sm mb-3 text-center p-2 position-relative overflow-hidden" style="height:250px;"></div>
 
           <div class="card bg-dark border-0 shadow-sm upcoming-card">
             <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
@@ -101,10 +99,10 @@ export function HomeView() {
     <section class="container my-5">
       <div class="row g-3">
         <div class="col-md-6">
-          <div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-0 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
+          <div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-0 h-100 position-relative overflow-hidden" style="height:150px;"></div>
         </div>
         <div class="col-md-6">
-          <div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-0 h-100 position-relative overflow-hidden" style="min-height:150px;"></div>
+          <div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-0 h-100 position-relative overflow-hidden" style="height:150px;"></div>
         </div>
       </div>
     </section>
@@ -230,6 +228,35 @@ export function HomeView() {
 
       ['#rail-destacados', '#rail-peliculas', '#rail-series', '#rail-anime', '#rail-musica']
         .forEach((sel) => setupAutoScroll(sel));
+
+      // === Publicidad ===
+      try {
+        const res = await fetch('src/data/publicidad.json');
+        const ads = await res.json();
+
+        const pick = (arr, n = 1) => {
+          const c = [...arr];
+          const out = [];
+          while (c.length && out.length < n) {
+            out.push(c.splice(Math.floor(Math.random() * c.length), 1)[0]);
+          }
+          return n === 1 ? out[0] : out;
+        };
+
+        const renderAd = (elId, ad) => {
+          const el = document.getElementById(elId);
+          if (!el || !ad) return;
+          el.innerHTML = `
+            <a href="${ad.url}" target="_blank" rel="noopener" class="d-block w-100 h-100">
+              <img src="${ad.img}" alt="${ad.alt}" />
+            </a>`;
+        };
+
+        renderAd('ad-superior', pick(ads.superior));
+        const [ad1, ad2] = pick(ads.inferior, 2);
+        renderAd('ad-bottom-1', ad1);
+        renderAd('ad-bottom-2', ad2);
+      } catch {}
 
       // === Logout ===
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {

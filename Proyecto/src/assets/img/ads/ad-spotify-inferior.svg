@@ -1,11 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="150" viewBox="0 0 1200 150">
   <defs>
-    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="spInf" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#1DB954"/>
       <stop offset="100%" stop-color="#0E7A36"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="150" fill="url(#g2)"/>
-  <text x="36" y="92" font-size="44" font-family="Inter, Arial, sans-serif" fill="#0b2a17" font-weight="800">Spotify Premium</text>
-  <text x="1180" y="92" font-size="20" font-family="Inter, Arial, sans-serif" fill="#0b2a17" text-anchor="end">Escucha offline</text>
+  <rect width="1200" height="150" fill="url(#spInf)"/>
+  <!-- Icono Spotify -->
+  <circle cx="150" cy="75" r="22" fill="#ffffff"/>
+  <path d="M136 71c9-5 19-5 28 0" fill="none" stroke="#1DB954" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M138 77c7-3.8 14-3.8 21 0" fill="none" stroke="#1DB954" stroke-width="2.3" stroke-linecap="round"/>
+  <path d="M140 83c5-2.6 10-2.6 15 0" fill="none" stroke="#1DB954" stroke-width="2" stroke-linecap="round"/>
+  <!-- Texto -->
+  <text x="210" y="90" font-size="40" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800">Spotify Premium</text>
+  <text x="210" y="120" font-size="18" font-family="Inter, Arial, sans-serif" fill="#eafff4">Musica sin limites y sin anuncios</text>
 </svg>

@@ -6,6 +6,10 @@
     </linearGradient>
   </defs>
   <rect width="1200" height="150" fill="url(#g2)"/>
-  <text x="36" y="92" font-size="44" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800">YouTube Premium</text>
-  <text x="1180" y="92" font-size="20" font-family="Inter, Arial, sans-serif" fill="#ffe6e6" text-anchor="end">Reproduce en segundo plano</text>
+  <!-- Icono YouTube -->
+  <rect x="140" y="58" width="44" height="32" rx="8" fill="#ffffff"/>
+  <polygon points="162,66 176,78 162,90" fill="#FF0000"/>
+  <!-- Texto -->
+  <text x="210" y="92" font-size="40" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="900">YouTube Premium</text>
+  <text x="210" y="122" font-size="18" font-family="Inter, Arial, sans-serif" fill="#ffe6e6">Sin anuncios y reproduccion en segundo plano</text>
 </svg>
