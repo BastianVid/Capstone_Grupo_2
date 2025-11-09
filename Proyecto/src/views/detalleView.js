@@ -116,13 +116,13 @@ export function DetalleView(item, categoria) {
           <!-- Integraciones -->
           <div class="cx-card p-4 mb-4">
             <h5 class="text-white mb-3">Integraciones</h5>
-            <div id="integrationRail" class="d-flex gap-3 flex-nowrap overflow-auto pb-2"></div>
+            <div id="integrationRail" class="integration-rail d-flex gap-3 flex-nowrap overflow-auto pb-2 scrollbar-dark"></div>
           </div>
 
           <!-- Similares -->
           <div class="cx-card p-4 mb-4">
             <h5 class="text-white mb-3">Similares</h5>
-            <div id="similaresRail" class="d-flex gap-3 flex-nowrap overflow-auto pb-2"></div>
+            <div id="similaresRail" class="d-flex gap-3 flex-nowrap overflow-auto pb-2 scrollbar-dark"></div>
           </div>
 
           <!-- Publicidad lateral -->

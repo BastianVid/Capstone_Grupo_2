@@ -26,7 +26,7 @@ export function HomeView() {
               <span class="fw-semibold">Próximamente</span>
               <a class="small" href="#/peliculas">Explorar tráilers</a>
             </div>
-            <div id="upcoming-list" class="list-group list-group-flush"></div>
+            <div id="upcoming-list" class="list-group list-group-flush scrollbar-dark"></div>
           </div>
         </aside>
 
@@ -50,7 +50,9 @@ export function HomeView() {
     <section class="container my-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="h5 mb-0">Destacado hoy</h2>
-        <a href="#/peliculas" class="btn btn-link btn-sm">Ver todo</a>
+        <a href="#/peliculas" class="cx-btn cx-btn-sm">
+          Ver todo <i class="bi bi-arrow-right-short"></i>
+        </a>
       </div>
       <div id="rail-destacados"></div>
     </section>
@@ -58,7 +60,9 @@ export function HomeView() {
     <section class="container my-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="h5 mb-0">Top películas</h2>
-        <a href="#/peliculas" class="btn btn-link btn-sm">Ver todo</a>
+        <a href="#/peliculas" class="cx-btn cx-btn-sm">
+          Ver todo <i class="bi bi-arrow-right-short"></i>
+        </a>
       </div>
       <div id="rail-peliculas"></div>
     </section>
@@ -66,7 +70,9 @@ export function HomeView() {
     <section class="container my-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="h5 mb-0">Series populares</h2>
-        <a href="#/series" class="btn btn-link btn-sm">Ver todo</a>
+        <a href="#/series" class="cx-btn cx-btn-sm">
+          Ver todo <i class="bi bi-arrow-right-short"></i>
+        </a>
       </div>
       <div id="rail-series"></div>
     </section>
@@ -74,7 +80,9 @@ export function HomeView() {
     <section class="container my-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="h5 mb-0">Anime que no te puedes perder</h2>
-        <a href="#/anime" class="btn btn-link btn-sm">Ver todo</a>
+        <a href="#/anime" class="cx-btn cx-btn-sm">
+          Ver todo <i class="bi bi-arrow-right-short"></i>
+        </a>
       </div>
       <div id="rail-anime"></div>
     </section>
@@ -82,7 +90,9 @@ export function HomeView() {
     <section class="container my-4 mb-5">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="h5 mb-0">Lo más escuchado</h2>
-        <a href="#/musica" class="btn btn-link btn-sm">Ver todo</a>
+        <a href="#/musica" class="cx-btn cx-btn-sm">
+          Ver todo <i class="bi bi-arrow-right-short"></i>
+        </a>
       </div>
       <div id="rail-musica"></div>
     </section>
