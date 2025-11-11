@@ -10,6 +10,7 @@ import {
   query,
   where,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
@@ -86,6 +87,7 @@ export const ContentModel = {
   // Genéricas para admin
   listCollection:     (name) => readCollection(name),
   addToCollection:    async (name, data) => { const ref = await addDoc(collection(db, name), data); return ref.id; },
+  setInCollection:    (name, id, data) => setDoc(doc(db, name, id), data),
   updateInCollection: (name, id, data) => updateDoc(doc(db, name, id), data),
   deleteFromCollection: (name, id) => deleteDoc(doc(db, name, id)),
 

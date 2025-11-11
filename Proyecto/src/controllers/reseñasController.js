@@ -16,6 +16,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   if (!user) { alert("Debes iniciar sesión para dejar una reseña."); return; }
 
   const userId = user.uid;
+  const userName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
   const itemRef = doc(db, categoria, itemId);
   const resenaRef = doc(db, categoria, itemId, "resenas", userId);
   const globalRef = doc(db, "userResenas", `${userId}_${categoria}_${itemId}`);
@@ -46,6 +47,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
     // Guardar o actualizar reseña del usuario
     tx.set(resenaRef, {
       userId,
+      userName,
       userEmail: user.email || null,
       estrellas,
       comentario,
@@ -62,6 +64,8 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
 
     await setDoc(globalRef, {
       userId,
+      userName,
+      userEmail: user.email || null,
       categoria,
       obraId: itemId,
       obraTitulo,
