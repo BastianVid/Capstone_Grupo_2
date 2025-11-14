@@ -1,0 +1,26 @@
+{
+  "superior": [
+    { "img": "./src/assets/img/ads/ad-eneba-superior.svg",       "alt": "Ofertas Eneba",        "url": "https://www.eneba.com/?r=tu_ref_eneba" },
+    { "img": "./src/assets/img/ads/ad-amazon-superior.svg",      "alt": "Amazon Prime Video",   "url": "https://amzn.to/tu_ref_amazon" },
+    { "img": "./src/assets/img/ads/ad-crunchyroll-superior.svg", "alt": "Crunchyroll Premium",  "url": "https://www.crunchyroll.com/" },
+    { "img": "./src/assets/img/ads/ad-spotify-superior.svg",     "alt": "Spotify Premium",     "url": "https://spotify.com/premium?ref=tu_ref_spotify" },
+    { "img": "./src/assets/img/ads/ad-humble-superior.svg",      "alt": "Humble Bundle",       "url": "https://humblebundle.com/?partner=tu_usuario" },
+    { "img": "./src/assets/img/ads/ad-yt-superior.svg",          "alt": "YouTube Premium",     "url": "https://www.youtube.com/premium" }
+  ],
+  "inferior": [
+    { "img": "./src/assets/img/ads/ad-eneba-inferior.svg",       "alt": "Ofertas Eneba",            "url": "https://www.eneba.com/?r=tu_ref_eneba" },
+    { "img": "./src/assets/img/ads/ad-amazon-inferior.svg",      "alt": "Amazon Prime Video",      "url": "https://amzn.to/tu_ref_amazon" },
+    { "img": "./src/assets/img/ads/ad-crunchyroll-inferior.svg", "alt": "Crunchyroll Premium",      "url": "https://www.crunchyroll.com/" },
+    { "img": "./src/assets/img/ads/ad-spotify-inferior.svg",     "alt": "Spotify Premium",         "url": "https://spotify.com/premium?ref=tu_ref_spotify" },
+    { "img": "./src/assets/img/ads/ad-humble-inferior.svg",      "alt": "Humble Bundle",           "url": "https://humblebundle.com/?partner=tu_usuario" },
+    { "img": "./src/assets/img/ads/ad-yt-inferior.svg",          "alt": "YouTube Premium",         "url": "https://www.youtube.com/premium" }
+  ],
+  "laterales": [
+    { "img": "./src/assets/img/ads/ad-eneba-lateral.svg",       "alt": "Ofertas Eneba",        "url": "https://www.eneba.com/?r=tu_ref_eneba" },
+    { "img": "./src/assets/img/ads/ad-amazon-lateral.svg",      "alt": "Amazon Prime Video",   "url": "https://amzn.to/tu_ref_amazon" },
+    { "img": "./src/assets/img/ads/ad-crunchyroll-lateral.svg", "alt": "Crunchyroll Premium",  "url": "https://www.crunchyroll.com/" },
+    { "img": "./src/assets/img/ads/ad-spotify-lateral.svg",     "alt": "Spotify Premium",     "url": "https://spotify.com/premium?ref=tu_ref_spotify" },
+    { "img": "./src/assets/img/ads/ad-humble-lateral.svg",      "alt": "Humble Bundle",       "url": "https://humblebundle.com/?partner=tu_usuario" },
+    { "img": "./src/assets/img/ads/ad-yt-lateral.svg",          "alt": "YouTube Premium",     "url": "https://www.youtube.com/premium" }
+  ]
+}

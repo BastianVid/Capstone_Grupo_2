@@ -1,56 +1,102 @@
 // ============================== Content Model ==============================
-// Maneja el acceso a datos en Firestore (series, películas, anime, música, reseñas)
+// Maneja el acceso a datos en Firestore (series, películas, anime, música, libros, etc.)
 
-import { db } from '../lib/firebase.js';
+import { db } from "../lib/firebase.js";
 import {
-  collection, addDoc, getDocs, getDoc, query, where, doc,
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  collection,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+  addDoc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-// 🔹 Función genérica: lee cualquier colección (ej: "peliculas", "anime")
+// ============================== FUNCIONES BASE ==============================
+
+// 🔹 Leer una colección completa (ej: "peliculas", "anime", "series")
 async function readCollection(name) {
-  const snap = await getDocs(collection(db, name));
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  try {
+    const snap = await getDocs(collection(db, name));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error(`❌ Error al leer colección "${name}":`, err);
+    return [];
+  }
 }
 
-// 🔹 Función genérica: obtiene un documento por id
+// 🔹 Leer un documento por ID
 async function readItem(name, id) {
-  const ref = doc(db, name, id);
-  const snap = await getDoc(ref);
-  return snap.exists() ? ({ id: snap.id, ...snap.data() }) : null;
+  try {
+    const ref = doc(db, name, id);
+    const snap = await getDoc(ref);
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  } catch (err) {
+    console.error(`❌ Error al leer ${name}/${id}:`, err);
+    return null;
+  }
 }
 
-// 🔹 Reseñas
-async function addReview({ peliculaId, usuario, texto, rating }) {
-  return await addDoc(collection(db, 'reseñas'), {
-    pelicula: peliculaId,
-    usuario,
-    texto,
-    rating: parseInt(rating, 10),
-    fecha: new Date(),
-  });
+// ============================== FUNCIONES ESPECÍFICAS ==============================
+
+// 🔹 Listar reseñas de un ítem (según el nuevo esquema /categoria/item/resenas)
+async function listResenas(categoria, itemId) {
+  try {
+    const colRef = collection(db, categoria, itemId, "resenas");
+    const snap = await getDocs(colRef);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.error(`❌ Error al listar reseñas de ${categoria}/${itemId}:`, err);
+    return [];
+  }
 }
 
-async function listReviewsByPelicula(peliculaId) {
-  const q = query(collection(db, 'reseñas'), where('pelicula', '==', peliculaId));
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+// 🔹 Listar reseñas por usuario (opcional)
+async function listResenasByUser(uid) {
+  const categorias = ["peliculas", "series", "anime", "musica", "libros"];
+  const results = [];
+
+  for (const cat of categorias) {
+    const catSnap = await getDocs(collection(db, cat));
+    for (const docItem of catSnap.docs) {
+      const resenasRef = collection(db, cat, docItem.id, "resenas");
+      const q = query(resenasRef, where("userId", "==", uid));
+      const snap = await getDocs(q);
+      snap.forEach((d) => results.push({ categoria: cat, id: docItem.id, ...d.data() }));
+    }
+  }
+
+  return results;
 }
 
 // ============================== EXPORT ==============================
 export const ContentModel = {
   // Colecciones principales
-  listSeries:       () => readCollection('series'),
-  listPeliculas:    () => readCollection('peliculas'),
-  listAnime:        () => readCollection('anime'),
-  listMusica:       () => readCollection('musica'),
-  listVideojuegos:  () => readCollection('videojuegos'),
-  listLibros:       () => readCollection('libros'),
+  listSeries:         () => readCollection("series"),
+  listPeliculas:      () => readCollection("peliculas"),
+  listAnime:          () => readCollection("anime"),
+  listMusica:         () => readCollection("musica"),
+  listLibros:         () => readCollection("libros"),
+  listVideojuegos:    () => readCollection("videojuegos"),
+  listManga:          () => readCollection("manga"),
+  listDocumentales:   () => readCollection("documentales"),
+
+  // Genéricas para admin
+  listCollection:     (name) => readCollection(name),
+  addToCollection:    async (name, data) => { const ref = await addDoc(collection(db, name), data); return ref.id; },
+  setInCollection:    (name, id, data) => setDoc(doc(db, name, id), data),
+  updateInCollection: (name, id, data) => updateDoc(doc(db, name, id), data),
+  deleteFromCollection: (name, id) => deleteDoc(doc(db, name, id)),
+
 
   // Items individuales
-  getPelicula: (id) => readItem('peliculas', id),
+  getPelicula: (id) => readItem("peliculas", id),
   getItem:     (tipo, id) => readItem(tipo, id),
 
-  // Reseñas
-  addReview,
-  listReviewsByPelicula,
+  // Reseñas (nueva estructura)
+  listResenas,
+  listResenasByUser,
 };

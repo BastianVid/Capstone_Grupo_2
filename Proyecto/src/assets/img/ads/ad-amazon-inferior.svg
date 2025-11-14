@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="150" viewBox="0 0 1200 150">
+  <defs>
+    <linearGradient id="amzInf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#00A8E1"/>
+      <stop offset="100%" stop-color="#0B1E3F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="150" fill="url(#amzInf)"/>
+  <!-- Icono Prime Video -->
+  <rect x="140" y="58" width="44" height="32" rx="8" fill="#ffffff"/>
+  <polygon points="162,66 176,78 162,90" fill="#00A8E1"/>
+  <!-- Texto -->
+  <text x="210" y="92" font-size="40" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800">Prime Video</text>
+  <text x="210" y="122" font-size="18" font-family="Inter, Arial, sans-serif" fill="#cfefff">Peliculas y series sin anuncios · Prueba 30 dias</text>
+</svg>
