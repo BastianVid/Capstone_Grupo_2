@@ -15,13 +15,31 @@ import {
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
+// ============================== NORMALIZACIÓN ==============================
+function normalizeItem(item) {
+  return {
+    ...item,
+    plataformaStreaming: Array.isArray(item.plataformaStreaming)
+      ? item.plataformaStreaming
+      : [],
+
+    genero: Array.isArray(item.genero)
+      ? item.genero
+      : [],
+
+    descripcion: item.descripcion || "",
+    titulo: item.titulo || "",
+    imagen: item.imagen || "",
+  };
+}
+
 // ============================== FUNCIONES BASE ==============================
 
 // 🔹 Leer una colección completa (ej: "peliculas", "anime", "series")
 async function readCollection(name) {
   try {
     const snap = await getDocs(collection(db, name));
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return snap.docs.map((d) => normalizeItem({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error(`❌ Error al leer colección "${name}":`, err);
     return [];
@@ -33,7 +51,10 @@ async function readItem(name, id) {
   try {
     const ref = doc(db, name, id);
     const snap = await getDoc(ref);
-    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+
+    if (!snap.exists()) return null;
+
+    return normalizeItem({ id: snap.id, ...snap.data() });
   } catch (err) {
     console.error(`❌ Error al leer ${name}/${id}:`, err);
     return null;
@@ -65,7 +86,9 @@ async function listResenasByUser(uid) {
       const resenasRef = collection(db, cat, docItem.id, "resenas");
       const q = query(resenasRef, where("userId", "==", uid));
       const snap = await getDocs(q);
-      snap.forEach((d) => results.push({ categoria: cat, id: docItem.id, ...d.data() }));
+      snap.forEach((d) =>
+        results.push({ categoria: cat, id: docItem.id, ...d.data() })
+      );
     }
   }
 
@@ -85,12 +108,14 @@ export const ContentModel = {
   listDocumentales:   () => readCollection("documentales"),
 
   // Genéricas para admin
-  listCollection:     (name) => readCollection(name),
-  addToCollection:    async (name, data) => { const ref = await addDoc(collection(db, name), data); return ref.id; },
-  setInCollection:    (name, id, data) => setDoc(doc(db, name, id), data),
-  updateInCollection: (name, id, data) => updateDoc(doc(db, name, id), data),
+  listCollection:       (name) => readCollection(name),
+  addToCollection:      async (name, data) => {
+    const ref = await addDoc(collection(db, name), data);
+    return ref.id;
+  },
+  setInCollection:      (name, id, data) => setDoc(doc(db, name, id), data),
+  updateInCollection:   (name, id, data) => updateDoc(doc(db, name, id), data),
   deleteFromCollection: (name, id) => deleteDoc(doc(db, name, id)),
-
 
   // Items individuales
   getPelicula: (id) => readItem("peliculas", id),

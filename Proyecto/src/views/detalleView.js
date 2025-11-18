@@ -51,6 +51,7 @@ export function DetalleView(item, categoria) {
                   <p class="mb-1 d-none" id="detalleCanciones"><strong>Total de canciones:</strong> <span></span></p>
                   <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
                   <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
+                  <p class="mb-1 d-none" id="detallePlataforma"><strong>Disponible en:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleTomos"><strong>Tomos:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleEditorial"><strong>Editorial:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleTemporadas"><strong>Temporadas:</strong> <span></span></p>
@@ -179,6 +180,8 @@ export function DetalleView(item, categoria) {
       const editorialEl = document.getElementById('detalleEditorial');
       const temporadasEl = document.getElementById('detalleTemporadas');
       const trailerEl = document.getElementById('detalleTrailer');
+      const plataformaEl = document.getElementById('detallePlataforma');
+
 
       // ============================== ASIGNACIÓN DE DATOS ==============================
       titEl.textContent = item.titulo || 'Sin título';
@@ -215,6 +218,13 @@ export function DetalleView(item, categoria) {
         temporadasEl.classList.remove('d-none');
         temporadasEl.querySelector('span').textContent = item.temporadas;
       }
+      // Plataforma de streaming
+      if (Array.isArray(item.plataformaStreaming) && item.plataformaStreaming.length > 0) {
+        plataformaEl.classList.remove('d-none');
+        plataformaEl.querySelector('span').textContent =
+          item.plataformaStreaming.join(', ');
+      }
+
 
       // ============================== INTEGRACIONES (misma franquicia) ==============================
       const renderIntegraciones = async () => {
