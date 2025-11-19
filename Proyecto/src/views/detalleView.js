@@ -9,6 +9,85 @@ import { guardarReseña, obtenerReseñaUsuario, eliminarReseña } from '../contr
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { navigate } from '../core/router.js';
 
+const STREAMING_ICON_BASE_PATH = 'src/assets/icons/streaming';
+
+const STREAMING_PLATFORM_ICONS = {
+  netflix: { label: 'Netflix', file: 'netflix.svg' },
+  primevideo: { label: 'Prime Video', file: 'primevideo.svg' },
+  hbomax: { label: 'HBO Max', file: 'hbomax.svg' },
+  disneyplus: { label: 'Disney+', file: 'disneyplus.svg' },
+  starplus: { label: 'Star+', file: 'starplus.svg' },
+  starz: { label: 'Starz', file: 'starz.svg' },
+  paramountplus: { label: 'Paramount+', file: 'paramountplus.svg' },
+  appletv: { label: 'Apple TV+', file: 'appletv.svg' },
+  crunchyroll: { label: 'Crunchyroll', file: 'crunchyroll.svg' },
+  hulu: { label: 'Hulu', file: 'hulu.svg' },
+  youtube: { label: 'YouTube', file: 'youtube.svg' },
+};
+
+const STREAMING_PLATFORM_MATCHERS = [
+  { key: 'netflix', patterns: ['netflix'] },
+  { key: 'primevideo', patterns: ['primevideo', 'amazonprime'], tokens: ['prime'] },
+  { key: 'hbomax', patterns: ['hbomax', 'hbogo', 'max'], tokens: ['hbo', 'max'] },
+  { key: 'disneyplus', patterns: ['disneyplus'], tokens: ['disney'] },
+  { key: 'starplus', patterns: ['starplus'] },
+  { key: 'starz', patterns: ['starz'] },
+  { key: 'paramountplus', patterns: ['paramountplus'], tokens: ['paramount'] },
+  { key: 'appletv', patterns: ['appletv', 'appletvplus'] },
+  { key: 'crunchyroll', patterns: ['crunchyroll'] },
+  { key: 'hulu', patterns: ['hulu'] },
+  { key: 'youtube', patterns: ['youtube'] },
+];
+
+function normalizePlatformValue(value = '') {
+  return value
+    .toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\+/g, ' plus ')
+    .replace(/&/g, ' and ')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, ' ');
+}
+
+function createPlatformMatchData(value = '') {
+  const normalized = normalizePlatformValue(value);
+  return {
+    collapsed: normalized.replace(/[^a-z0-9]/g, ''),
+    tokens: normalized.split(/[^a-z0-9]+/).filter(Boolean),
+  };
+}
+
+function parseStreamingPlatform(value = '') {
+  const data = createPlatformMatchData(value);
+  if (!data.collapsed) return { key: null, collapsed: '' };
+
+  for (const matcher of STREAMING_PLATFORM_MATCHERS) {
+    const hasPattern = matcher.patterns?.some((pattern) =>
+      data.collapsed.includes(pattern)
+    );
+    const hasToken = matcher.tokens?.some((token) =>
+      data.tokens.includes(token)
+    );
+
+    if (hasPattern || hasToken) {
+      return { key: matcher.key, collapsed: data.collapsed };
+    }
+  }
+
+  return { key: null, collapsed: data.collapsed };
+}
+
+function buildStreamingInitials(label = '') {
+  const boundaryLetters = label.match(/\b[0-9A-Za-z]/g) || [];
+  const fallbackLetters = boundaryLetters.length
+    ? boundaryLetters
+    : label.match(/[0-9A-Za-z]/g) || [];
+
+  const text = fallbackLetters.slice(0, 3).join('');
+  return text ? text.toUpperCase() : '?';
+}
+
 // ============================== DETALLE VIEW ==============================
 export function DetalleView(item, categoria) {
   // Recuperar desde sessionStorage si no llegó por router
@@ -51,7 +130,6 @@ export function DetalleView(item, categoria) {
                   <p class="mb-1 d-none" id="detalleCanciones"><strong>Total de canciones:</strong> <span></span></p>
                   <p class="mb-1"><strong>Año:</strong> <span id="detalleAnio">N/A</span></p>
                   <p class="mb-1"><strong>Género:</strong> <span id="detalleGenero" class="text-warning"></span></p>
-                  <p class="mb-1 d-none" id="detallePlataforma"><strong>Disponible en:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleTomos"><strong>Tomos:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleEditorial"><strong>Editorial:</strong> <span></span></p>
                   <p class="mb-1 d-none" id="detalleTemporadas"><strong>Temporadas:</strong> <span></span></p>
@@ -72,7 +150,6 @@ export function DetalleView(item, categoria) {
                 </iframe>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </section>
@@ -81,10 +158,23 @@ export function DetalleView(item, categoria) {
     <div class="container">
       <div class="row g-4">
         <div class="col-lg-8">
-          <!-- Sinopsis -->
-          <div class="cx-card p-4 mb-4">
-            <h5 class="text-white mb-3">Sinopsis</h5>
-            <p id="detalleDescripcion" class="mb-0 text-secondary"></p>
+          <!-- Sinopsis y plataformas -->
+          <div class="row g-3 mb-4 align-items-stretch">
+            <div class="col-12 col-md-7">
+              <div class="cx-card p-4 h-100">
+                <h5 class="text-white mb-3">Sinopsis</h5>
+                <p id="detalleDescripcion" class="mb-0 text-secondary"></p>
+              </div>
+            </div>
+            <div class="col-12 col-md-5">
+              <div id="detallePlataformasCard" class="cx-card p-4 h-100 d-flex flex-column">
+                <div class="mb-3">
+                  <h5 class="text-white mb-0">Disponible en</h5>
+                </div>
+                <div id="detallePlataformasIcons" class="streaming-icon-grid flex-grow-1"></div>
+                <p id="detallePlataformasEmpty" class="text-secondary small mb-0">No hay plataformas registradas.</p>
+              </div>
+            </div>
           </div>
 
           <!-- Tu calificación -->
@@ -180,7 +270,54 @@ export function DetalleView(item, categoria) {
       const editorialEl = document.getElementById('detalleEditorial');
       const temporadasEl = document.getElementById('detalleTemporadas');
       const trailerEl = document.getElementById('detalleTrailer');
-      const plataformaEl = document.getElementById('detallePlataforma');
+      const plataformasIconsEl = document.getElementById('detallePlataformasIcons');
+      const plataformasEmptyEl = document.getElementById('detallePlataformasEmpty');
+
+      const renderStreamingPlatforms = () => {
+        if (!plataformasIconsEl || !plataformasEmptyEl) return;
+
+        const lista = Array.isArray(item.plataformaStreaming)
+          ? item.plataformaStreaming
+          : [];
+
+        const fragments = [];
+        const seen = new Set();
+
+        lista.forEach((rawName) => {
+          const label = String(rawName || '').trim();
+          if (!label) return;
+
+          const { key, collapsed } = parseStreamingPlatform(label);
+          const dedupeKey = key || collapsed || label.toLowerCase();
+          if (seen.has(dedupeKey)) return;
+          seen.add(dedupeKey);
+
+          if (key && STREAMING_PLATFORM_ICONS[key]) {
+            const meta = STREAMING_PLATFORM_ICONS[key];
+            const iconPath = `${STREAMING_ICON_BASE_PATH}/${meta.file}`;
+            fragments.push(`
+              <span class="streaming-icon" title="${meta.label}">
+                <img src="${iconPath}" alt="${meta.label}">
+              </span>
+            `);
+          } else {
+            fragments.push(`
+              <span class="streaming-icon streaming-icon-fallback" title="${label}">
+                <span>${buildStreamingInitials(label)}</span>
+              </span>
+            `);
+          }
+        });
+
+        if (!fragments.length) {
+          plataformasIconsEl.innerHTML = '';
+          plataformasEmptyEl.classList.remove('d-none');
+          return;
+        }
+
+        plataformasIconsEl.innerHTML = fragments.join('');
+        plataformasEmptyEl.classList.add('d-none');
+      };
 
 
       // ============================== ASIGNACIÓN DE DATOS ==============================
@@ -190,6 +327,7 @@ export function DetalleView(item, categoria) {
       anioEl.textContent = item["año"] || 'N/A';
       genEl.textContent = Array.isArray(item.genero) ? item.genero.join(', ') : (item.genero || '');
       descEl.textContent = item.descripcion || '';
+      renderStreamingPlatforms();
       imgEl.src = resolveImagePath(item.imagen || item.img);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
 
@@ -218,14 +356,6 @@ export function DetalleView(item, categoria) {
         temporadasEl.classList.remove('d-none');
         temporadasEl.querySelector('span').textContent = item.temporadas;
       }
-      // Plataforma de streaming
-      if (Array.isArray(item.plataformaStreaming) && item.plataformaStreaming.length > 0) {
-        plataformaEl.classList.remove('d-none');
-        plataformaEl.querySelector('span').textContent =
-          item.plataformaStreaming.join(', ');
-      }
-
-
       // ============================== INTEGRACIONES (misma franquicia) ==============================
       const renderIntegraciones = async () => {
         const rail = document.getElementById("integrationRail");
@@ -301,15 +431,33 @@ export function DetalleView(item, categoria) {
 
         try {
           const { ContentModel } = await import('../models/contentModel.js');
-          const colecciones = [
-            "Peliculas", "Series", "Anime", "Musica", "Videojuegos", "Libros", "Manga", "Documentales"
-          ];
-          const promesas = colecciones.map(c =>
-            ContentModel[`list${c}`]().catch(() => [])
-          );
-          const data = (await Promise.all(promesas)).flatMap((arr, i) =>
-            arr.map(d => ({ ...d, categoria: colecciones[i].toLowerCase() }))
-          );
+          const categoriaActual = (categoria || '').toLowerCase();
+          const metodoPorCategoria = {
+            peliculas: 'listPeliculas',
+            series: 'listSeries',
+            anime: 'listAnime',
+            musica: 'listMusica',
+            libros: 'listLibros',
+            videojuegos: 'listVideojuegos',
+            manga: 'listManga',
+            documentales: 'listDocumentales'
+          };
+
+          const metodo = metodoPorCategoria[categoriaActual];
+          let data = [];
+
+          if (metodo && typeof ContentModel[metodo] === 'function') {
+            data = await ContentModel[metodo]();
+          } else {
+            // Fallback genérico por si se agrega una categoría nueva sin método dedicado
+            try {
+              data = await ContentModel.listCollection(categoriaActual);
+            } catch {
+              data = [];
+            }
+          }
+
+          const dataset = data.map(d => ({ ...d, categoria: categoriaActual }));
 
           const franquiciaActual = item.franquicia?.toLowerCase()?.trim() || '';
           const generosActuales = (item.genero || []).map(g => g.toLowerCase());
@@ -326,7 +474,7 @@ export function DetalleView(item, categoria) {
             tituloActual.includes(k) || descripcionActual.includes(k)
           );
 
-          const similares = data.filter(d => {
+          const similares = dataset.filter(d => {
             if (d.id === item.id) return false;
             const franquiciaObra = d.franquicia?.toLowerCase()?.trim();
             if (franquiciaActual && franquiciaObra && franquiciaActual === franquiciaObra) return false;

@@ -373,9 +373,21 @@ function renderListItems(items, editingId, meta) {
         item.title ||
         (isReviews ? item.obraTitulo : '') ||
         'Registro sin t&iacute;tulo';
-      const userLabel = item.userName || item.userEmail || item.userId;
+      const extractUid = () => {
+        if (item.userId) return item.userId;
+        if (typeof item.id === 'string' && item.id.includes('_')) {
+          const [uid] = item.id.split('_');
+          return uid;
+        }
+        return '';
+      };
+      const uid = extractUid();
+      const userLabel =
+        item.userEmail ||
+        item.userName ||
+        (uid ? `UID: ${uid.slice(0, 4)}...${uid.slice(-4)}` : 'Usuario sin datos');
       const lead = isReviews
-        ? [`&#11088; ${item.estrellas ?? 0}/5`, userLabel, item.categoria].filter(Boolean).join(' &bull; ')
+        ? [`&#11088; ${item.estrellas ?? 0}/5`, userLabel, item.categoria].filter(Boolean).join(' • ')
         : [
             item.director,
             item.autor,
@@ -389,8 +401,8 @@ function renderListItems(items, editingId, meta) {
         ? reviewDate.toLocaleDateString()
         : '';
       const metaLine = isReviews
-        ? [item.id, item.obraId, dateLabel].filter(Boolean).join(' &bull; ')
-        : [item.id, lead, getYear(item)].filter(Boolean).join(' &bull; ');
+        ? [userLabel, item.obraId || item.id, dateLabel].filter(Boolean).join(' • ')
+        : [item.id, lead, getYear(item)].filter(Boolean).join(' • ');
       const description = isReviews
         ? truncate(item.comentario || '', 160)
         : truncate(item.descripcion || item.description || '', 120);

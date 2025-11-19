@@ -8,7 +8,7 @@ import { Footer } from './shared/footer.js';
 export function DocumentalesView() {
   const html = `
     ${Navbar()}
-    <div class="container py-4">
+    <div class="container py-4" data-category-top="documentales">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h1 class="h3 mb-0"><i class="bi bi-film"></i> Documentales</h1>
 
@@ -44,6 +44,10 @@ export function DocumentalesView() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
+
+      const categoryTop = document.querySelector('[data-category-top="documentales"]');
+      const scrollToTop = () =>
+        categoryTop?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       // === Cargar datos con caching para reducir lecturas ===
       let data;
@@ -158,6 +162,7 @@ export function DocumentalesView() {
         if (currentPage > 1) {
           currentPage--;
           renderPage();
+          scrollToTop();
         }
       });
 
@@ -165,6 +170,7 @@ export function DocumentalesView() {
         if (currentPage < totalPages()) {
           currentPage++;
           renderPage();
+          scrollToTop();
         }
       });
 

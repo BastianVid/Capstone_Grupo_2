@@ -133,14 +133,16 @@ export function initNavbarSearch() {
     // Si no hay texto, ocultar dropdown
     if (!query) return hideDropdown();
 
-    // Si NO estás en home, filtra dentro de la vista actual
-    if (location.hash !== "" && location.hash !== "#/") {
+    const dropdownAllowedHashes = ["", "#/", "#/detalle"];
+
+    // Si NO estás en una vista con dropdown global (home o detalle), filtra dentro de la vista actual
+    if (!dropdownAllowedHashes.includes(location.hash)) {
       window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
       hideDropdown();
       return;
     }
 
-    // Si estás en home → mostrar lista de resultados
+    // Si estás en home o detalle → mostrar lista de resultados
     await buildCache();
     const results = cache.filter(x =>
       x._title.toLowerCase().includes(query) ||

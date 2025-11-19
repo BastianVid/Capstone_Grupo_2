@@ -849,6 +849,109 @@ footer {
   border-radius: 6px;
 }
 
+/* Plataformas de streaming */
+.streaming-icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.streaming-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: #0f1420;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.streaming-icon img {
+  max-width: 70%;
+  max-height: 70%;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+}
+
+.streaming-icon:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.streaming-icon-fallback {
+  background: linear-gradient(135deg, #2b2f44, #151929);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.streaming-icon-fallback span {
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .streaming-icon {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+/* Mis calificaciones */
+.calificaciones-hero {
+  background: radial-gradient(circle at top left, rgba(32, 78, 165, 0.35), transparent 55%),
+              linear-gradient(135deg, #11162b, #080b14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.calificaciones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.calificacion-card {
+  background: #101423;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 12px 28px rgba(3, 6, 14, 0.55);
+}
+.calificacion-cover {
+  width: 110px;
+  min-width: 110px;
+  height: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.calificacion-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.calificacion-stars {
+  font-size: 1rem;
+}
+@media (max-width: 768px) {
+  .calificacion-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .calificacion-cover {
+    width: 100%;
+    height: 220px;
+  }
+  .calificacion-card .btn {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
 /* Integración y rail de similares */
 .integration-rail,
 #similaresRail {

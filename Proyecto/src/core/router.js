@@ -15,6 +15,7 @@ import { VideojuegosView } from '../views/videojuegosView.js';
 import { LibrosView } from '../views/librosView.js';
 import { DetalleView } from '../views/detalleView.js';
 import { PerfilView } from '../views/perfilView.js';
+import { CalificacionesView } from '../views/calificacionesView.js';
 import { BuscarView } from '../views/buscarView.js'; 
 import { MangaView } from '../views/mangaView.js';
 import { DocumentalesView } from '../views/documentalesView.js';
@@ -47,6 +48,7 @@ const routes = {
   '/registro':        { view: RegistroView,     secure: false, title: 'Registro • CulturaX' },
   '/detalle':         { view: DetalleView,      secure: false, title: 'Detalle • CulturaX' },
   '/perfil':          { view: PerfilView,       secure: true,  title: 'Perfil • CulturaX' },
+  '/calificaciones':  { view: CalificacionesView, secure: true, title: 'Mis calificaciones – CulturaX' },
   '/buscar':          { view: BuscarView,       secure: false, title: 'Buscar • CulturaX' },
   '/manga':           { view: MangaView,        secure: false, title: 'Manga • CulturaX' },
   '/documentales':    { view: DocumentalesView, secure: false, title: 'Documentales • CulturaX' },
