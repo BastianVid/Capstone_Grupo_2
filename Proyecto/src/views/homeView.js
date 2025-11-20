@@ -5,6 +5,8 @@ import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbar
 import { renderRail } from './shared/renderRail.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { applyImgFallback } from './shared/image-fallback.js';
+import { requestGeminiRecommendation, buildCatalogSummary, buildUserReviewSummary, buildCommunityReviewSummary, hasGeminiApiKey } from '../lib/gemini.js';
+import { auth, currentUser as firebaseCurrentUser } from '../lib/firebase.js';
 
 // ============================== HOME VIEW ==============================
 export function HomeView() {
@@ -108,6 +110,42 @@ export function HomeView() {
     </section>
 
     ${Footer()}
+
+    <div class="cx-ai-chat" id="cxAiChat" aria-live="polite">
+      <button type="button" class="cx-ai-chat__fab" id="cxAiChatToggle" aria-expanded="false" aria-controls="cxAiChatWindow">
+        <i class="bi bi-stars"></i>
+        <span>¿No sabes qué ver?</span>
+      </button>
+
+      <div class="cx-ai-chat__overlay" id="cxAiChatOverlay" hidden>
+        <div class="cx-ai-chat__window" id="cxAiChatWindow" role="dialog" aria-modal="true" aria-labelledby="cxAiChatTitle">
+          <div class="cx-ai-chat__header">
+            <div>
+              <p class="cx-ai-chat__title mb-0" id="cxAiChatTitle">CulturIAx</p>
+              <small class="text-secondary">Sugerencias según reseñas</small>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-light border-0" id="cxAiChatClose" aria-label="Cerrar chat">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="cx-ai-chat__messages scrollbar-dark" id="cxAiChatMessages"></div>
+          <div class="cx-ai-chat__suggestions" id="cxAiChatSuggestions"></div>
+
+          <form class="cx-ai-chat__form" id="cxAiChatForm">
+            <input type="text" class="form-control" id="cxAiChatInput" placeholder="Cuéntame qué quieres ver..." autocomplete="off" />
+            <button class="cx-ai-chat__send" type="submit" aria-label="Enviar mensaje a CulturIAx">
+              <i class="bi bi-send"></i>
+            </button>
+          </form>
+
+          <div class="cx-ai-chat__status" id="cxAiChatStatus" hidden>
+            <div class="spinner-border spinner-border-sm text-light" role="status"></div>
+            <span>Buscando recomendaciones...</span>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
 
   return {
@@ -119,28 +157,60 @@ export function HomeView() {
       initNavbarSearch();
 
       const { ContentModel } = await import('../models/contentModel.js');
-      const [pelisRaw, seriesRaw, animeRaw, musicaRaw] = await Promise.all([
+      const [
+        pelisRaw,
+        seriesRaw,
+        animeRaw,
+        musicaRaw,
+        librosRaw,
+        documentalesRaw,
+        videojuegosRaw,
+        mangaRaw,
+        communityReviewsRaw,
+      ] = await Promise.all([
         ContentModel.listPeliculas(),
         ContentModel.listSeries(),
         ContentModel.listAnime(),
         ContentModel.listMusica(),
+        ContentModel.listLibros(),
+        ContentModel.listDocumentales(),
+        ContentModel.listVideojuegos(),
+        ContentModel.listManga(),
+        ContentModel.listCommunityResenas(60),
       ]);
 
       // === Normalización ===
-      const norm = (x, kind, defImg, defTag) => ({
-        id: x.id ?? null,
-        title: x.titulo ?? x.title ?? 'Sin título',
-        img: resolveImagePath(x.imagen ?? x.img ?? defImg),
-        tag: Array.isArray(x.genero) ? x.genero[0] : (x.genero ?? x.genre ?? defTag),
-        description: x.descripcion ?? x.description ?? '',
-        rating: x.calificacionPromedio ?? x.rating ?? 0,
-        kind,
-      });
+      const norm = (x, kind, defImg, defTag) => {
+        const genres = Array.isArray(x.genero)
+          ? x.genero.filter(Boolean)
+          : x.genero
+          ? [x.genero]
+          : Array.isArray(x.genre)
+          ? x.genre.filter(Boolean)
+          : x.genre
+          ? [x.genre]
+          : [];
+
+        return {
+          id: x.id ?? null,
+          title: x.titulo ?? x.title ?? 'Sin título',
+          img: resolveImagePath(x.imagen ?? x.img ?? defImg),
+          tag: genres[0] ?? x.genero ?? x.genre ?? defTag,
+          genres,
+          description: x.descripcion ?? x.description ?? '',
+          rating: x.calificacionPromedio ?? x.rating ?? 0,
+          kind,
+        };
+      };
 
       const pelis = (pelisRaw || []).map(x => norm(x, 'peliculas', 'inception.jpg', 'Película'));
       const series = (seriesRaw || []).map(x => norm(x, 'series', 'stranger-things.jpg', 'Serie'));
       const anime = (animeRaw || []).map(x => norm(x, 'anime', 'naruto.jpg', 'Anime'));
       const musica = (musicaRaw || []).map(x => norm(x, 'musica', 'avatar.jpg', 'Música'));
+      const libros = (librosRaw || []).map(x => norm(x, 'libros', 'avatar.jpg', 'Libro'));
+      const documentales = (documentalesRaw || []).map(x => norm(x, 'documentales', 'avatar.jpg', 'Documental'));
+      const videojuegos = (videojuegosRaw || []).map(x => norm(x, 'videojuegos', 'avatar.jpg', 'Videojuego'));
+      const manga = (mangaRaw || []).map(x => norm(x, 'manga', 'naruto.jpg', 'Manga'));
 
       // === Top dinámico y seguro ===
       const getTopRated = (arr) => {
@@ -154,6 +224,49 @@ export function HomeView() {
       const topSeries = getTopRated(series);
       const topAnime = getTopRated(anime);
       const topMusica = getTopRated(musica);
+      const topLibros = getTopRated(libros);
+      const topDocumentales = getTopRated(documentales);
+      const topVideojuegos = getTopRated(videojuegos);
+      const topManga = getTopRated(manga);
+
+      const collectGenres = (...groups) =>
+        groups
+          .flat()
+          .flatMap((item) =>
+            Array.isArray(item.genres) ? item.genres : item.tag ? [item.tag] : []
+          )
+          .filter(Boolean);
+
+      const trendingGenres = Array.from(
+        new Set(collectGenres(pelis, series, anime, musica, libros, documentales, videojuegos, manga))
+      ).slice(0, 3);
+
+      const combinedTop = [
+        ...topPelis.slice(0, 4),
+        ...topSeries.slice(0, 4),
+        ...topAnime.slice(0, 4),
+        ...topMusica.slice(0, 3),
+        ...topLibros.slice(0, 3),
+        ...topDocumentales.slice(0, 3),
+        ...topVideojuegos.slice(0, 3),
+        ...topManga.slice(0, 3),
+      ];
+      const geminiCatalogSummary = buildCatalogSummary(combinedTop);
+      const communityReviewSummary = buildCommunityReviewSummary(communityReviewsRaw);
+      let userReviewEntries = [];
+      try {
+        const activeUser = firebaseCurrentUser || auth.currentUser;
+        if (activeUser?.uid) {
+          userReviewEntries = await ContentModel.listUserResenasQuick(activeUser.uid, 20);
+          if (!userReviewEntries.length) {
+            userReviewEntries = await ContentModel.listResenasByUser(activeUser.uid, 20);
+          }
+        }
+      } catch (err) {
+        console.error('[CulturIAx] No se pudieron leer reseñas personales:', err);
+      }
+      const userReviewSummary = buildUserReviewSummary(userReviewEntries);
+      const geminiKeyReady = hasGeminiApiKey();
 
       // === Destacados aleatorios (si no hay rating, usa mezcla básica)
       const shuffle = (arr) => arr.sort(() => Math.random() - 0.5);
@@ -208,6 +321,171 @@ export function HomeView() {
       renderRail('#rail-series', topSeries, { onItemClick: onCard });
       renderRail('#rail-anime', topAnime, { onItemClick: onCard });
       renderRail('#rail-musica', topMusica, { onItemClick: onCard });
+
+      // === CulturIAx (AI chat) ===
+      const initCulturIAx = () => {
+        const root = document.getElementById('cxAiChat');
+        const overlayEl = document.getElementById('cxAiChatOverlay');
+        const dialogEl = document.getElementById('cxAiChatWindow');
+        const toggleBtn = document.getElementById('cxAiChatToggle');
+        const closeBtn = document.getElementById('cxAiChatClose');
+        const formEl = document.getElementById('cxAiChatForm');
+        const inputEl = document.getElementById('cxAiChatInput');
+        const sendBtn = formEl?.querySelector('button[type="submit"]');
+        const messagesEl = document.getElementById('cxAiChatMessages');
+        const suggestionsEl = document.getElementById('cxAiChatSuggestions');
+        const statusEl = document.getElementById('cxAiChatStatus');
+        const statusText = statusEl?.querySelector('span');
+        const history = [];
+        let pending = false;
+
+        if (!root || !overlayEl || !dialogEl || !toggleBtn || !messagesEl) return;
+
+        const isOpen = () => !overlayEl.hidden;
+        const openChat = () => {
+          overlayEl.hidden = false;
+          root.classList.add('is-open');
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          if (inputEl) setTimeout(() => inputEl.focus(), 120);
+        };
+        const closeChat = () => {
+          const activeEl = document.activeElement;
+          if (activeEl && dialogEl.contains(activeEl)) {
+            activeEl.blur();
+          }
+          overlayEl.hidden = true;
+          root.classList.remove('is-open');
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          toggleBtn.focus();
+        };
+
+        toggleBtn.addEventListener('click', () => {
+          if (isOpen()) {
+            closeChat();
+          } else {
+            openChat();
+          }
+        });
+        closeBtn?.addEventListener('click', closeChat);
+        overlayEl.addEventListener('click', (evt) => {
+          if (evt.target === overlayEl) closeChat();
+        });
+        document.addEventListener('keydown', (evt) => {
+          if (evt.key === 'Escape' && isOpen()) {
+            evt.preventDefault();
+            closeChat();
+          }
+        });
+
+        const appendMessage = (text, role = 'ai') => {
+          if (!text) return;
+          const wrapper = document.createElement('div');
+          wrapper.className = `cx-ai-chat__message ${role === 'user' ? 'is-user' : 'is-ai'}`;
+          const bubble = document.createElement('div');
+          bubble.className = 'cx-ai-chat__bubble';
+
+          if (role !== 'user') {
+            const author = document.createElement('div');
+            author.className = 'cx-ai-chat__author';
+            author.innerHTML = '<i class="bi bi-stars"></i>CulturIAx';
+            bubble.appendChild(author);
+          }
+
+          text.split(/\n{1,2}/).forEach((segment) => {
+            if (!segment.trim()) return;
+            const p = document.createElement('p');
+            p.className = 'mb-1 text-break';
+            p.textContent = segment.trim();
+            bubble.appendChild(p);
+          });
+
+          wrapper.appendChild(bubble);
+          messagesEl.appendChild(wrapper);
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        };
+
+        const setPending = (state, customStatus) => {
+          pending = state;
+          if (statusEl) {
+            statusEl.hidden = !state;
+            if (customStatus && statusText) statusText.textContent = customStatus;
+          }
+          if (inputEl) inputEl.disabled = state;
+          if (sendBtn) sendBtn.disabled = state;
+        };
+
+        messagesEl.innerHTML = '';
+        const greeting = geminiKeyReady
+          ? 'Hola, ¿no sabes qué ver? Soy CulturIAx y puedo proponerte películas y series con reseñas brillantes de CulturaX. Cuéntame qué ganas tienes hoy.'
+          : 'Para activar a CulturIAx pega tu API key en src/lib/gemini.js y vuelve a abrir el chat.';
+        appendMessage(greeting, 'ai');
+
+        const sendMessage = async (rawMessage) => {
+          const message = rawMessage?.trim();
+          if (!message || pending) return;
+          appendMessage(message, 'user');
+
+          if (!geminiKeyReady) {
+            appendMessage('Agrega tu API key en src/lib/gemini.js para activar a CulturIAx.', 'ai');
+            return;
+          }
+
+          setPending(true, 'Buscando recomendaciones...');
+          try {
+            const { text, submittedContent } = await requestGeminiRecommendation({
+              userMessage: message,
+              catalogSummary: geminiCatalogSummary,
+              userReviewSummary,
+              communityReviewSummary,
+              history,
+            });
+            history.push(submittedContent);
+            history.push({ role: 'model', parts: [{ text }] });
+            appendMessage(text, 'ai');
+          } catch (err) {
+            const fallback =
+              err.message === 'GEMINI_API_KEY_MISSING'
+                ? 'Necesitas configurar la clave de CulturIAx en src/lib/gemini.js.'
+                : 'No pude contactar al motor IA ahora mismo. Inténtalo nuevamente en unos segundos.';
+            appendMessage(fallback, 'ai');
+            console.error('[CulturIAx]', err);
+          } finally {
+            setPending(false);
+          }
+        };
+
+        formEl?.addEventListener('submit', (evt) => {
+          evt.preventDefault();
+          if (!inputEl) return;
+          const value = inputEl.value.trim();
+          if (!value) return;
+          inputEl.value = '';
+          sendMessage(value);
+        });
+
+        suggestionsEl?.addEventListener('click', (evt) => {
+          const target = evt.target instanceof Element ? evt.target : null;
+          const button = target?.closest('button[data-suggestion]');
+          if (!button) return;
+          sendMessage(button.dataset.suggestion);
+        });
+
+        if (suggestionsEl) {
+          const baseSuggestion = userReviewEntries.length
+            ? 'CulturIAx, revisa mis reseñas y sugiere algo que encaje con ellas.'
+            : trendingGenres[0]
+            ? `CulturIAx, recomiéndame algo de ${trendingGenres[0]} con buenas reseñas.`
+            : 'CulturIAx, sorpréndeme con algo muy recomendado.';
+          suggestionsEl.innerHTML = '';
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.dataset.suggestion = baseSuggestion;
+          button.textContent = baseSuggestion;
+          suggestionsEl.appendChild(button);
+        }
+      };
+
+      initCulturIAx();
 
       // === Autoscroll ===
       const setupAutoScroll = (selector, step = 1, everyMs = 25) => {

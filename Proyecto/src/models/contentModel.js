@@ -76,23 +76,75 @@ async function listResenas(categoria, itemId) {
 }
 
 // 🔹 Listar reseñas por usuario (opcional)
-async function listResenasByUser(uid) {
-  const categorias = ["peliculas", "series", "anime", "musica", "libros"];
+async function listResenasByUser(uid, limitCount = 20) {
+  if (!uid) return [];
+  const categorias = [
+    "peliculas",
+    "series",
+    "anime",
+    "musica",
+    "libros",
+    "documentales",
+    "videojuegos",
+    "manga",
+  ];
   const results = [];
-
-  for (const cat of categorias) {
-    const catSnap = await getDocs(collection(db, cat));
-    for (const docItem of catSnap.docs) {
-      const resenasRef = collection(db, cat, docItem.id, "resenas");
-      const q = query(resenasRef, where("userId", "==", uid));
-      const snap = await getDocs(q);
-      snap.forEach((d) =>
-        results.push({ categoria: cat, id: docItem.id, ...d.data() })
-      );
+  try {
+    for (const cat of categorias) {
+      const catSnap = await getDocs(collection(db, cat));
+      for (const docItem of catSnap.docs) {
+        const obraData = docItem.data() || {};
+        const resenasRef = collection(db, cat, docItem.id, "resenas");
+        const qUser = query(resenasRef, where("userId", "==", uid));
+        const snap = await getDocs(qUser);
+        snap.forEach((d) =>
+          results.push({
+            id: d.id,
+            categoria: cat,
+            obraId: docItem.id,
+            obraTitulo: obraData.titulo ?? obraData.title ?? "Sin título",
+            obraImg: obraData.imagen ?? obraData.img ?? "",
+            ...d.data(),
+          })
+        );
+      }
     }
-  }
 
-  return results;
+    return results
+      .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0))
+      .slice(0, limitCount);
+  } catch (err) {
+    console.error("⚠️ Error al leer reseñas completas del usuario:", err);
+    return [];
+  }
+}
+
+async function listUserResenasQuick(uid, limitCount = 20) {
+  if (!uid) return [];
+  try {
+    const colRef = collection(db, "userResenas");
+    const snap = await getDocs(query(colRef, where("userId", "==", uid)));
+    return snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0))
+      .slice(0, limitCount);
+  } catch (err) {
+    console.error("⚠️ Error al listar reseñas del usuario desde userResenas:", err);
+    return [];
+  }
+}
+
+async function listCommunityResenas(limitCount = 40) {
+  try {
+    const snap = await getDocs(collection(db, "userResenas"));
+    return snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => new Date(b.fecha || 0) - new Date(a.fecha || 0))
+      .slice(0, limitCount);
+  } catch (err) {
+    console.error("⚠️ Error al listar reseñas globales:", err);
+    return [];
+  }
 }
 
 // ============================== EXPORT ==============================
@@ -124,4 +176,6 @@ export const ContentModel = {
   // Reseñas (nueva estructura)
   listResenas,
   listResenasByUser,
+  listUserResenasQuick,
+  listCommunityResenas,
 };
