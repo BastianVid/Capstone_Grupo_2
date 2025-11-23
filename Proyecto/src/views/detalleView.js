@@ -98,6 +98,11 @@ export function DetalleView(item, categoria) {
       item = JSON.parse(storedItem);
       categoria = storedCategoria || categoria;
     }
+  // ❌ Nunca usar la categoria que viene dentro del item guardado
+  if (item.categoria) {
+    delete item.categoria;
+    }
+
   }
 
   if (!item || !categoria) {
@@ -239,6 +244,21 @@ export function DetalleView(item, categoria) {
   return {
     html,
     async bind() {
+      // =========================
+    // SANITIZE UNIVERSAL
+    // =========================
+        const sanitize = (v) => {
+        if (!v) return "";
+        return v
+          .toString()
+          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase();
+      };
+
+
+
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
@@ -356,38 +376,49 @@ export function DetalleView(item, categoria) {
         temporadasEl.classList.remove('d-none');
         temporadasEl.querySelector('span').textContent = item.temporadas;
       }
-      // ============================== INTEGRACIONES (misma franquicia) ==============================
+      // ======================= INTEGRACIONES ==========================
       const renderIntegraciones = async () => {
         const rail = document.getElementById("integrationRail");
         if (!rail) return;
 
-        rail.innerHTML = `<p class="text-secondary small">Buscando integraciones relacionadas...</p>`;
+        rail.innerHTML = `<p class="text-secondary small">Buscando integraciones...</p>`;
 
         try {
           const { ContentModel } = await import("../models/contentModel.js");
-          const colecciones = [
-            "Peliculas", "Series", "Anime", "Musica", "Videojuegos", "Libros", "Manga", "Documentales"
-          ];
-          const promesas = colecciones.map(c =>
-            ContentModel[`list${c}`]().catch(() => [])
-          );
-          const data = (await Promise.all(promesas)).flatMap((arr, i) =>
-            arr.map(d => ({ ...d, categoria: colecciones[i].toLowerCase() }))
-          );
 
-          const franquiciaActual = item.franquicia?.toLowerCase()?.trim();
+          // Colecciones EXACTAS según ContentModel
+          const colecciones = [
+            "peliculas",
+            "series",
+            "anime",
+            "musica",
+            "videojuegos",
+            "libros",
+            "manga",
+            "documentales"
+          ];
+
+          // Cargar TODO
+          const datasets = [];
+          for (const c of colecciones) {
+            const lista = await ContentModel.listCollection(c);
+            lista.forEach(x => datasets.push({ ...x, categoria: c }));
+          }
+
+          // Sanitizar franquicia
+          const franquiciaActual = sanitize(item.franquicia);
+
           if (!franquiciaActual) {
-            rail.innerHTML = `<p class="text-secondary small">No hay franquicia definida para esta obra.</p>`;
+            rail.innerHTML = `<p class="text-secondary small">No hay franquicia registrada.</p>`;
             return;
           }
 
-          const integraciones = data.filter(d => {
-            const franquiciaObra = d.franquicia?.toLowerCase()?.trim();
-            return franquiciaObra === franquiciaActual && d.id !== item.id;
-          });
+          const integraciones = datasets.filter(x =>
+            sanitize(x.franquicia) === franquiciaActual && x.id !== item.id
+          );
 
           if (!integraciones.length) {
-            rail.innerHTML = `<p class="text-secondary small">No se encontraron integraciones asociadas.</p>`;
+            rail.innerHTML = `<p class="text-secondary small">No hay integraciones relacionadas.</p>`;
             return;
           }
 
@@ -397,7 +428,7 @@ export function DetalleView(item, categoria) {
                   data-id="${r.id}" data-categoria="${r.categoria}"
                   style="min-width:180px; cursor:pointer;">
                 <img src="${resolveImagePath(r.imagen || r.img)}"
-                     alt="${r.titulo}" class="w-100" style="height:240px; object-fit:cover;">
+                    alt="${r.titulo}" class="w-100" style="height:240px; object-fit:cover;">
                 <div class="p-2">
                   <div class="small text-white fw-semibold">${r.titulo}</div>
                   <div class="text-secondary small text-capitalize">${r.categoria}</div>
@@ -406,24 +437,27 @@ export function DetalleView(item, categoria) {
             `)
             .join("");
 
-          rail.querySelectorAll(".int-card").forEach(card => {
-            card.addEventListener("click", () => {
+          rail.querySelectorAll('.int-card').forEach(card => {
+            card.addEventListener('click', () => {
               const id = card.dataset.id;
               const cat = card.dataset.categoria;
+
               const selected = integraciones.find(x => x.id === id);
               if (!selected) return;
+
               sessionStorage.setItem("detalleItem", JSON.stringify(selected));
               sessionStorage.setItem("detalleCategoria", cat);
+
               navigate("/detalle");
             });
           });
+
         } catch (err) {
-          console.error("Error cargando integraciones:", err);
+          console.error("❌ Error integraciones:", err);
           rail.innerHTML = `<p class="text-danger small">Error al cargar integraciones.</p>`;
         }
       };
       await renderIntegraciones();
-
       // ============================== SIMILARES (por tema o género, excluyendo franquicia) ==============================
       const renderSimilares = async () => {
         const rail = document.getElementById('similaresRail');
@@ -459,7 +493,7 @@ export function DetalleView(item, categoria) {
 
           const dataset = data.map(d => ({ ...d, categoria: categoriaActual }));
 
-          const franquiciaActual = item.franquicia?.toLowerCase()?.trim() || '';
+          const franquiciaActual = sanitize(item.franquicia);
           const generosActuales = (item.genero || []).map(g => g.toLowerCase());
           const descripcionActual = (item.descripcion || '').toLowerCase();
           const tituloActual = (item.titulo || '').toLowerCase();
@@ -476,7 +510,7 @@ export function DetalleView(item, categoria) {
 
           const similares = dataset.filter(d => {
             if (d.id === item.id) return false;
-            const franquiciaObra = d.franquicia?.toLowerCase()?.trim();
+            const franquiciaObra = sanitize(d.franquicia);
             if (franquiciaActual && franquiciaObra && franquiciaActual === franquiciaObra) return false;
 
             const matchGenero = d.genero?.some(g => generosActuales.includes(g.toLowerCase()));
