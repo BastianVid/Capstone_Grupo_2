@@ -19,7 +19,7 @@ export function HomeView() {
 
         <!-- Izquierda -->
         <aside class="col-lg-4 col-xl-3">
-          <div id="ad-superior" class="card bg-dark border-0 shadow-sm mb-3 text-center p-2 position-relative overflow-hidden" style="height:250px;"></div>
+          <div id="ad-superior" class="card bg-dark border-0 shadow-sm mb-3 text-center p-2 position-relative overflow-hidden"></div>
 
           <div class="card bg-dark border-0 shadow-sm upcoming-card">
             <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
@@ -112,13 +112,8 @@ export function HomeView() {
     ${Footer()}
 
     <div class="cx-ai-chat" id="cxAiChat" aria-live="polite">
-      <button type="button" class="cx-ai-chat__fab" id="cxAiChatToggle" aria-expanded="false" aria-controls="cxAiChatWindow">
-        <i class="bi bi-stars"></i>
-        <span>¿No sabes qué ver?</span>
-      </button>
-
-      <div class="cx-ai-chat__overlay" id="cxAiChatOverlay" hidden>
-        <div class="cx-ai-chat__window" id="cxAiChatWindow" role="dialog" aria-modal="true" aria-labelledby="cxAiChatTitle">
+      <div class="cx-ai-chat__panel" id="cxAiChatPanel" aria-hidden="true">
+        <div class="cx-ai-chat__window" id="cxAiChatWindow" role="dialog" aria-modal="false" aria-labelledby="cxAiChatTitle">
           <div class="cx-ai-chat__header">
             <div>
               <p class="cx-ai-chat__title mb-0" id="cxAiChatTitle">CulturIAx</p>
@@ -145,6 +140,11 @@ export function HomeView() {
           </div>
         </div>
       </div>
+
+      <button type="button" class="cx-ai-chat__fab" id="cxAiChatToggle" aria-expanded="false" aria-controls="cxAiChatWindow">
+        <i class="bi bi-stars"></i>
+        <span>¿No sabes qué ver?</span>
+      </button>
     </div>
   `;
 
@@ -325,7 +325,7 @@ export function HomeView() {
       // === CulturIAx (AI chat) ===
       const initCulturIAx = () => {
         const root = document.getElementById('cxAiChat');
-        const overlayEl = document.getElementById('cxAiChatOverlay');
+        const panelEl = document.getElementById('cxAiChatPanel');
         const dialogEl = document.getElementById('cxAiChatWindow');
         const toggleBtn = document.getElementById('cxAiChatToggle');
         const closeBtn = document.getElementById('cxAiChatClose');
@@ -339,21 +339,23 @@ export function HomeView() {
         const history = [];
         let pending = false;
 
-        if (!root || !overlayEl || !dialogEl || !toggleBtn || !messagesEl) return;
+        if (!root || !panelEl || !dialogEl || !toggleBtn || !messagesEl) return;
 
-        const isOpen = () => !overlayEl.hidden;
+        const isOpen = () => root.classList.contains('is-open');
         const openChat = () => {
-          overlayEl.hidden = false;
+          if (isOpen()) return;
           root.classList.add('is-open');
+          panelEl.setAttribute('aria-hidden', 'false');
           toggleBtn.setAttribute('aria-expanded', 'true');
           if (inputEl) setTimeout(() => inputEl.focus(), 120);
         };
         const closeChat = () => {
+          if (!isOpen()) return;
           const activeEl = document.activeElement;
           if (activeEl && dialogEl.contains(activeEl)) {
             activeEl.blur();
           }
-          overlayEl.hidden = true;
+          panelEl.setAttribute('aria-hidden', 'true');
           root.classList.remove('is-open');
           toggleBtn.setAttribute('aria-expanded', 'false');
           toggleBtn.focus();
@@ -367,8 +369,8 @@ export function HomeView() {
           }
         });
         closeBtn?.addEventListener('click', closeChat);
-        overlayEl.addEventListener('click', (evt) => {
-          if (evt.target === overlayEl) closeChat();
+        document.addEventListener('mousedown', (evt) => {
+          if (isOpen() && !root.contains(evt.target)) closeChat();
         });
         document.addEventListener('keydown', (evt) => {
           if (evt.key === 'Escape' && isOpen()) {
@@ -524,8 +526,10 @@ export function HomeView() {
         const renderAd = (elId, ad) => {
           const el = document.getElementById(elId);
           if (!el || !ad) return;
+          const href = ad.url || '#';
+          const isExternal = href && !href.startsWith('#');
           el.innerHTML = `
-            <a href="${ad.url}" target="_blank" rel="noopener" class="d-block w-100 h-100">
+            <a href="${href}" ${isExternal ? 'target="_blank" rel="noopener"' : ''} class="d-block w-100 h-100">
               <img src="${ad.img}" alt="${ad.alt}" />
             </a>`;
         };

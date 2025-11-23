@@ -59,23 +59,19 @@ export function RegistroView() {
   return {
     html,
     bind() {
-      // Estado del navbar
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
       const form = document.getElementById('regForm');
       const alertBox = document.getElementById('alertBox');
-      // Al menos 8 caracteres, 1 mayúscula y 1 número (sin exigir punto)
       const strongPass = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-      function showAlert(msg, type = 'danger') {
+      const showAlert = (msg, type = 'danger') => {
         alertBox.className = `alert alert-${type}`;
         alertBox.textContent = msg;
         alertBox.classList.remove('d-none');
-      }
-      function hideAlert() {
-        alertBox.classList.add('d-none');
-      }
+      };
+      const hideAlert = () => alertBox.classList.add('d-none');
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -103,15 +99,13 @@ export function RegistroView() {
           return;
         }
 
-        const displayName = usuario || nombre;
-
         const { register } = await import('../controllers/authController.js');
         try {
-          await register(email, pass, displayName);
-          // redirige a '#/login' desde el controller (verificación requerida)
+          await register(email, pass, nombre, usuario);
         } catch (err) {
           const map = {
             'auth/email-already-in-use': 'Este correo ya está en uso. Inicia sesión o usa otro.',
+            'USERNAME_TAKEN': 'Ese nombre de usuario ya está en uso. Elige otro.',
             'auth/invalid-email': 'El correo no es válido.',
             'auth/weak-password': 'La contraseña es demasiado débil.',
           };
@@ -119,13 +113,11 @@ export function RegistroView() {
         }
       });
 
-      // Logout (por si ya está logueado)
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
       });
 
-      // Buscador (redirige a /buscar)
       document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
         e.preventDefault();
         const q = e.currentTarget.querySelector('input').value.trim();

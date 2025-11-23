@@ -218,8 +218,8 @@ export function DetalleView(item, categoria) {
 
           <!-- Publicidad lateral -->
           <section class="my-4">
-            <div id="ad-right-1" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="height:140px;"></div>
-            <div id="ad-right-2" class="card bg-dark border-0 shadow-sm text-center p-0 mb-3 position-relative overflow-hidden" style="height:140px;"></div>
+            <div id="ad-right-1" class="card bg-dark border-0 shadow-sm text-center p-2 mb-3 position-relative overflow-hidden"></div>
+            <div id="ad-right-2" class="card bg-dark border-0 shadow-sm text-center p-2 mb-3 position-relative overflow-hidden"></div>
           </section>
         </div>
       </div>
@@ -227,8 +227,8 @@ export function DetalleView(item, categoria) {
       <!-- Publicidad inferior -->
       <section class="my-4">
         <div class="row g-3">
-          <div class="col-md-6"><div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-0 position-relative overflow-hidden" style="height:150px;"></div></div>
-          <div class="col-md-6"><div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-0 position-relative overflow-hidden" style="height:150px;"></div></div>
+          <div class="col-md-6"><div id="ad-bottom-1" class="card bg-dark border-0 shadow-sm text-center p-2 position-relative overflow-hidden"></div></div>
+          <div class="col-md-6"><div id="ad-bottom-2" class="card bg-dark border-0 shadow-sm text-center p-2 position-relative overflow-hidden"></div></div>
         </div>
       </section>
     </div>
@@ -593,21 +593,22 @@ export function DetalleView(item, categoria) {
       });
 
       const renderResenas = async user => {
-        const snap = await getDocs(collection(db, categoria, item.id, 'resenas'));
+        const snap = await getDocs(collection(db, categoria, item.id, "resenas"));
         if (snap.empty) {
-          commentsList.innerHTML = `<p class="text-muted">No hay reseñas aún.</p>`;
+          commentsList.innerHTML = `<p class="text-muted">No hay rese�as a�n.</p>`;
           return;
         }
-        let html = '';
+        let html = "";
         let count = 0;
         snap.forEach(d => {
           if (count >= 5) return;
           const r = d.data();
           const own = user && r.userId === user.uid;
+          const author = r.userEmail || "Usuario anonimo";
           html += `
             <div class="border-bottom border-secondary pb-2 mb-2 ${own ? 'review-own' : ''}">
-              <strong>${r.userEmail || 'Usuario anónimo'} ${own ? ' (Tu reseña)' : ''}</strong>
-              <p class="mb-1 text-warning small">${'★'.repeat(r.estrellas)}${'☆'.repeat(5 - r.estrellas)}</p>
+              <strong>${author}${own ? ' (Tu resena)' : ''}</strong>
+              <p class="mb-1 text-warning small">${"&#9733;".repeat(r.estrellas)}${"&#9734;".repeat(5 - r.estrellas)}</p>
               <p class="mb-0 small">${r.comentario}</p>
             </div>`;
           count++;
@@ -670,3 +671,9 @@ export function DetalleView(item, categoria) {
     },
   };
 }
+
+
+
+
+
+

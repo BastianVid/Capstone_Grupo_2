@@ -1,5 +1,6 @@
 {
   "superior": [
+    { "img": "./src/assets/img/ads/ad-culturiax-superior.svg",  "alt": "CulturIAx - Tu curador IA", "url": "#/home" },
     { "img": "./src/assets/img/ads/ad-eneba-superior.svg",       "alt": "Ofertas Eneba",        "url": "https://www.eneba.com/?r=tu_ref_eneba" },
     { "img": "./src/assets/img/ads/ad-amazon-superior.svg",      "alt": "Amazon Prime Video",   "url": "https://amzn.to/tu_ref_amazon" },
     { "img": "./src/assets/img/ads/ad-crunchyroll-superior.svg", "alt": "Crunchyroll Premium",  "url": "https://www.crunchyroll.com/" },

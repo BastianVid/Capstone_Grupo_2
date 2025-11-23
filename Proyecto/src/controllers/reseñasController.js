@@ -9,6 +9,7 @@ import {
   getDocs,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { db, auth } from "../lib/firebase.js";
+import { UserModel } from "../models/userModel.js";
 
 // ============================== GUARDAR O ACTUALIZAR RESEÑA ==============================
 export async function guardarReseña(categoria, itemId, estrellas, comentario) {
@@ -16,7 +17,8 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   if (!user) { alert("Debes iniciar sesión para dejar una reseña."); return; }
 
   const userId = user.uid;
-  const userName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
+  const profile = await UserModel.ensureProfile(user).catch(() => null);
+  const userName = profile?.username || user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
   const itemRef = doc(db, categoria, itemId);
   const resenaRef = doc(db, categoria, itemId, "resenas", userId);
   const globalRef = doc(db, "userResenas", `${userId}_${categoria}_${itemId}`);
