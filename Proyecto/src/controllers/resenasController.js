@@ -1,4 +1,4 @@
-﻿// ============================== IMPORTS ==============================
+// ============================== IMPORTS ==============================
 import {
   doc,
   getDoc,
@@ -11,10 +11,10 @@ import {
 import { db, auth } from "../lib/firebase.js";
 import { UserModel } from "../models/userModel.js";
 
-// ============================== GUARDAR O ACTUALIZAR RESEÑA ==============================
-export async function guardarReseña(categoria, itemId, estrellas, comentario) {
+// ============================== GUARDAR O ACTUALIZAR RESENA ==============================
+export async function guardarResena(categoria, itemId, estrellas, comentario) {
   const user = auth.currentUser;
-  if (!user) { alert("Debes iniciar sesión para dejar una reseña."); return; }
+  if (!user) { alert("Debes iniciar sesion para dejar una resena."); return; }
 
   const userId = user.uid;
   const profile = await UserModel.ensureProfile(user).catch(() => null);
@@ -46,7 +46,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       }
     }
 
-    // Guardar o actualizar reseña del usuario
+    // Guardar o actualizar resena del usuario
     tx.set(resenaRef, {
       userId,
       userName,
@@ -61,7 +61,7 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
   try {
     const itemSnap = await getDoc(itemRef);
     const itemData = itemSnap.exists() ? itemSnap.data() : {};
-    const obraTitulo = itemData.titulo || itemData.title || "Sin título";
+    const obraTitulo = itemData.titulo || itemData.title || "Sin titulo";
     const obraImg = itemData.imagen || itemData.img || "";
 
     await setDoc(globalRef, {
@@ -77,12 +77,12 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       fecha: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Error al registrar reseña global:", error);
+    console.error("Error al registrar resena global:", error);
   }
 }
 
-// ============================== OBTENER RESEÑA DE USUARIO ==============================
-export async function obtenerReseñaUsuario(categoria, itemId) {
+// ============================== OBTENER RESENA DE USUARIO ==============================
+export async function obtenerResenaUsuario(categoria, itemId) {
   const user = auth.currentUser;
   if (!user) return null;
   const resenaRef = doc(db, categoria, itemId, "resenas", user.uid);
@@ -90,8 +90,8 @@ export async function obtenerReseñaUsuario(categoria, itemId) {
   return snap.exists() ? snap.data() : null;
 }
 
-// ============================== ELIMINAR RESEÑA ==============================
-export async function eliminarReseña(categoria, itemId) {
+// ============================== ELIMINAR RESENA ==============================
+export async function eliminarResena(categoria, itemId) {
   const user = auth.currentUser;
   if (!user) return;
 
@@ -109,6 +109,6 @@ export async function eliminarReseña(categoria, itemId) {
     const nuevoPromedio = total ? suma / total : 0;
     await setDoc(doc(db, categoria, itemId), { calificacionPromedio: nuevoPromedio, totalVotos: total }, { merge: true });
   } catch (error) {
-    console.error("Error al eliminar reseña:", error);
+    console.error("Error al eliminar resena:", error);
   }
 }

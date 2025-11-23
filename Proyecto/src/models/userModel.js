@@ -7,6 +7,12 @@ import {
   setDoc,
   runTransaction,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { storage } from '../lib/firebase.js';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
 
 const cache = new Map();
 
@@ -20,9 +26,12 @@ const sanitizeUsername = (raw = '') =>
   raw
     .toString()
     .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9._-]/g, '')
+    .replace(/[^A-Za-z0-9._-]/g, '')
     .slice(0, 24);
+
+const toLowerId = (raw = '') =>
+  sanitizeUsername(raw)
+    .toLowerCase();
 
 async function getUserProfile(uid, { fresh = false } = {}) {
   if (!uid) return null;
@@ -44,10 +53,11 @@ async function setUserProfile(uid, data) {
 
 async function claimUsername(uid, desired, extras = {}) {
   const username = sanitizeUsername(desired);
-  if (!username) throw usernameError('USERNAME_INVALID', 'Nombre de usuario inválido');
+  const usernameLower = toLowerId(desired);
+  if (!usernameLower) throw usernameError('USERNAME_INVALID', 'Nombre de usuario inválido');
 
   return runTransaction(db, async (tx) => {
-    const unameRef = doc(db, 'usernames', username);
+    const unameRef = doc(db, 'usernames', usernameLower);
     const unameSnap = await tx.get(unameRef);
     if (unameSnap.exists() && unameSnap.data()?.uid !== uid) {
       throw usernameError('USERNAME_TAKEN', 'El usuario ya existe');
@@ -60,11 +70,11 @@ async function claimUsername(uid, desired, extras = {}) {
       email: extras.email ?? baseData.email ?? null,
       nombre: extras.nombre ?? baseData.nombre ?? null,
       username,
-      usernameLower: username,
+      usernameLower,
       updatedAt: new Date().toISOString(),
     };
 
-    tx.set(unameRef, { uid, username });
+    tx.set(unameRef, { uid, username: username, usernameLower });
     tx.set(userRef, payload, { merge: true });
     cache.set(uid, { uid, ...payload });
     return { username, profile: { uid, ...payload } };
@@ -117,7 +127,7 @@ async function ensureProfile(user, opts = {}) {
 async function isUsernameAvailable(username, excludeUid = null) {
   const uname = sanitizeUsername(username);
   if (!uname) return false;
-  const snap = await getDoc(doc(db, 'usernames', uname));
+  const snap = await getDoc(doc(db, 'usernames', toLowerId(username)));
   if (!snap.exists()) return true;
   return excludeUid ? snap.data()?.uid === excludeUid : false;
 }
@@ -129,4 +139,13 @@ export const UserModel = {
   ensureProfile,
   claimUsername,
   isUsernameAvailable,
+  async uploadAvatar(uid, file) {
+    if (!uid || !file) throw usernameError('USER_MISSING', 'Usuario no válido');
+    const avatarRef = ref(storage, `avatars/${uid}`);
+    await uploadBytes(avatarRef, file);
+    const url = await getDownloadURL(avatarRef);
+    await setUserProfile(uid, { photoURL: url });
+    return url;
+  },
 };
+

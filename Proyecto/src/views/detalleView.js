@@ -5,7 +5,7 @@ import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbar
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import { guardarReseña, obtenerReseñaUsuario, eliminarReseña } from '../controllers/reseñasController.js';
+import { guardarResena, obtenerResenaUsuario, eliminarResena } from '../controllers/resenasController.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { navigate } from '../core/router.js';
 
@@ -603,6 +603,7 @@ export function DetalleView(item, categoria) {
       const delBtn = document.getElementById('deleteComment');
       const commentsList = document.getElementById('commentsList');
       let currentRating = 0;
+      const profileCache = new Map();
 
       const pintarEstrellas = v => {
         stars.forEach((s, i) => {
@@ -626,27 +627,44 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      const renderResenas = async user => {
+            const renderResenas = async user => {
         const snap = await getDocs(collection(db, categoria, item.id, "resenas"));
         if (snap.empty) {
-          commentsList.innerHTML = `<p class="text-muted">No hay rese�as a�n.</p>`;
+          commentsList.innerHTML = `<p class="text-muted">No hay resenas aun.</p>`;
           return;
         }
-        let html = "";
-        let count = 0;
+        const entries = [];
         snap.forEach(d => {
-          if (count >= 5) return;
-          const r = d.data();
-          const own = user && r.userId === user.uid;
-          const author = r.userEmail || "Usuario anonimo";
-          html += `
+          if (entries.length < 5) entries.push({ id: d.id, data: d.data() });
+        });
+
+        const usernames = new Map();
+        await Promise.all(entries.map(async ({ id }) => {
+          if (profileCache.has(id)) {
+            usernames.set(id, profileCache.get(id));
+            return;
+          }
+          try {
+            const profileSnap = await getDoc(doc(db, "users", id));
+            const uname = profileSnap.exists() ? (profileSnap.data().username || profileSnap.data().usernameLower || null) : null;
+            profileCache.set(id, uname);
+            usernames.set(id, uname);
+          } catch {
+            usernames.set(id, null);
+          }
+        }));
+
+        const html = entries.map(({ id, data }) => {
+          const own = user && data.userId === user.uid;
+          const author = usernames.get(id) || data.userName || "Usuario";
+          return `
             <div class="border-bottom border-secondary pb-2 mb-2 ${own ? 'review-own' : ''}">
               <strong>${author}${own ? ' (Tu resena)' : ''}</strong>
-              <p class="mb-1 text-warning small">${"&#9733;".repeat(r.estrellas)}${"&#9734;".repeat(5 - r.estrellas)}</p>
-              <p class="mb-0 small">${r.comentario}</p>
+              <p class="mb-1 text-warning small">${"&#9733;".repeat(data.estrellas)}${"&#9734;".repeat(5 - data.estrellas)}</p>
+              <p class="mb-0 small">${data.comentario}</p>
             </div>`;
-          count++;
-        });
+        }).join("");
+
         commentsList.innerHTML = html;
       };
 
@@ -656,7 +674,7 @@ export function DetalleView(item, categoria) {
         await renderResenas(user);
 
         if (user) {
-          const r = await obtenerReseñaUsuario(categoria, item.id);
+          const r = await obtenerResenaUsuario(categoria, item.id);
           if (r) {
             currentRating = r.estrellas;
             comentarioEl.value = r.comentario;
@@ -680,7 +698,7 @@ export function DetalleView(item, categoria) {
           if (!currentRating) { errorEl.textContent = '⚠️ Debes calificar con estrellas.'; return; }
           if (!comentario) { errorEl.textContent = '⚠️ El comentario no puede estar vacío.'; return; }
 
-          await guardarReseña(categoria, item.id, currentRating, comentario);
+          await guardarResena(categoria, item.id, currentRating, comentario);
           msg.textContent = '✅ Reseña guardada.';
           delBtn.classList.remove('d-none');
           await renderResenas(user);
@@ -691,7 +709,7 @@ export function DetalleView(item, categoria) {
         delBtn.addEventListener('click', async () => {
           if (!user) return;
           if (confirm('¿Eliminar tu reseña?')) {
-            await eliminarReseña(categoria, item.id);
+            await eliminarResena(categoria, item.id);
             comentarioEl.value = '';
             currentRating = 0;
             pintarEstrellas(0);
@@ -705,6 +723,11 @@ export function DetalleView(item, categoria) {
     },
   };
 }
+
+
+
+
+
 
 
 

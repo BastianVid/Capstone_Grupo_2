@@ -48,7 +48,7 @@ export function PerfilView() {
           <div class="stat-card">
             <i class="bi bi-chat-left-text"></i>
             <div>
-              <h5>Reseñas</h5>
+              <h5>ReseÃ±as</h5>
               <p id="statResenas">0 publicadas</p>
             </div>
           </div>
@@ -68,7 +68,7 @@ export function PerfilView() {
     <!-- PANEL DE CONTENIDO -->
     <section class="container my-5">
       <ul class="nav nav-pills mb-3 justify-content-center" id="profileTabs">
-        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-resenas">Mis reseñas</button></li>
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-resenas">Mis reseÃ±as</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-favoritos">Favoritos</button></li>
         <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-actividad">Actividad</button></li>
       </ul>
@@ -77,7 +77,7 @@ export function PerfilView() {
           <div id="resenasGrid"></div>
         </div>
         <div class="tab-pane fade text-center text-secondary py-5" id="tab-favoritos">
-          <p><i class="bi bi-heart fs-1 mb-2 d-block"></i> Próximamente podrás guardar tus obras favoritas.</p>
+          <p><i class="bi bi-heart fs-1 mb-2 d-block"></i> PrÃ³ximamente podrÃ¡s guardar tus obras favoritas.</p>
         </div>
         <div class="tab-pane fade text-center text-secondary py-5" id="tab-actividad">
           <p><i class="bi bi-clock-history fs-1 mb-2 d-block"></i> Sin actividad reciente.</p>
@@ -103,13 +103,9 @@ export function PerfilView() {
       const avatarEl = document.getElementById("perfilAvatar");
       const nombreEl = document.getElementById("perfilNombre");
       const correoEl = document.getElementById("perfilCorreo");
-      const usernameLabel = document.getElementById("perfilUsernameLabel");
       const usernameInput = document.getElementById("perfilUsernameInput");
       const usernameStatus = document.getElementById("usernameStatus");
       const btnSaveUsername = document.getElementById("btnSaveUsername");
-      const btnCancelUsername = document.getElementById("btnCancelUsername");
-      const btnEditUsername = document.getElementById("btnEditUsername");
-      const usernameEditWrap = document.getElementById("usernameEditWrap");
       const btnChangeAvatar = document.getElementById("btnChangeAvatar");
       const avatarInput = document.getElementById("avatarInput");
 
@@ -118,9 +114,8 @@ export function PerfilView() {
       correoEl.textContent = user.email || "";
       avatarEl.src = profile?.photoURL || user.photoURL || "src/assets/img/profile-placeholder.jpg";
       usernameInput.value = profile?.username || user.displayName || "";
-      usernameLabel.textContent = profile?.username ? `@${profile.username}` : '';
 
-      // === ESTADÍSTICAS DEL USUARIO ===
+      // === ESTADÃSTICAS DEL USUARIO ===
       const resenasSnap = await getDocs(collection(db, "userResenas"));
       const propias = [];
       resenasSnap.forEach((d) => {
@@ -132,13 +127,13 @@ export function PerfilView() {
       document.getElementById("statFecha").textContent =
         new Date(user.metadata?.creationTime || Date.now()).toLocaleDateString("es-CL");
 
-      // === RENDERIZAR RESEÑAS ===
+      // === RENDERIZAR RESEÃ‘AS ===
       const mapped = propias.map((r) => ({
         title: r.obraTitulo,
         img: resolveImagePath(r.obraImg),
         tag: r.categoria,
         description: `${r.comentario}`,
-        subtitle: `★ ${r.estrellas}/5`,
+        subtitle: `â˜… ${r.estrellas}/5`,
       }));
 
       renderCards("#resenasGrid", mapped, {
@@ -158,47 +153,17 @@ export function PerfilView() {
       });
 
       // === CAMBIAR USERNAME ===
-      btnSaveUsername?.addEventListener("click", async () => {
-        const desired = usernameInput.value.trim();
-        if (!desired) {
-          usernameStatus.textContent = "Ingresa un username.";
-          usernameStatus.className = "text-danger";
-          return;
-        }
-        btnSaveUsername.disabled = true;
-        usernameStatus.textContent = "Guardando...";
-        usernameStatus.className = "text-secondary";
-        try {
-          const { profile: newProfile } = await UserModel.claimUsername(user.uid, desired, {
-            email: user.email,
-            nombre: user.displayName,
-          });
           usernameStatus.textContent = "Username actualizado.";
           usernameStatus.className = "text-success";
           nombreEl.textContent = newProfile?.username || nombreEl.textContent;
-          usernameLabel.textContent = newProfile?.username ? `@${newProfile.username}` : usernameLabel.textContent;
           await updateProfile(user, { displayName: newProfile?.username });
           updateNavbarSessionUI();
-          usernameEditWrap.classList.add("d-none");
-          btnEditUsername.classList.remove("d-none");
         } catch (err) {
           usernameStatus.textContent = err?.code === "USERNAME_TAKEN" ? "Ese username ya existe." : "No se pudo guardar.";
           usernameStatus.className = "text-danger";
         } finally {
           btnSaveUsername.disabled = false;
         }
-      });
-
-      btnEditUsername?.addEventListener("click", () => {
-        usernameEditWrap.classList.remove("d-none");
-        btnEditUsername.classList.add("d-none");
-        usernameInput.focus();
-      });
-
-      btnCancelUsername?.addEventListener("click", () => {
-        usernameEditWrap.classList.add("d-none");
-        btnEditUsername.classList.remove("d-none");
-        usernameStatus.textContent = "";
       });
 
       // === CAMBIAR AVATAR ===
@@ -233,4 +198,3 @@ export function PerfilView() {
     },
   };
 }
-
