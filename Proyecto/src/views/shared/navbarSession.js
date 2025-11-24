@@ -20,13 +20,15 @@ export async function updateNavbarSessionUI() {
   if (user) {
     let profile = null;
     try { profile = await UserModel.ensureProfile(user); } catch {}
-    const displayName =
+    const rawName =
       profile?.username ||
       user.displayName ||
       (user.email ? user.email.split('@')[0] : null) ||
       'Mi cuenta';
+    const handle =
+      rawName && rawName.startsWith('@') ? rawName : rawName ? `@${rawName}` : 'Mi cuenta';
 
-    if (nameEl)  nameEl.textContent  = displayName;
+    if (nameEl)  nameEl.textContent  = handle;
     if (emailEl) emailEl.textContent = user.email || '';
 
     loginBtn?.classList.add('d-none');
