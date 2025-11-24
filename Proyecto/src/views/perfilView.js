@@ -114,7 +114,7 @@ export function PerfilView() {
       const avatarInput = document.getElementById("avatarInput");
 
       const profile = await UserModel.ensureProfile(user).catch(() => null);
-      nombreEl.textContent = profile?.nombre || user.displayName || "Usuario sin nombre";
+      nombreEl.textContent = profile?.username || profile?.nombre || user.displayName || "Usuario sin nombre";
       correoEl.textContent = user.email || "";
       avatarEl.src = profile?.photoURL || user.photoURL || "src/assets/img/profile-placeholder.jpg";
       usernameInput.value = profile?.username || user.displayName || "";

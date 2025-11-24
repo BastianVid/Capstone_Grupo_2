@@ -379,8 +379,21 @@ export function HomeView() {
           }
         });
 
+        const sanitizeAiText = (value = '') => {
+          let output = String(value || '');
+          // Quitar negritas estilo Markdown y asteriscos duplicados
+          output = output.replace(/\*\*(.*?)\*\*/g, '$1');
+          output = output.replace(/__([^_]+)__/g, '$1');
+          // Convertir viñetas con asterisco a puntos simples
+          output = output.replace(/^\s*\*\s+/gm, '• ');
+          // Remover acumulaciones de asteriscos sueltos
+          output = output.replace(/\*{2,}/g, '');
+          return output.trim();
+        };
+
         const appendMessage = (text, role = 'ai') => {
           if (!text) return;
+          const safeText = role === 'user' ? text : sanitizeAiText(text);
           const wrapper = document.createElement('div');
           wrapper.className = `cx-ai-chat__message ${role === 'user' ? 'is-user' : 'is-ai'}`;
           const bubble = document.createElement('div');
@@ -393,7 +406,7 @@ export function HomeView() {
             bubble.appendChild(author);
           }
 
-          text.split(/\n{1,2}/).forEach((segment) => {
+          safeText.split(/\n{1,2}/).forEach((segment) => {
             if (!segment.trim()) return;
             const p = document.createElement('p');
             p.className = 'mb-1 text-break';
