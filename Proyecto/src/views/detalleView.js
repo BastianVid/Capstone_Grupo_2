@@ -269,11 +269,17 @@ export function DetalleView(item, categoria) {
         await logout();
       });
 
-      // Cargar datos faltantes si es necesario
-      if (!item["año"] || !item.genero) {
+      {
         const snap = await getDoc(doc(db, categoria, item.id));
-        if (snap.exists()) item = { id: snap.id, ...snap.data() };
+        if (snap.exists()) {
+          item = {
+            ...item,          // ⬅ conserva lo que venía del rail
+            ...snap.data(),   // ⬅ añade TODOS los datos correctos de Firestore
+            id: snap.id
+          };
+        }
       }
+
 
       // Referencias DOM
       const imgEl = document.getElementById('detalleImg');
@@ -413,9 +419,11 @@ export function DetalleView(item, categoria) {
             return;
           }
 
-          const integraciones = datasets.filter(x =>
-            sanitize(x.franquicia) === franquiciaActual && x.id !== item.id
+         const integraciones = datasets.filter(x =>
+            sanitize(x.franquicia) === franquiciaActual &&
+            !(x.id === item.id && x.categoria === categoria) // solo excluye el actual real
           );
+
 
           if (!integraciones.length) {
             rail.innerHTML = `<p class="text-secondary small">No hay integraciones relacionadas.</p>`;
