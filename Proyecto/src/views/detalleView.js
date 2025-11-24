@@ -90,7 +90,6 @@ function buildStreamingInitials(label = '') {
 
 // ============================== DETALLE VIEW ==============================
 export function DetalleView(item, categoria) {
-  // Recuperar desde sessionStorage si no llegó por router
   if (!item) {
     const storedItem = sessionStorage.getItem('detalleItem');
     const storedCategoria = sessionStorage.getItem('detalleCategoria');
@@ -98,7 +97,7 @@ export function DetalleView(item, categoria) {
       item = JSON.parse(storedItem);
       categoria = storedCategoria || categoria;
     }
-  // ❌ Nunca usar la categoria que viene dentro del item guardado
+
   if (item.categoria) {
     delete item.categoria;
     }
@@ -244,7 +243,7 @@ export function DetalleView(item, categoria) {
   return {
     html,
     async bind() {
-      // =========================
+    // =========================
     // SANITIZE UNIVERSAL
     // =========================
         const sanitize = (v) => {
@@ -263,7 +262,6 @@ export function DetalleView(item, categoria) {
       updateNavbarSessionUI();
       initNavbarSearch();
 
-      // Logout
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         await logout();
@@ -273,15 +271,13 @@ export function DetalleView(item, categoria) {
         const snap = await getDoc(doc(db, categoria, item.id));
         if (snap.exists()) {
           item = {
-            ...item,          // ⬅ conserva lo que venía del rail
-            ...snap.data(),   // ⬅ añade TODOS los datos correctos de Firestore
+            ...item,          
+            ...snap.data(),   
             id: snap.id
           };
         }
       }
 
-
-      // Referencias DOM
       const imgEl = document.getElementById('detalleImg');
       const titEl = document.getElementById('detalleTitulo');
       const dirEl = document.getElementById('detalleDirector');
@@ -357,13 +353,11 @@ export function DetalleView(item, categoria) {
       imgEl.src = resolveImagePath(item.imagen || item.img);
       heroBg.style.backgroundImage = `url('${imgEl.src}')`;
 
-      // 🎬 Tráiler
       if (item.trailer) {
         const embedURL = item.trailer.replace("watch?v=", "embed/");
         trailerEl.src = `${embedURL}?autoplay=0&mute=0&controls=1&rel=0&modestbranding=1`;
       }
 
-      // Campos condicionales
       if (categoria === 'musica' && item.totalCanciones) {
         cancionesEl.classList.remove('d-none');
         cancionesEl.querySelector('span').textContent = `${item.totalCanciones} canciones`;
@@ -392,7 +386,6 @@ export function DetalleView(item, categoria) {
         try {
           const { ContentModel } = await import("../models/contentModel.js");
 
-          // Colecciones EXACTAS según ContentModel
           const colecciones = [
             "peliculas",
             "series",
@@ -404,14 +397,12 @@ export function DetalleView(item, categoria) {
             "documentales"
           ];
 
-          // Cargar TODO
           const datasets = [];
           for (const c of colecciones) {
             const lista = await ContentModel.listCollection(c);
             lista.forEach(x => datasets.push({ ...x, categoria: c }));
           }
 
-          // Sanitizar franquicia
           const franquiciaActual = sanitize(item.franquicia);
 
           if (!franquiciaActual) {
@@ -421,7 +412,7 @@ export function DetalleView(item, categoria) {
 
          const integraciones = datasets.filter(x =>
             sanitize(x.franquicia) === franquiciaActual &&
-            !(x.id === item.id && x.categoria === categoria) // solo excluye el actual real
+            !(x.id === item.id && x.categoria === categoria)
           );
 
 
@@ -491,7 +482,6 @@ export function DetalleView(item, categoria) {
           if (metodo && typeof ContentModel[metodo] === 'function') {
             data = await ContentModel[metodo]();
           } else {
-            // Fallback genérico por si se agrega una categoría nueva sin método dedicado
             try {
               data = await ContentModel.listCollection(categoriaActual);
             } catch {
@@ -581,11 +571,9 @@ export function DetalleView(item, categoria) {
           if (!el || !ad) return;
           el.innerHTML = `<a href="${ad.url}" target="_blank" rel="noopener" class="d-block w-100 h-100"><img src="${ad.img}" alt="${ad.alt}" /></a>`;
         };
-        // Laterales: usa formato lateral específico
         const [rs1, rs2] = rnd(ads.laterales ?? ads.superior, 2);
         renderAd('ad-right-1', rs1);
         renderAd('ad-right-2', rs2);
-        // Inferiores: usa formato inferior
         const [ib1, ib2] = rnd(ads.inferior, 2);
         renderAd('ad-bottom-1', ib1);
         renderAd('ad-bottom-2', ib2);
@@ -743,7 +731,7 @@ export function DetalleView(item, categoria) {
           delBtn.classList.add('d-none');
         }
 
-        // Guardar reseña
+        // ============================== GUARDA RESEÑAS ==============================
         addBtn.addEventListener('click', async () => {
           errorEl.textContent = '';
           const comentario = comentarioEl.value.trim();
@@ -758,7 +746,7 @@ export function DetalleView(item, categoria) {
           await renderPromedio();
         });
 
-        // Eliminar reseña
+        // ============================== ELIMINA RESEÑAS ==============================
         delBtn.addEventListener('click', async () => {
           if (!user) return;
           if (confirm('¿Eliminar tu reseña?')) {
