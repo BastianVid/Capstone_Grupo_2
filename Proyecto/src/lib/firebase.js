@@ -33,11 +33,6 @@ export const googleProvider = new GoogleAuthProvider();
 export let currentUser = null;
 onAuthStateChanged(auth, (u) => {
   currentUser = u;
-  if (u) {
-    console.log(`👤 Usuario autenticado: ${u.email}`);
-  } else {
-    console.log("🚪 Usuario desconectado");
-  }
 });
 
 // ============================== NOTA ==============================

@@ -5,7 +5,7 @@ import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbar
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import { guardarResena, obtenerResenaUsuario, eliminarResena } from '../controllers/resenasController.js';
+import { guardarResena, obtenerResenaUsuario, eliminarResena, toggleLikeResena } from '../controllers/resenasController.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { navigate } from '../core/router.js';
 
@@ -123,7 +123,7 @@ export function DetalleView(item, categoria) {
           <div class="row g-4 align-items-center justify-content-between">
             <!-- Izquierda -->
             <div class="col-md-7 d-flex align-items-start gap-4">
-              <img id="detalleImg" src="src/assets/img/default.jpg" alt="Obra"
+              <img id="detalleImg" src="src/assets/img/profile-placeholder.jpg" alt="Obra"
                    class="rounded shadow-lg" style="width:200px;height:300px;object-fit:cover;">
               <div class="text-white">
                 <h1 id="detalleTitulo" class="fw-bold mb-2">Cargando...</h1>
@@ -627,45 +627,90 @@ export function DetalleView(item, categoria) {
         });
       });
 
-            const renderResenas = async user => {
+      const renderResenas = async user => {
         const snap = await getDocs(collection(db, categoria, item.id, "resenas"));
         if (snap.empty) {
           commentsList.innerHTML = `<p class="text-muted">No hay resenas aun.</p>`;
           return;
         }
-        const entries = [];
-        snap.forEach(d => {
-          if (entries.length < 5) entries.push({ id: d.id, data: d.data() });
-        });
+
+        const entries = snap.docs
+          .map(d => ({ id: d.id, data: d.data() }))
+          .sort((a, b) => new Date(b.data.fecha || 0) - new Date(a.data.fecha || 0))
+          .slice(0, 5);
 
         const usernames = new Map();
+
         await Promise.all(entries.map(async ({ id }) => {
           if (profileCache.has(id)) {
             usernames.set(id, profileCache.get(id));
-            return;
-          }
-          try {
-            const profileSnap = await getDoc(doc(db, "users", id));
-            const uname = profileSnap.exists() ? (profileSnap.data().username || profileSnap.data().usernameLower || null) : null;
-            profileCache.set(id, uname);
-            usernames.set(id, uname);
-          } catch {
-            usernames.set(id, null);
+          } else {
+            try {
+              const profileSnap = await getDoc(doc(db, "users", id));
+              const uname = profileSnap.exists()
+                ? (profileSnap.data().username || profileSnap.data().usernameLower || null)
+                : null;
+              profileCache.set(id, uname);
+              usernames.set(id, uname);
+            } catch {
+              usernames.set(id, null);
+            }
           }
         }));
 
         const html = entries.map(({ id, data }) => {
           const own = user && data.userId === user.uid;
           const author = usernames.get(id) || data.userName || "Usuario";
+          const likesCount = data.likesCount || 0;
+          const liked = user && Array.isArray(data.likedBy) ? data.likedBy.includes(user.uid) : false;
+
           return `
             <div class="border-bottom border-secondary pb-2 mb-2 ${own ? 'review-own' : ''}">
-              <strong>${author}${own ? ' (Tu resena)' : ''}</strong>
-              <p class="mb-1 text-warning small">${"&#9733;".repeat(data.estrellas)}${"&#9734;".repeat(5 - data.estrellas)}</p>
-              <p class="mb-0 small">${data.comentario}</p>
+              <div class="d-flex justify-content-between align-items-start gap-3">
+                <div class="flex-grow-1">
+                  <strong>${author}${own ? ' (Tu resena)' : ''}</strong>
+                  <p class="mb-1 text-warning small">${"&#9733;".repeat(data.estrellas)}${"&#9734;".repeat(5 - data.estrellas)}</p>
+                  <p class="mb-0 small">${data.comentario}</p>
+                </div>
+                <button class="btn btn-sm ${liked ? 'btn-primary' : 'btn-outline-primary'} btn-like-resena"
+                        data-resena-id="${id}" aria-pressed="${liked}">
+                  <i class="bi ${liked ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'} like-icon"></i>
+                  <span class="like-count">${likesCount}</span>
+                </button>
+              </div>
             </div>`;
         }).join("");
 
         commentsList.innerHTML = html;
+
+        commentsList.querySelectorAll('.btn-like-resena').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            errorEl.textContent = '';
+            if (!auth.currentUser) {
+              errorEl.textContent = 'Debes iniciar sesion para dar like.';
+              return;
+            }
+
+            btn.disabled = true;
+            const targetResenaUserId = btn.dataset.resenaId;
+
+            try {
+              const { likesCount, liked } = await toggleLikeResena(categoria, item.id, targetResenaUserId);
+              const icon = btn.querySelector('.like-icon');
+              const countEl = btn.querySelector('.like-count');
+              if (countEl) countEl.textContent = likesCount;
+              if (icon) icon.className = liked ? 'bi bi-hand-thumbs-up-fill like-icon' : 'bi bi-hand-thumbs-up like-icon';
+              btn.classList.toggle('btn-primary', liked);
+              btn.classList.toggle('btn-outline-primary', !liked);
+              btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+            } catch (err) {
+              console.error('toggleLikeResena failed', err);
+              errorEl.textContent = 'No se pudo registrar tu like.';
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        });
       };
 
       // ============================== AUTENTICACIÓN ==============================
