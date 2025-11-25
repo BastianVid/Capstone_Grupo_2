@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===========================
+    // 1️⃣ Categorías (lectura/escritura controlada)
+    // ===========================
+    match /{categoria}/{itemId} {
+      allow read: if true; // todos pueden leer
+      allow write: if request.auth != null; // solo usuarios logueados
+
+      // Subcolección de reseñas dentro de cada ítem
+      match /resenas/{userId} {
+        allow read: if true;
+        // Permitir escribir/actualizar likes o reseña si está autenticado
+        allow write: if request.auth != null;
+      }
+    }
+
+    // ===========================
+    // 2️⃣ Colección global de reseñas de usuario
+    // ===========================
+    match /userResenas/{documentId} {
+      allow read: if true; // todos pueden leer reseñas globales
+      allow write: if request.auth != null; // cualquier usuario logueado puede escribir su reseña
+    }
+
+    // ===========================
+    // 3️⃣ Default fallback
+    // ===========================
+    match /{document=**} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}

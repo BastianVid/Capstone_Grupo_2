@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
+  <defs>
+    <linearGradient id="amzSup" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#12b5ff"/>
+      <stop offset="100%" stop-color="#0b1f40"/>
+    </linearGradient>
+    <linearGradient id="amzGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#5ee8ff" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="675" rx="28" fill="url(#amzSup)"/>
+  <rect x="80" y="90" width="1040" height="495" rx="26" fill="url(#amzGlow)" opacity="0.45"/>
+  <circle cx="1040" cy="120" r="90" fill="#1a3c63" opacity="0.35"/>
+  <circle cx="1010" cy="560" r="120" fill="#0c2c50" opacity="0.3"/>
+
+  <!-- Icono Prime Video -->
+  <rect x="120" y="232" width="68" height="48" rx="12" fill="#ffffff" opacity="0.95"/>
+  <polygon points="148,242 188,256 148,270" fill="#0ea5e9"/>
+
+  <!-- Texto -->
+  <text x="210" y="258" font-size="68" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800">Amazon Prime Video</text>
+  <text x="210" y="320" font-size="30" font-family="Inter, Arial, sans-serif" fill="#dbeafe" font-weight="600">Series y peliculas sin anuncios</text>
+  <text x="210" y="360" font-size="24" font-family="Inter, Arial, sans-serif" fill="#dbeafe" opacity="0.85">Incluye estrenos y contenido exclusivo</text>
+
+  <!-- CTA -->
+  <rect x="210" y="400" rx="18" ry="18" width="320" height="78" fill="#ffffff" opacity="0.18" stroke="#9ae6ff" stroke-width="2"/>
+  <text x="370" y="448" font-size="28" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="700" text-anchor="middle">Prueba gratis 30 dias</text>
+
+  <!-- Detalles -->
+  <text x="210" y="506" font-size="18" font-family="Inter, Arial, sans-serif" fill="#cbd5e1" opacity="0.9">Calidad 4K UHD • Descargas sin conexion • Hasta 3 dispositivos</text>
+</svg>

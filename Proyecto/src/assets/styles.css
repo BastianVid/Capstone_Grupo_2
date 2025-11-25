@@ -1,29 +1,54 @@
 /* =========================================================
-   Reset básico
+   ÍNDICE GENERAL DEL STYLESHEET - CULTURAX
+   =========================================================
+   [1] Reset básico
+   [2] Paleta y tema (Bootstrap mapping)
+   [3] Navbar (Bootstrap)
+   [4] Header & Navbar legacy
+   [5] Tipografía y cuerpo
+   [6] Secciones genéricas
+   [7] Botones propios
+   [8] Footer
+   [9] Responsive global
+   [10] Catálogo de películas
+   [11] Formularios
+   [12] Grid genérico
+   [13] Slider antiguo
+   [14] Hero (carrusel principal)
+   [15] Sidebar (publicidad y próximos estrenos)
+   [16] Utilidades (truncado multilínea)
+   [17] Rails (tarjetas uniformes)
+   [18] Perfil (nuevo diseño)
+   [19] Reseñas (tema oscuro)
+   [20] Animaciones / efectos
+   [21] Publicidad (ajustes de cobertura)
+   [22] DetalleView – vista de detalle de obras
+   [23] PerfilView 
    ========================================================= */
+
+/* 
+   [1] Reset básico
+*/
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* =========================================================
-   Paleta y tema (compatible con Bootstrap)
-   ========================================================= */
+/* 
+   [2] Paleta y tema (compatible con Bootstrap)
+*/
 :root {
-  --bg: #0f172a;        /* fondo general */
-  --card: #1e293b;      /* paneles / cards */
-  --accent: #38bdf8;    /* acento */
-  --text: #f1f5f9;      /* texto principal */
-  --muted: #94a3b8;     /* texto secundario */
-
-  /* Rails (ancho y separación de tarjetas) */
-  --rail-card-w: clamp(170px, 18vw, 210px); /* compacto */
-  --rail-body-h: 150px;                     /* alto del bloque texto+botón */
+  --bg: #0f172a;
+  --card: #1e293b;
+  --accent: #38bdf8;
+  --text: #f1f5f9;
+  --muted: #94a3b8;
+  --rail-card-w: clamp(170px, 18vw, 210px);
+  --rail-body-h: 150px;
   --rail-gap: 14px;
 }
 
-/* Tema Bootstrap oscuro mapeado a la paleta */
 :root,
 html[data-bs-theme="dark"] {
   --bs-body-bg: var(--bg);
@@ -39,23 +64,12 @@ html[data-bs-theme="dark"] {
   --bs-primary-rgb: 56,189,248;
 }
 
-/* Compatibilidad si alguien fuerza data-bs-theme="light" */
 html[data-bs-theme="light"] body { background: var(--bg); color: var(--text); }
 html[data-bs-theme="dark"]  body { background: var(--bg); color: var(--text); }
 
-/* =========================================================
-   Tipografía y cuerpo
-   ========================================================= */
-body {
-  font-family: "Inter", system-ui, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-}
-
-/* =========================================================
-   Navbar (Bootstrap)
-   ========================================================= */
+/* 
+   [3] Navbar (Bootstrap)
+*/
 .cx-header {
   position: sticky;
   top: 0;
@@ -63,13 +77,9 @@ body {
   background: var(--card);
   border-bottom: 1px solid var(--bs-border-color);
 }
-
-/* Links del navbar */
 .cx-header .nav-link { color: rgba(241,245,249,.7); }
 .cx-header .nav-link:hover,
 .cx-header .nav-link:focus { color: var(--accent) !important; }
-
-/* Dropdown en tema oscuro */
 .cx-header .dropdown-menu {
   background-color: var(--card);
   color: var(--text);
@@ -81,8 +91,6 @@ body {
   background-color: #243244;
   color: var(--text);
 }
-
-/* Inputs y selects en el header (buscador) */
 .cx-header .form-control,
 .cx-header .form-select {
   background-color: #0f172a;
@@ -90,8 +98,6 @@ body {
   border-color: #475569;
 }
 .cx-header .form-control::placeholder { color: var(--muted); }
-
-/* Botones primarios en la cabecera */
 .cx-header .btn-primary {
   background-color: var(--accent);
   border-color: var(--accent);
@@ -102,9 +108,9 @@ body {
   border-color: #0ea5e9;
 }
 
-/* =========================================================
-   (Legacy) Header & Navbar simple – compatibilidad
-   ========================================================= */
+/* 
+   [4] Header & Navbar legacy
+*/
 header {
   background: var(--card);
   padding: 16px 24px;
@@ -132,15 +138,23 @@ nav a {
 }
 nav a:hover { color: var(--accent); }
 
-/* =========================================================
-   Secciones genéricas
-   ========================================================= */
+/* 
+   [5] Tipografía y cuerpo
+*/
+body {
+  font-family: "Inter", system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+/* 
+   [6] Secciones genéricas
+*/
 main {
   max-width: 1000px;
   margin: 40px auto;
   padding: 0 20px;
 }
-
 .bienvenida,
 .cx-hero {
   text-align: center;
@@ -158,9 +172,9 @@ main {
 .bienvenida p,
 .cx-hero p { color: var(--muted); margin-bottom: 24px; }
 
-/* =========================================================
-   Botones propios (no Bootstrap)
-   ========================================================= */
+/* 
+   [7] Botones propios
+*/
 .cx-btn {
   display: inline-block;
   background: var(--accent);
@@ -174,9 +188,16 @@ main {
 }
 .cx-btn:hover { background: #0ea5e9; }
 
-/* =========================================================
-   Footer
-   ========================================================= */
+/* Tamaño reducido para CTAs discretas */
+.cx-btn-sm {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  line-height: 1.2;
+}
+
+/* 
+   [8] Footer
+*/
 footer {
   text-align: center;
   padding: 20px;
@@ -185,9 +206,9 @@ footer {
   margin-top: 40px;
 }
 
-/* =========================================================
-   Responsive global
-   ========================================================= */
+/* 
+   [9] Responsive global
+*/
 @media (max-width: 768px) {
   nav { gap: 8px; }
   nav ul { flex-direction: column; gap: 12px; }
@@ -195,9 +216,9 @@ footer {
   .bienvenida, .cx-hero { padding: 40px 16px; }
 }
 
-/* =========================================================
-   Catálogo de películas
-   ========================================================= */
+/* 
+   [10] Catálogo de películas
+*/
 .peliculas { text-align: center; margin: 40px 20px; }
 .peliculas h2 { margin-bottom: 24px; color: var(--accent); }
 
@@ -225,9 +246,9 @@ footer {
 .pelicula-card h3 { margin-bottom: 8px; color: var(--text); }
 .pelicula-card p { font-size: 0.9rem; color: var(--muted); margin-bottom: 12px; }
 
-/* =========================================================
-   Formularios (registro / login)
-   ========================================================= */
+/* 
+   [11] Formularios (registro / login)
+*/
 .form-card {
   background: var(--card);
   max-width: 400px;
@@ -238,7 +259,12 @@ footer {
   text-align: center;
 }
 .form-card h2 { margin-bottom: 24px; color: var(--accent); }
-.form-card form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+.form-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+}
 .form-card label { font-weight: 500; color: var(--text); }
 .form-card input {
   width: 100%;
@@ -250,17 +276,24 @@ footer {
 }
 .form-card input::placeholder { color: var(--muted); }
 .form-card button { margin-top: 8px; }
-
-/* =========================================================
-   Secciones genéricas (grid reutilizable)
-   ========================================================= */
+/* 
+   [12] Secciones genéricas (grid reutilizable)
+*/
 .seccion {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 20px;
 }
-.seccion h2 { text-align: center; margin-bottom: 24px; color: var(--accent); }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+.seccion h2 {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--accent);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
 .item-card {
   background: var(--card);
   border-radius: 12px;
@@ -273,9 +306,9 @@ footer {
 .item-card h3 { margin-bottom: 12px; color: var(--accent); }
 .item-card p { color: var(--muted); }
 
-/* =========================================================
-   Slider antiguo (si aún se usa en alguna vista)
-   ========================================================= */
+/* 
+   [13] Slider antiguo (si aún se usa en alguna vista)
+*/
 .slider {
   position: relative;
   max-width: 1000px;
@@ -318,11 +351,11 @@ footer {
 }
 .dot.active { background: var(--accent); }
 
-/* =========================================================
-   HERO (carrusel principal)
-   ========================================================= */
+/* 
+   [14] Hero (carrusel principal)
+*/
 .cx-hero {
-  height: 620px;
+  height: 668px;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -338,18 +371,31 @@ footer {
   display: block;
 }
 
-/* =========================================================
-   Sidebar (publicidad y próximos estrenos)
-   ========================================================= */
-.ad-billboard { height: 160px; object-fit: cover; border-radius: 8px; }
-@media (min-width: 1200px) { .ad-billboard { height: 200px; } }
+/* 
+   [15] Sidebar (publicidad y próximos estrenos)
+*/
+.ad-billboard {
+  height: 160px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+@media (min-width: 1200px) {
+  .ad-billboard { height: 200px; }
+}
+.upcoming-card .list-group {
+  max-height: 360px;
+  overflow: auto;
+}
+.upcoming-thumb {
+  width: 56px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 6px;
+}
 
-.upcoming-card .list-group { max-height: 360px; overflow: auto; }
-.upcoming-thumb { width: 56px; height: 84px; object-fit: cover; border-radius: 6px; }
-
-/* =========================================================
-   Utilidades: truncado multilínea
-   ========================================================= */
+/* 
+   [16] Utilidades: truncado multilínea
+*/
 .text-truncate-1,
 .text-truncate-2,
 .text-truncate-3 {
@@ -362,31 +408,36 @@ footer {
 .text-truncate-2 { -webkit-line-clamp: 2; line-clamp: 2; }
 .text-truncate-3 { -webkit-line-clamp: 3; line-clamp: 3; }
 
-/* Placeholder aplicado por image-fallback.js */
 .is-fallback {
   filter: none;
   background: #0f172a;
 }
 
-/* =========================================================
-   Rails (tarjetas uniformes y simétricas)
-   ========================================================= */
-
-/* Contenedor desplazable horizontal (sin barra visible) */
+/* Publicidad lateral e inferior */
+.ad-side,
+.ad-bottom {
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  width: 100%;
+  display: block;
+}
+/* 
+   [17] Rails (tarjetas uniformes y simétricas)
+*/
 .cx-rail {
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 0;              /* sin espacio extra debajo */
-  scrollbar-width: none;          /* Firefox: oculta scrollbar */
-  -ms-overflow-style: none;       /* IE/Edge Legacy */
+  padding-bottom: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.cx-rail::-webkit-scrollbar {      /* Chrome/Safari/Edge: oculta scrollbar */
+.cx-rail::-webkit-scrollbar {
   height: 0 !important;
   background: transparent;
 }
 
-/* Pista en columnas de ancho fijo para cada tarjeta */
 .cx-rail-track {
   display: grid;
   grid-auto-flow: column;
@@ -396,7 +447,6 @@ footer {
   scroll-snap-type: x mandatory;
 }
 
-/* Cada tarjeta: altura TOTAL fija = alto de imagen (relación 2:3) + cuerpo */
 .cx-rail-card {
   scroll-snap-align: start;
   background: var(--card);
@@ -404,87 +454,943 @@ footer {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: calc((var(--rail-card-w) * 1.5) + var(--rail-body-h)); /* 1.5 = 3/2 */
+  height: calc((var(--rail-card-w) * 1.5) + var(--rail-body-h));
   box-shadow: 0 6px 14px rgba(0,0,0,.25);
   border: 1px solid var(--bs-border-color);
 }
 
-/* El thumb mantiene relación 2:3 y no altera la altura */
 .cx-rail-thumb {
   width: 100%;
-  aspect-ratio: 2 / 3;            /* asegura alto = 1.5 * ancho */
+  aspect-ratio: 2 / 3;
   object-fit: cover;
   display: block;
   background: #0b1220;
 }
 
-/* Cuerpo con altura fija y botón pegado al fondo */
 .cx-rail-body {
-  height: var(--rail-body-h);     /* fuerza igual alto en todas */
+  height: var(--rail-body-h);
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow: hidden;               /* evita que textos hagan crecer la tarjeta */
+  overflow: hidden;
 }
 
-/* Meta, título y descripción (truncadas) */
 .cx-rail-meta { font-size: .8rem; color: var(--muted); }
 
-/* Título más pequeño */
 .cx-rail-title {
   font-weight: 600;
   line-height: 1.2;
-  font-size: 0.95rem;             /* reducido */
+  font-size: 0.95rem;
 }
 .cx-rail-title.text-truncate-2 { -webkit-line-clamp: 2; line-clamp: 2; }
 
 .cx-rail-desc { font-size: .9rem; color: var(--muted); }
 .cx-rail-desc.text-truncate-3 { -webkit-line-clamp: 3; line-clamp: 3; }
 
-/* CTA idéntico en todas las tarjetas */
 .cx-rail-actions { margin-top: auto; }
 .cx-rail-actions .btn {
   width: 100%;
-  height: 38px;                   /* mismo alto en todo */
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
 }
 
-/* Ajuste extra en móviles para títulos */
 @media (max-width: 576px) {
   .cx-rail-title { font-size: 0.9rem; }
 }
 
-/* =========================================================
-   Footer (CulturaX)
-   ========================================================= */
-.cx-footer {
-  text-align: initial;                 /* evita centrado global del tag footer */
-  background: var(--card);
-  border-top: 1px solid var(--bs-border-color);
+/* 
+   [18] Perfil — Nuevo diseño moderno alineado a la izquierda
+*/
+.perfil-container {
+  background: linear-gradient(180deg, #0a0f1c 0%, #0d1424 100%);
+  color: #fff;
+  min-height: calc(100vh - 200px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.perfil-hero {
+  position: relative;
+  background: linear-gradient(180deg, #0c1220 0%, #0a0f1c 100%);
+  overflow: hidden;
+  padding: 2rem 0;
+}
+
+.perfil-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.8rem;
+  padding: 2rem 5%;
+  z-index: 1;
+  justify-content: flex-start;
+}
+
+.perfil-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #111726;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.4) inset;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.perfil-avatar:hover {
+  transform: scale(1.03);
+  box-shadow:
+    0 6px 14px rgba(0, 0, 0, 0.6),
+    0 2px 6px rgba(0, 0, 0, 0.45) inset;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.border-gradient {
+  border: 3px solid transparent;
+  background-image: linear-gradient(#0a0f1c, #0a0f1c),
+    linear-gradient(135deg, #00e0ff, #007bff);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  transition: transform 0.3s ease;
+}
+.border-gradient:hover { transform: scale(1.05); }
+
+.perfil-nombre {
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+.perfil-correo {
+  color: #9ca3af;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.perfil-divider {
+  width: 100%;
+  height: 1px;
+  margin: 2rem 0;
+  background: linear-gradient(to right, transparent, rgba(0,255,255,0.2), transparent);
+}
+
+.perfil-subtitulo {
+  color: #38bdf8;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.2rem;
+}
+
+/* Reseñas del perfil */
+.review-card {
+  background: rgba(20, 26, 40, 0.85);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 20px rgba(0,255,255,0.1);
+}
+.review-thumb {
+  width: 80px;
+  height: 115px;
+  object-fit: cover;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease forwards;
+  opacity: 0;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .perfil-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  .perfil-avatar {
+    width: 100px;
+    height: 100px;
+  }
+  .perfil-nombre { font-size: 1.4rem; }
+  .perfil-subtitulo { justify-content: center; }
+  .review-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .review-thumb { margin-bottom: 1rem; }
+  .perfil-divider { margin: 1.5rem 0; }
+}
+
+/* 
+   [19] Reseñas (tema oscuro coherente con CulturaX)
+*/
+.review-own {
+  background-color: rgba(56, 189, 248, 0.15);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(56,189,248,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.review-own:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 16px rgba(56,189,248,0.35);
+}
+
+.review-other {
+  background-color: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.review-other:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(56,189,248,0.15);
+}
+
+.text-accent { color: var(--accent); }
+
+.perfil-userinfo {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #f1f5f9;
+}
+.perfil-line i { margin-right: 6px; color: var(--accent); }
+.perfil-line span { font-weight: 500; color: #e2e8f0; }
+/* 
+   [20] Header avanzado + animaciones globales
+*/
+.cx-header {
+  backdrop-filter: blur(10px);
+  background-color: rgba(20, 25, 40, 0.9) !important;
+}
+
+.cx-header .dropdown-menu-dark {
+  background-color: #1e2233 !important;
+}
+.cx-header .dropdown-item:hover {
+  background-color: #2a3045 !important;
+  color: #f5c518 !important;
+}
+
+.fade-rotate {
+  opacity: 0;
+  transform: scale(1.02);
+  animation: fadeSlide 1s ease forwards;
+}
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 
+   [21] Publicidad y DetalleView – ajustes visuales
+*/
+#ad-superior img,
+#ad-bottom-1 img,
+#ad-bottom-2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  display: block;
+}
+#ad-right-1 img,
+#ad-right-2 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 10px;
+  display: block;
+}
+#ad-superior,
+#ad-bottom-1,
+#ad-bottom-2,
+#ad-right-1,
+#ad-right-2 {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+/* Mejoras visuales DetalleView */
+.card.shadow-sm {
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .35) !important;
+}
+
+/* Similares */
+#similaresRail .sim-card {
+  flex: 0 0 150px;
+  background: #0f1320;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform .2s;
+}
+#similaresRail .sim-card:hover { transform: translateY(-3px); }
+#similaresRail img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+#similaresRail .sim-title {
+  padding: 6px 8px;
+  font-size: 0.9rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stars rating hover */
+#stars span {
+  cursor: pointer;
+  transition: color 0.2s ease;
+  color: gray;
+}
+#stars span:hover { color: gold; }
+
+/* Efecto hover en promedio general */
+#promedioGeneral { transition: transform 0.3s ease; }
+
+/* Light border cards */
+.bg-light.border-2.border-dark {
+  background-color: #f8f9fa !important;
+  border-color: #212529 !important;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+/* 
+   [22] DetalleView – vista de detalle de obras
+ */
+
+/* Rating stars */
+#rating i {
+  color: #aaa;
+  transition: color 0.2s, transform 0.15s;
+}
+#rating i.active,
+#rating i.hovered {
+  color: #ffc107;
+}
+#rating i:hover {
+  transform: translateY(-1px);
+}
+.review-own {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid #ffc107;
+}
+
+/* Hero superior con blur y overlay */
+.detalle-hero {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+  margin-bottom: 1.25rem;
+}
+#detalleHeroBg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(18px) brightness(0.45);
+  transform: scale(1.1);
+}
+.detalle-hero .overlay {
+  position: relative;
+  z-index: 2;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.3));
+}
+
+/* Tarjetas del detalle */
+.cx-card {
+  background: #12151f;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Lista de reseñas con scroll */
+#commentsList {
+  max-height: 320px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+#commentsList::-webkit-scrollbar {
+  width: 6px;
+}
+#commentsList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+}
+
+/* Plataformas de streaming */
+.streaming-icon-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.streaming-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: #0f1420;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.streaming-icon img {
+  max-width: 70%;
+  max-height: 70%;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
+}
+
+.streaming-icon:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.35);
+}
+
+.streaming-icon-fallback {
+  background: linear-gradient(135deg, #2b2f44, #151929);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.streaming-icon-fallback span {
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .streaming-icon {
+    width: 54px;
+    height: 54px;
+  }
+}
+
+/* Mis calificaciones */
+.calificaciones-hero {
+  background: radial-gradient(circle at top left, rgba(32, 78, 165, 0.35), transparent 55%),
+              linear-gradient(135deg, #11162b, #080b14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.calificaciones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.calificacion-card {
+  background: #101423;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 12px 28px rgba(3, 6, 14, 0.55);
+}
+.calificacion-cover {
+  width: 110px;
+  min-width: 110px;
+  height: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.calificacion-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.calificacion-stars {
+  font-size: 1rem;
+}
+@media (max-width: 768px) {
+  .calificacion-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .calificacion-cover {
+    width: 100%;
+    height: 220px;
+  }
+  .calificacion-card .btn {
+    align-self: stretch;
+    width: 100%;
+  }
+}
+
+/* Integración y rail de similares */
+.integration-rail,
+#similaresRail {
+  overflow-x: auto;
+}
+.integration-rail .int-card,
+#similaresRail .sim-card {
+  min-width: 180px;
+  max-width: 180px;
+  background: #0f1320;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+.integration-rail img,
+#similaresRail img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.integration-rail .int-title,
+#similaresRail .sim-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#similaresRail .sim-card {
+  transition: transform 0.2s;
+}
+#similaresRail .sim-card:hover {
+  transform: translateY(-3px);
+}
+
+/* Animación de entrada */
+.fade-rotate {
+  animation: fadeRotate 1s ease;
+}
+@keyframes fadeRotate {
+  from {
+    opacity: 0;
+    transform: rotateY(90deg);
+  }
+  to {
+    opacity: 1;
+    transform: rotateY(0);
+  }
+}
+
+#similaresRail {
+  display: flex !important;
+  gap: 1rem !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160,160,160,0.4) transparent;
+  padding-bottom: 6px;
+}
+/* Rail de DetalleView para que coincida con los rails de HomeView*/
+#similaresRail::-webkit-scrollbar {
+  height: 6px;
+}
+
+#similaresRail::-webkit-scrollbar-thumb {
+  background: rgba(160,160,160,0.4);
+  border-radius: 4px;
+}
+
+#similaresRail::-webkit-scrollbar-thumb:hover {
+  background: rgba(200,200,200,0.6);
+}
+
+#similaresRail::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+}
+
+/* 
+   [23] DetalleView – vista de detalle de obras
+ */
+
+/* === PERFIL PRO === */
+.perfil-hero-pro {
+  position: relative;
+  height: 340px;
+  background: linear-gradient(135deg, #0a1124, #111a33);
+  border-radius: 0 0 20px 20px;
+  overflow: hidden;
+}
+.perfil-cover {
+  position: absolute;
+  inset: 0;
+  background: url('src/assets/img/cover-dark.jpg') center/cover no-repeat;
+  filter: brightness(0.4) blur(2px);
+}
+.perfil-info {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 80px;
+  flex-wrap: wrap;
+}
+.perfil-avatar-pro {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 25px rgba(56,189,248,.3);
+}
+.perfil-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.perfil-avatar-wrap button {
+  width: 160px;
+}
+.perfil-nombre-pro {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.perfil-email-pro {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+.stat-card {
+  background: linear-gradient(145deg, #121826, #0e1422);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 15px rgba(56,189,248,0.2);
+}
+.stat-card i {
+  font-size: 1.8rem;
+  color: var(--accent);
+}
+.nav-pills .nav-link.active {
+  background-color: var(--accent);
+  color: #0a0f1c !important;
+  font-weight: 600;
+}
+.nav-pills .nav-link {
+  color: var(--text);
+}
+.perfil-username-group input {
+  max-width: 240px;
+  min-width: 200px;
+}
+.perfil-username-group button {
+  white-space: nowrap;
+}
+
+.perfil-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.perfil-actions .btn {
+  padding-inline: 14px;
+}
+
+/* Utilidad: barra de desplazamiento oscura reutilizable */
+
+.scrollbar-dark {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160,160,160,0.4) #12151f; /* thumb | track */
+}
+.scrollbar-dark::-webkit-scrollbar {
+  width: 6px; /* vertical */
+  height: 6px; /* horizontal */
+}
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background: rgba(160,160,160,0.4);
+  border-radius: 6px;
+}
+.scrollbar-dark::-webkit-scrollbar-thumb:hover {
+  background: rgba(200,200,200,0.6);
+}
+.scrollbar-dark::-webkit-scrollbar-track {
+  background: #12151f;
+}
+
+/* Forzar estilo oscuro en Similares cuando se use la clase */
+#similaresRail.scrollbar-dark { scrollbar-color: rgba(160,160,160,0.4) #12151f; }
+#similaresRail.scrollbar-dark::-webkit-scrollbar { height: 6px; }
+#similaresRail.scrollbar-dark::-webkit-scrollbar-track { background: #12151f; }
+
+/* Integraciones con scroll oscuro */
+#integrationRail.scrollbar-dark { scrollbar-color: rgba(160,160,160,0.4) #12151f; }
+#integrationRail.scrollbar-dark::-webkit-scrollbar { height: 6px; }
+#integrationRail.scrollbar-dark::-webkit-scrollbar-track { background: #12151f; }
+
+/* ==========================================================================
+   CulturIAx (floating chat)
+   ========================================================================== */
+.cx-ai-chat {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1090;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+
+.cx-ai-chat__fab {
+  border: none;
+  border-radius: 999px;
+  padding: 0.85rem 1.25rem;
+  background: linear-gradient(135deg, var(--accent), #3b82f6);
+  color: #05070f;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 10px 25px rgba(14, 165, 233, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cx-ai-chat__fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(14, 165, 233, 0.45);
+}
+
+.cx-ai-chat__fab i {
+  font-size: 1.2rem;
+}
+
+.cx-ai-chat.is-open .cx-ai-chat__fab {
+  transform: translateY(-2px) scale(0.99);
+  box-shadow: 0 14px 30px rgba(14, 165, 233, 0.5);
+}
+
+.cx-ai-chat__panel {
+  position: absolute;
+  bottom: 74px;
+  right: 0;
+  width: min(420px, 90vw);
+  max-height: min(75vh, 640px);
+  background: rgba(5, 7, 15, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 22px 48px rgba(2, 6, 23, 0.65);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+  pointer-events: none;
+  transition: transform 0.22s ease, opacity 0.2s ease, visibility 0.2s ease;
+  visibility: hidden;
+  backdrop-filter: blur(6px);
+}
+
+.cx-ai-chat.is-open .cx-ai-chat__panel {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.cx-ai-chat__window {
+  width: 100%;
+  height: 100%;
+  background: rgba(5, 7, 15, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.65);
+  overflow: hidden;
+  animation: cxChatPop 0.25s ease;
+}
+
+.cx-ai-chat__header {
+  padding: 1rem;
+  background: linear-gradient(120deg, rgba(18, 33, 77, 0.95), rgba(32, 10, 53, 0.95));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cx-ai-chat__title {
+  font-weight: 700;
+  color: #f8fafc;
+  margin-bottom: 0.15rem;
+}
+
+.cx-ai-chat__messages {
+  padding: 1rem;
+  height: 360px;
+  max-height: calc(75vh - 210px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cx-ai-chat__message {
+  display: flex;
+}
+
+.cx-ai-chat__message.is-user {
+  justify-content: flex-end;
+}
+
+.cx-ai-chat__bubble {
+  background: #11172c;
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  max-width: 360px;
+  white-space: pre-line;
+}
+
+.cx-ai-chat__bubble p {
+  margin-bottom: 0.35rem;
+}
+
+.cx-ai-chat__bubble p:last-child {
+  margin-bottom: 0;
+}
+
+.cx-ai-chat__message.is-user .cx-ai-chat__bubble {
+  background: linear-gradient(130deg, var(--accent), #38bdf8);
+  color: #020617;
+  border-color: transparent;
+}
+
+.cx-ai-chat__author {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(248, 250, 252, 0.8);
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cx-ai-chat__suggestions {
+  padding: 0 1rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cx-ai-chat__suggestions button {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.85rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.cx-ai-chat__suggestions button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.cx-ai-chat__form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cx-ai-chat__form input {
+  background: #050814;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.cx-ai-chat__form input:focus {
+  border-color: var(--accent);
+  box-shadow: none;
+}
+
+.cx-ai-chat__send {
+  border: none;
+  background: var(--accent);
+  color: #020617;
+  border-radius: 999px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cx-ai-chat__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem 1rem;
+  font-size: 0.8rem;
   color: var(--muted);
 }
 
-.cx-footer .cx-footer-link {
-  color: rgba(241,245,249,.85);
-  text-decoration: none;
-}
-.cx-footer .cx-footer-link:hover {
-  color: var(--accent);
-  text-decoration: none;
+@keyframes cxChatPop {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.cx-footer h6 { letter-spacing: .02em; }
-
-.cx-footer .btn-primary {
-  background-color: var(--accent);
-  border-color: var(--accent);
-  color: #0b1220;
+@media (max-width: 768px) {
+  .cx-ai-chat {
+    right: 16px;
+    bottom: 16px;
+  }
+  .cx-ai-chat__panel {
+    width: min(92vw, 420px);
+    bottom: 70px;
+  }
 }
-.cx-footer .btn-primary:hover {
-  background-color: #0ea5e9;
-  border-color: #0ea5e9;
+
+@media (max-width: 576px) {
+  .cx-ai-chat__messages {
+    height: 300px;
+    max-height: calc(70vh - 190px);
+  }
 }
