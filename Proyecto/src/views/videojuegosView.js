@@ -8,7 +8,7 @@ import { Footer } from './shared/footer.js';
 export function VideojuegosView() {
   const html = `
     ${Navbar()}
-    <div class="container py-4">
+    <div class="container py-4" data-category-top="videojuegos">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h1 class="h3 mb-0"><i class="bi bi-controller"></i> Videojuegos</h1>
 
@@ -44,6 +44,10 @@ export function VideojuegosView() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
+
+      const categoryTop = document.querySelector('[data-category-top="videojuegos"]');
+      const scrollToTop = () =>
+        categoryTop?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       // === Cargar datos con caché para reducir lecturas ===
       let data;
@@ -153,6 +157,7 @@ export function VideojuegosView() {
         if (currentPage > 1) {
           currentPage--;
           renderPage();
+          scrollToTop();
         }
       });
 
@@ -160,6 +165,7 @@ export function VideojuegosView() {
         if (currentPage < totalPages()) {
           currentPage++;
           renderPage();
+          scrollToTop();
         }
       });
 

@@ -1,17 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
   <defs>
     <linearGradient id="hbSup" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#c31432"/>
+      <stop offset="0%" stop-color="#d7263d"/>
       <stop offset="100%" stop-color="#240b36"/>
     </linearGradient>
+    <linearGradient id="hbGlow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff6f91" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#7c1f3d" stop-opacity="0.12"/>
+    </linearGradient>
   </defs>
-  <rect width="1200" height="250" fill="url(#hbSup)"/>
+
+  <rect width="1200" height="675" rx="28" fill="url(#hbSup)"/>
+  <rect x="90" y="110" width="1020" height="455" rx="26" fill="url(#hbGlow)" opacity="0.55"/>
+  <circle cx="1020" cy="190" r="120" fill="#5a0f24" opacity="0.35"/>
+  <circle cx="1040" cy="520" r="120" fill="#1a0a2b" opacity="0.35"/>
+
   <!-- Icono Humble -->
-  <circle cx="200" cy="130" r="28" fill="#ffffff"/>
-  <path d="M200 143c-9-5-16-7-16-16a8 8 0 0 1 16-5a8 8 0 0 1 16 5c0 9-7 11-16 16z" fill="#c31432"/>
+  <g transform="translate(115 220)">
+    <circle cx="65" cy="65" r="65" fill="#ffffff" opacity="0.96"/>
+    <path d="M65 89c-19-11-33-15-33-35a17 17 0 1 1 33-10a17 17 0 1 1 33 10c0 20-14 24-33 35z" fill="#d7263d"/>
+  </g>
+
   <!-- Texto -->
-  <text x="270" y="138" font-size="60" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="900">Humble Bundle</text>
-  <text x="270" y="184" font-size="24" font-family="Inter, Arial, sans-serif" fill="#ffd6de">Bundles de juegos y libros</text>
-  <rect x="270" y="200" rx="12" ry="12" width="280" height="48" fill="#ffffff" opacity="0.18"/>
-  <text x="410" y="231" font-size="20" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="700" text-anchor="middle">Descubrir bundles</text>
+  <text x="250" y="262" font-size="66" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800">Humble Bundle</text>
+  <text x="250" y="318" font-size="30" font-family="Inter, Arial, sans-serif" fill="#ffe2eb" font-weight="700">Bundles de juegos, libros y software</text>
+  <text x="250" y="360" font-size="24" font-family="Inter, Arial, sans-serif" fill="#ffd6de" opacity="0.9">Apoya caridad mientras desbloqueas colecciones premium</text>
+
+  <!-- CTA -->
+  <rect x="250" y="402" rx="18" ry="18" width="320" height="82" fill="#ffffff" opacity="0.17" stroke="#ffc0cf" stroke-width="2"/>
+  <text x="410" y="452" font-size="28" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800" text-anchor="middle">Descubrir bundles</text>
 </svg>

@@ -1,17 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" fill="none">
   <defs>
     <linearGradient id="crSup" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#FF7A00"/>
-      <stop offset="100%" stop-color="#FF9C40"/>
+      <stop offset="0%" stop-color="#ff9f1c"/>
+      <stop offset="100%" stop-color="#c04800"/>
+    </linearGradient>
+    <linearGradient id="crGlow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffb347" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#ff6a00" stop-opacity="0.1"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="250" fill="url(#crSup)"/>
-  <!-- Icono Crunchyroll -->
-  <circle cx="200" cy="130" r="28" fill="#ffffff"/>
-  <path d="M200 112a20 20 0 1 0 0 40a14 14 0 1 1 0-40z" fill="#F47421"/>
+
+  <rect width="1200" height="675" rx="28" fill="url(#crSup)"/>
+  <rect x="90" y="120" width="1020" height="450" rx="26" fill="url(#crGlow)" opacity="0.5"/>
+  <circle cx="1030" cy="530" r="110" fill="#b43700" opacity="0.25"/>
+  <circle cx="1080" cy="170" r="80" fill="#ffb347" opacity="0.25"/>
+
+  <!-- Logo Crunchyroll -->
+  <circle cx="150" cy="270" r="70" fill="#fff" opacity="0.96"/>
+  <path d="M150 212a58 58 0 1 1 0 116c-17 0-30-10-30-23s13-23 30-23c8 0 16 3 20 9-3-16-19-27-38-27-20 0-36 13-36 29s16 29 36 29a58 58 0 0 0 0-116z" fill="#ff9f1c"/>
+
   <!-- Texto -->
-  <text x="270" y="138" font-size="60" font-family="Inter, Arial, sans-serif" fill="#2b1600" font-weight="900">Crunchyroll</text>
-  <text x="270" y="184" font-size="24" font-family="Inter, Arial, sans-serif" fill="#3a1e00">Anime en streaming y simulcast</text>
-  <rect x="270" y="200" rx="12" ry="12" width="280" height="48" fill="#ffffff" opacity="0.22"/>
-  <text x="410" y="231" font-size="20" font-family="Inter, Arial, sans-serif" fill="#2b1600" font-weight="700" text-anchor="middle">Prueba gratuita</text>
+  <text x="250" y="262" font-size="66" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800">Crunchyroll Premium</text>
+  <text x="250" y="318" font-size="30" font-family="Inter, Arial, sans-serif" fill="#fff7ec" font-weight="700">Anime y simulcast sin anuncios</text>
+  <text x="250" y="360" font-size="24" font-family="Inter, Arial, sans-serif" fill="#fff3e0" opacity="0.9">Episodios nuevos minutos despues de Japon</text>
+
+  <!-- CTA -->
+  <rect x="250" y="402" rx="18" ry="18" width="330" height="82" fill="#ffffff" opacity="0.15" stroke="#ffd7a6" stroke-width="2"/>
+  <text x="415" y="452" font-size="28" font-family="Inter, Arial, sans-serif" fill="#ffffff" font-weight="800" text-anchor="middle">Prueba gratis 14 dias</text>
 </svg>

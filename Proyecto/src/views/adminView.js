@@ -134,7 +134,7 @@ const CATEGORY_CONFIG = {
       { key: 'obraImg', label: 'Imagen de la obra', type: 'text', placeholder: 'antman.jpg' },
       { key: 'userId', label: 'ID del usuario', type: 'text', required: true, placeholder: '6c9CUuU38x...' },
       { key: 'estrellas', label: 'Estrellas (1-5)', type: 'number', min: 1, max: 5, step: 1, required: true },
-      { key: 'comentario', label: 'Comentario', type: 'textarea', rows: 4, placeholder: 'Escribe la opini&oacute;n del usuario' },
+      { key: 'comentario', label: 'Comentario', type: 'textarea', rows: 4, placeholder: 'Escribe la opinion del usuario' },
       { key: 'fecha', label: 'Fecha (ISO 8601)', type: 'text', placeholder: '2025-11-09T03:36:12.552Z' },
     ],
   },
@@ -373,9 +373,22 @@ function renderListItems(items, editingId, meta) {
         item.title ||
         (isReviews ? item.obraTitulo : '') ||
         'Registro sin t&iacute;tulo';
-      const userLabel = item.userName || item.userEmail || item.userId;
+      const extractUid = () => {
+        if (item.userId) return item.userId;
+        if (typeof item.id === 'string' && item.id.includes('_')) {
+          const [uid] = item.id.split('_');
+          return uid;
+        }
+        return '';
+      };
+      const uid = extractUid();
+      const username = item.adminUsername || item.userName;
+      const userLabel =
+        username ||
+        item.userEmail ||
+        (uid ? `UID: ${uid.slice(0, 4)}...${uid.slice(-4)}` : 'Usuario sin datos');
       const lead = isReviews
-        ? [`&#11088; ${item.estrellas ?? 0}/5`, userLabel, item.categoria].filter(Boolean).join(' &bull; ')
+        ? [`&#11088; ${item.estrellas ?? 0}/5`, userLabel, item.categoria].filter(Boolean).join(' &middot; ')
         : [
             item.director,
             item.autor,
@@ -389,8 +402,8 @@ function renderListItems(items, editingId, meta) {
         ? reviewDate.toLocaleDateString()
         : '';
       const metaLine = isReviews
-        ? [item.id, item.obraId, dateLabel].filter(Boolean).join(' &bull; ')
-        : [item.id, lead, getYear(item)].filter(Boolean).join(' &bull; ');
+        ? [userLabel, item.obraId || item.id, dateLabel].filter(Boolean).join(' &middot; ')
+        : [item.id, lead, getYear(item)].filter(Boolean).join(' &middot; ');
       const description = isReviews
         ? truncate(item.comentario || '', 160)
         : truncate(item.descripcion || item.description || '', 120);
@@ -748,6 +761,8 @@ export function AdminView() {
         cache: {},
         query: {},
         editingId: null,
+        userFilter: '',
+        userProfiles: new Map(),
       };
       let toastTimer;
       let ContentModel;
@@ -811,17 +826,26 @@ export function AdminView() {
       const getFilteredItems = () => {
         const data = getDataset();
         const q = (state.query[state.active] || '').trim().toLowerCase();
-        if (!q) return data;
-        return data.filter((item) => {
+        const filtered = data.filter((item) => {
+          if (state.active === 'resenas' && state.userFilter) {
+            if (item.userId !== state.userFilter) return false;
+          }
+
+          if (!q) return true;
           const bucket = [
             item.titulo,
             item.title,
+            item.obraTitulo,
             item.descripcion,
             item.description,
             item.director,
             item.autor,
             item.franquicia,
             item.plataforma,
+            item.userName,
+            item.adminUsername,
+            item.userEmail,
+            item.userId,
             item.id,
             ...(Array.isArray(item.genero) ? item.genero : []),
           ]
@@ -830,6 +854,7 @@ export function AdminView() {
             .toLowerCase();
           return bucket.includes(q);
         });
+        return filtered;
       };
       const renderCategoryList = () => {
         if (!categoryList) return;
@@ -869,7 +894,29 @@ export function AdminView() {
         if (!meta) return [];
         if (!force && state.cache[key]) return state.cache[key];
         const model = await ensureModel();
-        const data = await model.listCollection(meta.collection);
+        let data = await model.listCollection(meta.collection);
+
+        if (key === 'resenas') {
+          // Enriquecer con username real desde /users
+          let userProfiles = [];
+          try {
+            userProfiles = await model.listCollection('users');
+          } catch (_) {
+            userProfiles = [];
+          }
+          const userMap = new Map();
+          userProfiles.forEach((u) => {
+            if (!u || !u.id) return;
+            const uname = u.username || u.usernameLower || u.nombre || u.email || '';
+            userMap.set(u.id, uname);
+          });
+          state.userProfiles = userMap;
+          data = data.map((d) => {
+            const username = userMap.get(d.userId) || d.userName || d.userEmail || '';
+            return { ...d, adminUsername: username };
+          });
+        }
+
         state.cache[key] = sortRecords(data || []);
         return state.cache[key];
       };
@@ -1131,6 +1178,13 @@ export function AdminView() {
             renderWorkspace();
           });
         }
+        const userFilter = workspace.querySelector('#userFilter');
+        if (userFilter) {
+          userFilter.addEventListener('change', (event) => {
+            state.userFilter = event.target.value;
+            renderWorkspace();
+          });
+        }
         const list = workspace.querySelector('#adminList');
         if (list) {
           list.addEventListener('click', (event) => {
@@ -1167,10 +1221,19 @@ export function AdminView() {
         if (!workspace) return;
         const meta = getMeta();
         if (!meta) return;
+        if (meta.key !== 'resenas') {
+          state.userFilter = '';
+        }
         const items = getFilteredItems();
         const dataset = getDataset();
         const editingData = state.editingId ? dataset.find((item) => item.id === state.editingId) : null;
         const searchValue = state.query[state.active] || '';
+        const userFilterOptions =
+          meta.key === 'resenas'
+            ? Array.from(state.userProfiles.entries())
+                .map(([uid, uname]) => ({ uid, uname: uname || `UID: ${uid.slice(0, 6)}...` }))
+                .sort((a, b) => a.uname.localeCompare(b.uname, 'es', { sensitivity: 'base' }))
+            : [];
         workspace.style.setProperty('--cx-accent', meta.accent);
         workspace.innerHTML = `
           <div class="cx-admin-panel">
@@ -1211,6 +1274,21 @@ export function AdminView() {
                           value="${escapeHtml(searchValue)}"
                         />
                       </div>
+                      ${
+                        meta.key === 'resenas'
+                          ? `
+                          <div class="input-group input-group-sm mt-2">
+                            <span class="input-group-text bg-dark border-dark text-secondary"><i class="bi bi-person"></i></span>
+                            <select id="userFilter" class="form-select form-select-sm bg-dark border-dark text-white">
+                              <option value="">Todos los usuarios</option>
+                              ${userFilterOptions
+                                .map((u) => `<option value="${escapeHtml(u.uid)}" ${state.userFilter === u.uid ? 'selected' : ''}>${escapeHtml(u.uname)}</option>`)
+                                .join('')}
+                            </select>
+                          </div>
+                          `
+                          : ''
+                      }
                     </div>
                   </div>
                   <div id="adminList" class="cx-admin-list scrollbar-dark">

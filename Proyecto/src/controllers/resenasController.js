@@ -1,4 +1,4 @@
-﻿// ============================== IMPORTS ==============================
+// ============================== IMPORTS ==============================
 import {
   doc,
   getDoc,
@@ -7,22 +7,28 @@ import {
   deleteDoc,
   collection,
   getDocs,
+  arrayUnion,
+  arrayRemove,
+  updateDoc,
 } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 import { db, auth } from "../lib/firebase.js";
+import { UserModel } from "../models/userModel.js";
 
-// ============================== GUARDAR O ACTUALIZAR RESEÑA ==============================
-export async function guardarReseña(categoria, itemId, estrellas, comentario) {
+// ============================== GUARDAR O ACTUALIZAR RESENA ==============================
+export async function guardarResena(categoria, itemId, estrellas, comentario) {
   const user = auth.currentUser;
-  if (!user) { alert("Debes iniciar sesión para dejar una reseña."); return; }
+  if (!user) { alert("Debes iniciar sesion para dejar una resena."); return; }
 
   const userId = user.uid;
-  const userName = user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
+  const profile = await UserModel.ensureProfile(user).catch(() => null);
+  const userName = profile?.username || user.displayName || (user.email ? user.email.split("@")[0] : "Usuario");
   const itemRef = doc(db, categoria, itemId);
   const resenaRef = doc(db, categoria, itemId, "resenas", userId);
   const globalRef = doc(db, "userResenas", `${userId}_${categoria}_${itemId}`);
 
   await runTransaction(db, async (tx) => {
     const itemSnap = await tx.get(itemRef);
+    const resenaSnap = await tx.get(resenaRef);
     let totalVotos = 0;
     let promedio = 0;
 
@@ -32,7 +38,6 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       totalVotos = itemSnap.data().totalVotos || 0;
       promedio = itemSnap.data().calificacionPromedio || 0;
 
-      const resenaSnap = await tx.get(resenaRef);
       if (resenaSnap.exists()) {
         const prevEstrellas = resenaSnap.data().estrellas;
         const nuevaSuma = promedio * totalVotos - prevEstrellas + estrellas;
@@ -44,7 +49,9 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       }
     }
 
-    // Guardar o actualizar reseña del usuario
+    // Guardar o actualizar resena del usuario
+    const prevLikes = resenaSnap.exists() ? resenaSnap.data().likesCount || 0 : 0;
+
     tx.set(resenaRef, {
       userId,
       userName,
@@ -52,15 +59,18 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       estrellas,
       comentario,
       fecha: new Date().toISOString(),
-    });
+      likesCount: prevLikes,
+    }, { merge: true });
   });
 
   // Registro global (para el perfil)
   try {
     const itemSnap = await getDoc(itemRef);
     const itemData = itemSnap.exists() ? itemSnap.data() : {};
-    const obraTitulo = itemData.titulo || itemData.title || "Sin título";
+    const obraTitulo = itemData.titulo || itemData.title || "Sin titulo";
     const obraImg = itemData.imagen || itemData.img || "";
+    const resenaSnap = await getDoc(resenaRef);
+    const likesCount = resenaSnap.exists() ? resenaSnap.data().likesCount || 0 : 0;
 
     await setDoc(globalRef, {
       userId,
@@ -73,14 +83,15 @@ export async function guardarReseña(categoria, itemId, estrellas, comentario) {
       estrellas,
       comentario,
       fecha: new Date().toISOString(),
+      likesCount,
     });
   } catch (error) {
-    console.error("Error al registrar reseña global:", error);
+    console.error("Error al registrar resena global:", error);
   }
 }
 
-// ============================== OBTENER RESEÑA DE USUARIO ==============================
-export async function obtenerReseñaUsuario(categoria, itemId) {
+// ============================== OBTENER RESENA DE USUARIO ==============================
+export async function obtenerResenaUsuario(categoria, itemId) {
   const user = auth.currentUser;
   if (!user) return null;
   const resenaRef = doc(db, categoria, itemId, "resenas", user.uid);
@@ -88,8 +99,8 @@ export async function obtenerReseñaUsuario(categoria, itemId) {
   return snap.exists() ? snap.data() : null;
 }
 
-// ============================== ELIMINAR RESEÑA ==============================
-export async function eliminarReseña(categoria, itemId) {
+// ============================== ELIMINAR RESENA ==============================
+export async function eliminarResena(categoria, itemId) {
   const user = auth.currentUser;
   if (!user) return;
 
@@ -107,6 +118,39 @@ export async function eliminarReseña(categoria, itemId) {
     const nuevoPromedio = total ? suma / total : 0;
     await setDoc(doc(db, categoria, itemId), { calificacionPromedio: nuevoPromedio, totalVotos: total }, { merge: true });
   } catch (error) {
-    console.error("Error al eliminar reseña:", error);
+    console.error("Error al eliminar resena:", error);
   }
+}
+
+// ============================== LIKE/UNLIKE UNA RESENA ==============================
+export async function toggleLikeResena(categoria, itemId, resenaUserId) {
+  const user = auth.currentUser;
+  if (!user) throw new Error("LOGIN_REQUIRED");
+
+  const resenaRef = doc(db, categoria, itemId, "resenas", resenaUserId);
+  const globalRef = doc(db, "userResenas", `${resenaUserId}_${categoria}_${itemId}`);
+
+  const resenaSnap = await getDoc(resenaRef);
+  if (!resenaSnap.exists()) throw new Error("RESENA_NOT_FOUND");
+
+  const data = resenaSnap.data() || {};
+  const alreadyLiked = Array.isArray(data.likedBy) && data.likedBy.includes(user.uid);
+  const baseLikes = typeof data.likesCount === "number" ? data.likesCount : 0;
+  const likesCount = alreadyLiked ? Math.max(0, baseLikes - 1) : baseLikes + 1;
+
+  await updateDoc(resenaRef, {
+    likesCount,
+    likedBy: alreadyLiked ? arrayRemove(user.uid) : arrayUnion(user.uid),
+  });
+
+  try {
+    const globalSnap = await getDoc(globalRef);
+    if (globalSnap.exists()) {
+      await updateDoc(globalRef, { likesCount });
+    }
+  } catch (_) {
+    // Ignorar si el espejo no existe o no se puede actualizar
+  }
+
+  return { likesCount, liked: !alreadyLiked };
 }

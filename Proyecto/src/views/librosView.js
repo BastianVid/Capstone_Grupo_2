@@ -8,7 +8,7 @@ import { Footer } from './shared/footer.js';
 export function LibrosView() {
   const html = `
     ${Navbar()}
-    <div class="container py-4">
+    <div class="container py-4" data-category-top="libros">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h1 class="h3 mb-0"><i class="bi bi-book"></i> Libros</h1>
 
@@ -44,6 +44,10 @@ export function LibrosView() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
+
+      const categoryTop = document.querySelector('[data-category-top="libros"]');
+      const scrollToTop = () =>
+        categoryTop?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       // === Cargar datos con caché para reducir lecturas ===
       let data;
@@ -152,6 +156,7 @@ export function LibrosView() {
         if (currentPage > 1) {
           currentPage--;
           renderPage();
+          scrollToTop();
         }
       });
 
@@ -159,6 +164,7 @@ export function LibrosView() {
         if (currentPage < totalPages()) {
           currentPage++;
           renderPage();
+          scrollToTop();
         }
       });
 

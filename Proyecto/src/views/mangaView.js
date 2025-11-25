@@ -8,7 +8,7 @@ import { Footer } from './shared/footer.js';
 export function MangaView() {
   const html = `
     ${Navbar()}
-    <div class="container py-4">
+    <div class="container py-4" data-category-top="manga">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h1 class="h3 mb-0"><i class="bi bi-journal-bookmark"></i> Manga</h1>
 
@@ -44,6 +44,10 @@ export function MangaView() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
+
+      const categoryTop = document.querySelector('[data-category-top="manga"]');
+      const scrollToTop = () =>
+        categoryTop?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       // === Cargar datos con caching para reducir lecturas ===
       let data;
@@ -154,6 +158,7 @@ export function MangaView() {
         if (currentPage > 1) {
           currentPage--;
           renderPage();
+          scrollToTop();
         }
       });
 
@@ -161,6 +166,7 @@ export function MangaView() {
         if (currentPage < totalPages()) {
           currentPage++;
           renderPage();
+          scrollToTop();
         }
       });
 

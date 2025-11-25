@@ -8,7 +8,7 @@ import { Footer } from './shared/footer.js';
 export function AnimeView() {
   const html = `
     ${Navbar()}
-    <div class="container py-4">
+    <div class="container py-4" data-category-top="anime">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h1 class="h3 mb-0"><i class="bi bi-emoji-smile"></i> Anime</h1>
 
@@ -44,6 +44,10 @@ export function AnimeView() {
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
+
+      const categoryTop = document.querySelector('[data-category-top="anime"]');
+      const scrollToTop = () =>
+        categoryTop?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       // === Cargar datos con caching para reducir lecturas ===
       let data;
@@ -157,6 +161,7 @@ export function AnimeView() {
         if (currentPage > 1) {
           currentPage--;
           renderPage();
+          scrollToTop();
         }
       });
 
@@ -164,6 +169,7 @@ export function AnimeView() {
         if (currentPage < totalPages()) {
           currentPage++;
           renderPage();
+          scrollToTop();
         }
       });
 

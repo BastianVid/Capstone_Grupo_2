@@ -3,6 +3,7 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
 
 // ============================== CONFIG ==============================
 const firebaseConfig = {
@@ -21,6 +22,7 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 // Instancias principales
 export const auth = getAuth(app);
 export const db   = getFirestore(app);
+export const storage = getStorage(app);
 
 // ============================== GOOGLE PROVIDER ==============================
 export const googleProvider = new GoogleAuthProvider();
@@ -31,11 +33,6 @@ export const googleProvider = new GoogleAuthProvider();
 export let currentUser = null;
 onAuthStateChanged(auth, (u) => {
   currentUser = u;
-  if (u) {
-    console.log(`👤 Usuario autenticado: ${u.email}`);
-  } else {
-    console.log("🚪 Usuario desconectado");
-  }
 });
 
 // ============================== NOTA ==============================

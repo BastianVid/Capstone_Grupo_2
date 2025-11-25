@@ -48,10 +48,7 @@ export function Navbar() {
             <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark shadow-lg">
               <li><h6 class="dropdown-header text-secondary small" id="navUserEmail"></h6></li>
               <li><a class="dropdown-item" href="#/perfil"><i class="bi bi-person me-2"></i>Tu perfil</a></li>
-              <li><a class="dropdown-item" href="#/lista"><i class="bi bi-bookmark-heart me-2"></i>Mi lista</a></li>
               <li><a class="dropdown-item" href="#/calificaciones"><i class="bi bi-star me-2"></i>Mis calificaciones</a></li>
-              <li><a class="dropdown-item" href="#/intereses"><i class="bi bi-lightbulb me-2"></i>Tus intereses</a></li>
-              <li><a class="dropdown-item" href="#/configuracion"><i class="bi bi-gear me-2"></i>Configuración</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><button id="logoutBtn" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Cerrar sesión</button></li>
             </ul>
@@ -133,14 +130,16 @@ export function initNavbarSearch() {
     // Si no hay texto, ocultar dropdown
     if (!query) return hideDropdown();
 
-    // Si NO estás en home, filtra dentro de la vista actual
-    if (location.hash !== "" && location.hash !== "#/") {
+    const dropdownAllowedHashes = ["", "#/", "#/detalle"];
+
+    // Si NO estás en una vista con dropdown global (home o detalle), filtra dentro de la vista actual
+    if (!dropdownAllowedHashes.includes(location.hash)) {
       window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
       hideDropdown();
       return;
     }
 
-    // Si estás en home → mostrar lista de resultados
+    // Si estás en home o detalle → mostrar lista de resultados
     await buildCache();
     const results = cache.filter(x =>
       x._title.toLowerCase().includes(query) ||

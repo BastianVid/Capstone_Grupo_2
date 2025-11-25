@@ -2,6 +2,7 @@
 import { auth } from '../../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { isAdmin, isAdminFlexible } from "../../controllers/authController.js";
+import { UserModel } from '../../models/userModel.js';
 
 let subscribed = false;
 
@@ -17,7 +18,10 @@ export async function updateNavbarSessionUI() {
   if (!loginBtn || !userMenu) return;
 
   if (user) {
+    let profile = null;
+    try { profile = await UserModel.ensureProfile(user); } catch {}
     const displayName =
+      profile?.username ||
       user.displayName ||
       (user.email ? user.email.split('@')[0] : null) ||
       'Mi cuenta';
