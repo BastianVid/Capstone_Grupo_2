@@ -23,6 +23,8 @@ export function Navbar() {
           <li class="nav-item"><a href="#/libros"           class="nav-link text-white-50 px-2">Libros</a></li>
           <li class="nav-item"><a href="#/manga"            class="nav-link text-white-50 px-2">Mangas</a></li>
           <li class="nav-item"><a href="#/documentales"     class="nav-link text-white-50 px-2">Documentales</a></li>
+          <li class="nav-item"><a href="#/proximamente"     class="nav-link text-white-50 px-2">Proximamente</a></li>
+          
 
         </ul>
 
@@ -89,6 +91,7 @@ export function initNavbarSearch() {
       ContentModel.listLibros?.().catch(() => []),
       ContentModel.listManga?.().catch(() => []),
       ContentModel.listDocumentales?.().catch(() => []),
+      ContentModel.listProximamente?.().catch(() => []),
     ]);
 
 
@@ -109,6 +112,8 @@ export function initNavbarSearch() {
       ...libros.map(p => norm(p, "libros", { img: "book.jpg", tag: "Libro" })),
       ...manga.map(p => norm(p, "manga", { img: "chainsaw-man.jpg", tag: "Manga" })),
       ...documentales.map(p => norm(p, "documentales", { img: "doc.jpg", tag: "Documental" })),
+      ...proximamente.map(p => norm(p, "proximamente", { img: "comingsoon.jpg", tag: "Próximamente" })),
+
     ];
 
     building = false;

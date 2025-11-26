@@ -165,6 +165,7 @@ export const ContentModel = {
   listVideojuegos:  () => readCollection("videojuegos"),
   listManga:        () => readCollection("manga"),
   listDocumentales: () => readCollection("documentales"),
+  listProximamente: () => readCollection("proximamente"),
 
   listCollection: (name) => readCollection(name),
 

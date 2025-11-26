@@ -394,7 +394,8 @@ export function DetalleView(item, categoria) {
             "videojuegos",
             "libros",
             "manga",
-            "documentales"
+            "documentales",
+            "proximamente"
           ];
 
           const datasets = [];

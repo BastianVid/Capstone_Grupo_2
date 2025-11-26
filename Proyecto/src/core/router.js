@@ -20,6 +20,7 @@ import { BuscarView } from '../views/buscarView.js';
 import { MangaView } from '../views/mangaView.js';
 import { DocumentalesView } from '../views/documentalesView.js';
 import { AdminView } from "../views/adminView.js";
+import { ProximamenteView } from "../views/proximamenteView.js";
 
 
 // (Opcional) Vista 404
@@ -52,7 +53,8 @@ const routes = {
   '/buscar':          { view: BuscarView,       secure: false, title: 'Buscar • CulturaX' },
   '/manga':           { view: MangaView,        secure: false, title: 'Manga • CulturaX' },
   '/documentales':    { view: DocumentalesView, secure: false, title: 'Documentales • CulturaX' },
-  '/admin': { view: AdminView, secure: true, title: 'Dashboard • CulturaX' },
+  '/admin':           { view: AdminView,        secure: true, title: 'Dashboard • CulturaX' },
+  '/proximamente':    { view: ProximamenteView, secure: true, title: 'Proximamente • CulturaX' },
   '/404':             { view: NotFoundView,     secure: false, title: 'No encontrado • CulturaX' },
 };
 
