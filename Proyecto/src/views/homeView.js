@@ -453,7 +453,7 @@ export function HomeView() {
         messagesEl.innerHTML = '';
         const greeting = geminiKeyReady
           ? 'Hola, ¿no sabes qué ver? Soy CulturIAx y puedo proponerte películas y series con reseñas brillantes de CulturaX. Cuéntame qué ganas tienes hoy.'
-          : 'Para activar a CulturIAx pega tu API key en src/lib/gemini.js y vuelve a abrir el chat.';
+          : 'El asistente IA no está disponible por ahora. Intenta de nuevo en unos minutos.';
         appendMessage(greeting, 'ai');
 
         const sendMessage = async (rawMessage) => {
@@ -462,7 +462,7 @@ export function HomeView() {
           appendMessage(message, 'user');
 
           if (!geminiKeyReady) {
-            appendMessage('Agrega tu API key en src/lib/gemini.js para activar a CulturIAx.', 'ai');
+            appendMessage('El asistente IA no está disponible por ahora. Intenta más tarde.', 'ai');
             return;
           }
 
@@ -481,7 +481,7 @@ export function HomeView() {
           } catch (err) {
             const fallback =
               err.message === 'GEMINI_API_KEY_MISSING'
-                ? 'Necesitas configurar la clave de CulturIAx en src/lib/gemini.js.'
+                ? 'El asistente IA no está configurado en el servidor.'
                 : 'No pude contactar al motor IA ahora mismo. Inténtalo nuevamente en unos segundos.';
             appendMessage(fallback, 'ai');
             console.error('[CulturIAx]', err);

@@ -23,6 +23,9 @@ const STREAMING_PLATFORM_ICONS = {
   crunchyroll: { label: 'Crunchyroll', file: 'crunchyroll.svg' },
   hulu: { label: 'Hulu', file: 'hulu.svg' },
   youtube: { label: 'YouTube', file: 'youtube.svg' },
+  spotify: { label: 'Spotify', file: 'spotify.svg' },
+  applemusic: { label: 'Apple Music', file: 'applemusic.svg' },
+  amazonmusic: { label: 'Amazon Music', file: 'amazonmusic.svg' },
 };
 
 const STREAMING_PLATFORM_MATCHERS = [
@@ -37,6 +40,9 @@ const STREAMING_PLATFORM_MATCHERS = [
   { key: 'crunchyroll', patterns: ['crunchyroll'] },
   { key: 'hulu', patterns: ['hulu'] },
   { key: 'youtube', patterns: ['youtube'] },
+  { key: 'spotify', patterns: ['spotify'], tokens: ['spot'] },
+  { key: 'applemusic', patterns: ['applemusic', 'itunes'], tokens: ['apple', 'music'] },
+  { key: 'amazonmusic', patterns: ['amazonmusic'], tokens: ['amazon', 'music'] },
 ];
 
 function normalizePlatformValue(value = '') {

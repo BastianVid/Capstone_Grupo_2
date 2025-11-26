@@ -1,0 +1,60 @@
+// ============================== Gemini Client ==============================
+// Helper utilities to interact with Google Gemini for movie recommendations.
+
+const GEMINI_MODEL = "gemini-2.5-flash";
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+
+// Texto usado para guiar al dev cuando no existe API key configurada.
+export const GEMINI_API_KEY_PLACEHOLDER = "PON_AQUI_TU_API_KEY_DE_LA_IA";
+
+// Opcional: si quieres incrustar una key para desarrollo local, colócala aquí
+// pero NO la subas al repo. Por seguridad se deja vacío.
+export const GEMINI_EMBEDDED_API_KEY = GEMINI_API_KEY_PLACEHOLDER;
+
+const presetKey =
+  typeof window !== "undefined" && window.__GEMINI_API_KEY__
+    ? String(window.__GEMINI_API_KEY__)
+    : "";
+
+const storedKey =
+  typeof window !== "undefined"
+    ? (() => {
+        try {
+          const k = localStorage.getItem("culturax:geminiKey");
+          return k && k.trim() ? k.trim() : "";
+        } catch {
+          return "";
+        }
+      })()
+    : "";
+
+const embeddedKey =
+  GEMINI_EMBEDDED_API_KEY &&
+  GEMINI_EMBEDDED_API_KEY !== GEMINI_API_KEY_PLACEHOLDER
+    ? GEMINI_EMBEDDED_API_KEY.trim()
+    : "";
+
+let geminiApiKey =
+  (presetKey && presetKey.trim()) ||
+  storedKey ||
+  embeddedKey;
+
+export function setGeminiApiKey(key) {
+  const normalized = key?.trim();
+  geminiApiKey = normalized || embeddedKey;
+  if (typeof window !== "undefined") {
+    try {
+      if (normalized) {
+        localStorage.setItem("culturax:geminiKey", normalized);
+      } else {
+        localStorage.removeItem("culturax:geminiKey");
+      }
+    } catch {
+      // ignore
+    }
+  }
+}
+
+export function getGeminiApiKey() {
+  return geminiApiKey;
+}
