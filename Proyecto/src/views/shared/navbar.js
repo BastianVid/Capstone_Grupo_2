@@ -6,35 +6,37 @@ export function Navbar() {
   return `
   <header class="cx-header">
     <div class="container py-2">
-      <div class="cx-header-frame d-flex align-items-center gap-3 flex-wrap w-100">
+      <div class="cx-header-frame d-flex align-items-center gap-3 flex-wrap w-100 justify-content-between">
 
-        <!-- Brand -->
-        <a href="#/" class="navbar-brand fw-bold text-white d-flex align-items-center gap-2 m-0">
-          <i class="bi bi-film"></i><span>CulturaX</span>
-        </a>
+        <div class="d-flex align-items-center gap-3 flex-wrap flex-grow-1">
+          <!-- Brand -->
+          <a href="#/" class="navbar-brand fw-bold text-white d-flex align-items-center gap-2 m-0">
+            <i class="bi bi-film"></i><span>CulturaX</span>
+          </a>
 
-        <!-- Nav -->
-        <ul class="nav d-none d-md-flex">
-          <li class="nav-item"><a href="#/peliculas"        class="nav-link text-white-50 px-2">Películas</a></li>
-          <li class="nav-item"><a href="#/series"           class="nav-link text-white-50 px-2">Series</a></li>
-          <li class="nav-item"><a href="#/anime"            class="nav-link text-white-50 px-2">Anime</a></li>
-          <li class="nav-item"><a href="#/musica"           class="nav-link text-white-50 px-2">Música</a></li>
-          <li class="nav-item"><a href="#/videojuegos"      class="nav-link text-white-50 px-2">Videojuegos</a></li>
-          <li class="nav-item"><a href="#/libros"           class="nav-link text-white-50 px-2">Libros</a></li>
-          <li class="nav-item"><a href="#/manga"            class="nav-link text-white-50 px-2">Mangas</a></li>
-          <li class="nav-item"><a href="#/documentales"     class="nav-link text-white-50 px-2">Documentales</a></li>
+          <!-- Nav desktop -->
+          <ul class="nav d-none d-md-flex">
+            <li class="nav-item"><a href="#/peliculas"        class="nav-link text-white-50 px-2">Películas</a></li>
+            <li class="nav-item"><a href="#/series"           class="nav-link text-white-50 px-2">Series</a></li>
+            <li class="nav-item"><a href="#/anime"            class="nav-link text-white-50 px-2">Anime</a></li>
+            <li class="nav-item"><a href="#/musica"           class="nav-link text-white-50 px-2">Música</a></li>
+            <li class="nav-item"><a href="#/videojuegos"      class="nav-link text-white-50 px-2">Videojuegos</a></li>
+            <li class="nav-item"><a href="#/libros"           class="nav-link text-white-50 px-2">Libros</a></li>
+            <li class="nav-item"><a href="#/manga"            class="nav-link text-white-50 px-2">Mangas</a></li>
+            <li class="nav-item"><a href="#/documentales"     class="nav-link text-white-50 px-2">Documentales</a></li>
+          </ul>
+        </div>
 
-        </ul>
-
-        <div class="dropdown d-md-none">
+        <!-- Nav mobile dropdown (always visible en móvil, separado) -->
+        <div class="dropdown d-md-none ms-auto me-2">
           <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Categorias
+            Categorías
           </button>
           <ul class="dropdown-menu dropdown-menu-dark shadow-sm">
-            <li><a class="dropdown-item" href="#/peliculas">Peliculas</a></li>
+            <li><a class="dropdown-item" href="#/peliculas">Películas</a></li>
             <li><a class="dropdown-item" href="#/series">Series</a></li>
             <li><a class="dropdown-item" href="#/anime">Anime</a></li>
-            <li><a class="dropdown-item" href="#/musica">Musica</a></li>
+            <li><a class="dropdown-item" href="#/musica">Música</a></li>
             <li><a class="dropdown-item" href="#/videojuegos">Videojuegos</a></li>
             <li><a class="dropdown-item" href="#/libros">Libros</a></li>
             <li><a class="dropdown-item" href="#/manga">Mangas</a></li>
@@ -78,9 +80,7 @@ export function Navbar() {
 }
 
 /**
- * 🔹 Inicializa el buscador global
- * - En Home → muestra lista desplegable con resultados
- * - En otras vistas → emite evento "globalSearch" (filtrado local)
+ * Busca global
  */
 export function initNavbarSearch() {
   const input = document.getElementById("siteSearchInput");
@@ -106,7 +106,6 @@ export function initNavbarSearch() {
       ContentModel.listManga?.().catch(() => []),
       ContentModel.listDocumentales?.().catch(() => []),
     ]);
-
 
     const norm = (x, categoria, def) => ({
       ...x,
@@ -143,19 +142,16 @@ export function initNavbarSearch() {
   input.addEventListener("input", async (e) => {
     const query = e.target.value.trim().toLowerCase();
 
-    // Si no hay texto, ocultar dropdown
     if (!query) return hideDropdown();
 
     const dropdownAllowedHashes = ["", "#/", "#/detalle"];
 
-    // Si NO estás en una vista con dropdown global (home o detalle), filtra dentro de la vista actual
     if (!dropdownAllowedHashes.includes(location.hash)) {
       window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
       hideDropdown();
       return;
     }
 
-    // Si estás en home o detalle → mostrar lista de resultados
     await buildCache();
     const results = cache.filter(x =>
       x._title.toLowerCase().includes(query) ||
@@ -187,11 +183,9 @@ export function initNavbarSearch() {
     });
   });
 
-  // Cerrar el dropdown al hacer click fuera
   document.addEventListener("click", (e) => {
     if (!form.contains(e.target)) hideDropdown();
   });
 
-  // Enter -> Si estás en home, no hacer nada especial
   form.addEventListener("submit", (e) => e.preventDefault());
 }
