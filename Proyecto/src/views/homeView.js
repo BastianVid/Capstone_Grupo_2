@@ -24,7 +24,7 @@ export function HomeView() {
           <div class="card bg-dark border-0 shadow-sm upcoming-card">
             <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
               <span class="fw-semibold">Próximamente</span>
-              <a class="small" href="#/peliculas">Explorar tráilers</a>
+              <a class="small" href="#/proximamente">Explorar tráilers</a>
             </div>
             <div id="upcoming-list" class="list-group list-group-flush scrollbar-dark"></div>
           </div>
@@ -157,27 +157,30 @@ export function HomeView() {
       initNavbarSearch();
 
       const { ContentModel } = await import('../models/contentModel.js');
-      const [
-        pelisRaw,
-        seriesRaw,
-        animeRaw,
-        musicaRaw,
-        librosRaw,
-        documentalesRaw,
-        videojuegosRaw,
-        mangaRaw,
-        communityReviewsRaw,
-      ] = await Promise.all([
-        ContentModel.listPeliculas(),
-        ContentModel.listSeries(),
-        ContentModel.listAnime(),
-        ContentModel.listMusica(),
-        ContentModel.listLibros(),
-        ContentModel.listDocumentales(),
-        ContentModel.listVideojuegos(),
-        ContentModel.listManga(),
-        ContentModel.listCommunityResenas(60),
-      ]);
+    const [
+      pelisRaw,
+      seriesRaw,
+      animeRaw,
+      musicaRaw,
+      librosRaw,
+      documentalesRaw,
+      videojuegosRaw,
+      mangaRaw,
+      proximamenteRaw,
+      communityReviewsRaw,
+    ] = await Promise.all([
+      ContentModel.listPeliculas(),
+      ContentModel.listSeries(),
+      ContentModel.listAnime(),
+      ContentModel.listMusica(),
+      ContentModel.listLibros(),
+      ContentModel.listDocumentales(),
+      ContentModel.listVideojuegos(),
+      ContentModel.listManga(),
+      ContentModel.listProximamente(),   
+      ContentModel.listCommunityResenas(60),
+    ]);
+
 
       // === Normalización ===
       const norm = (x, kind, defImg, defTag) => {
@@ -211,6 +214,9 @@ export function HomeView() {
       const documentales = (documentalesRaw || []).map(x => norm(x, 'documentales', 'avatar.jpg', 'Documental'));
       const videojuegos = (videojuegosRaw || []).map(x => norm(x, 'videojuegos', 'avatar.jpg', 'Videojuego'));
       const manga = (mangaRaw || []).map(x => norm(x, 'manga', 'naruto.jpg', 'Manga'));
+      const proximamente = (proximamenteRaw || []).map(x => norm(x, 'proximamente', 'default.jpg', 'Próximamente')
+);
+
 
       // === Top dinámico y seguro ===
       const getTopRated = (arr) => {
@@ -292,22 +298,37 @@ export function HomeView() {
       document.getElementById('hero-slides').innerHTML = slides;
       applyImgFallback(document, 'img.img-with-fallback');
 
-      // === Próximamente ===
-      const upcomingFallback = [
-        { titulo: 'Avengers', img: 'avengers.jpg', genero: ['Acción'] },
-        { titulo: 'Stranger Things T5', img: 'stranger-things.jpg', genero: ['Ciencia Ficción'] },
-        { titulo: 'Dragon Ball Z', img: 'dragon-ball-z.jpg', genero: ['Anime'] },
-        { titulo: 'Chainsaw Man', img: 'chainsaw-man.jpg', genero: ['Shonen'] },
-        { titulo: 'Bleach', img: 'bleach.jpg', genero: ['Shonen'] },
-      ];
-      document.getElementById('upcoming-list').innerHTML = upcomingFallback.map(x => `
-        <a class="list-group-item list-group-item-action bg-transparent text-white d-flex gap-2 align-items-start">
-          <img src="${resolveImagePath(x.img)}" style="width:70px;height:100px;object-fit:cover;">
-          <div class="flex-grow-1">
-            <div class="small fw-semibold text-truncate">${x.titulo}</div>
-            <div class="small text-secondary">${x.genero[0]}</div>
-          </div>
-        </a>`).join('');
+      // === Próximamente (desde Firestore) ===
+      const upcomingItems = proximamente.slice(0, 6);  // limita a 6 resultados
+
+      document.getElementById('upcoming-list').innerHTML =
+        upcomingItems.length
+          ? upcomingItems.map(x => `
+              <a class="list-group-item list-group-item-action bg-transparent text-white d-flex gap-2 align-items-start"
+                data-id="${x.id}" data-kind="${x.kind}">
+                <img src="${resolveImagePath(x.img)}" style="width:70px;height:100px;object-fit:cover;">
+                <div class="flex-grow-1">
+                  <div class="small fw-semibold text-truncate">${x.title}</div>
+                  <div class="small text-secondary">${x.tag}</div>
+                </div>
+              </a>
+            `).join('')
+          : `<div class="p-2 text-secondary small">Sin próximos estrenos</div>`;
+
+      
+     // Activar clic en las tarjetas
+      document.querySelectorAll('#upcoming-list a').forEach(el => {
+        el.addEventListener('click', () => {
+          sessionStorage.setItem('detalleItem', JSON.stringify({
+            id: el.dataset.id
+          }));
+          sessionStorage.setItem('detalleCategoria', 'proximamente');
+          location.hash = '#/detalle';
+        });
+      });
+
+
+
 
       // === Render Rails ===
       const onCard = (item) => {
