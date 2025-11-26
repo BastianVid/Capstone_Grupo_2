@@ -1044,7 +1044,7 @@ footer {
 .perfil-cover {
   position: absolute;
   inset: 0;
-  background: url('src/assets/img/cover-dark.jpg') center/cover no-repeat;
+  background: url('./img/cover-dark.jpg') center/cover no-repeat;
   filter: brightness(0.4) blur(2px);
 }
 .perfil-info {

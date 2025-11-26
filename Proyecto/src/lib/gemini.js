@@ -1,70 +1,54 @@
-// ============================== Gemini Client ==============================
-// Helper utilities to interact with Google Gemini for movie recommendations.
+// ============================== Gemini Client (via Cloud Function) ==============================
+// El cliente ya no expone la API key; todas las peticiones pasan por /api/gemini.
 
 const GEMINI_MODEL = "gemini-2.5-flash";
-const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const GEMINI_PROXY_URL = "/api/gemini";
 
-// Texto usado para guiar al dev cuando no existe API key configurada.
-export const GEMINI_API_KEY_PLACEHOLDER = "PON_AQUI_TU_API_KEY_DE_LA_IA";
+// Marcadores mantenidos por compatibilidad; la key vive en Cloud Functions.
+export const GEMINI_API_KEY_PLACEHOLDER = "SERVERSIDE_KEY";
+export const GEMINI_EMBEDDED_API_KEY = GEMINI_API_KEY_PLACEHOLDER;
 
-// Cambia el valor de esta constante por tu API key local (ya añadida en tu repo).
-export const GEMINI_EMBEDDED_API_KEY = "AIzaSyAaMuLHbunBGtaRF8S79S0rEn3LuyCqbfc";
-
-const presetKey =
-  typeof window !== "undefined" && window.__GEMINI_API_KEY__
-    ? String(window.__GEMINI_API_KEY__)
-    : "";
-
-const embeddedKey =
-  GEMINI_EMBEDDED_API_KEY &&
-  GEMINI_EMBEDDED_API_KEY !== GEMINI_API_KEY_PLACEHOLDER
-    ? GEMINI_EMBEDDED_API_KEY.trim()
-    : "";
-
-let geminiApiKey = (presetKey && presetKey.trim()) || embeddedKey;
-
-export function setGeminiApiKey(key) {
-  const normalized = key?.trim();
-  geminiApiKey = normalized || embeddedKey;
+export function setGeminiApiKey() {
+  // Sin-op: la clave no se gestiona en el cliente
+  return null;
 }
 
 export function getGeminiApiKey() {
-  return geminiApiKey;
+  return GEMINI_API_KEY_PLACEHOLDER;
 }
 
 export function hasGeminiApiKey() {
-  return Boolean(
-    geminiApiKey && geminiApiKey !== GEMINI_API_KEY_PLACEHOLDER
-  );
+  // Siempre true porque la key se almacena en el backend
+  return true;
 }
 
 export function buildCatalogSummary(items = []) {
   if (!Array.isArray(items) || items.length === 0) {
-    return "No hay reseñas disponibles todavía. Usa tu conocimiento general para proponer opciones family-friendly del catálogo de CulturaX.";
+    return "No hay resenas disponibles todavia. Usa conocimiento general para proponer opciones family-friendly del catalogo de CulturaX.";
   }
 
   return items
-    .map((item, index) => {
-      const title = item.title ?? "Sin título";
-      const rating =
+      .map((item, index) => {
+        const title = item.title ?? "Sin titulo";
+        const rating =
         typeof item.rating === "number" && item.rating > 0
           ? `${item.rating.toFixed(1)}/5`
           : "sin calificar";
-      const genres = Array.isArray(item.genres)
-        ? item.genres
-        : item.tag
-        ? [item.tag]
-        : [];
-      const genresLabel = genres.length
-        ? genres.join(", ")
-        : "sin género identificado";
-      const blurb = item.description
-        ? item.description.slice(0, 220).trim()
-        : "Sin descripción disponible.";
+        const genres = Array.isArray(item.genres)
+          ? item.genres
+          : item.tag
+            ? [item.tag]
+            : [];
+        const genresLabel = genres.length
+          ? genres.join(", ")
+          : "sin genero identificado";
+        const blurb = item.description
+          ? item.description.slice(0, 220).trim()
+          : "Sin descripcion disponible.";
 
-      return `${index + 1}. ${title} | Géneros: ${genresLabel} | Rating promedio: ${rating}. Reseña destacada: ${blurb}`;
-    })
-    .join("\n");
+        return `${index + 1}. ${title} | Generos: ${genresLabel} | Rating promedio: ${rating}. Resena destacada: ${blurb}`;
+      })
+      .join("\n");
 }
 
 const cleanSnippet = (text, max = 220) => {
@@ -75,94 +59,88 @@ const cleanSnippet = (text, max = 220) => {
 
 export function buildUserReviewSummary(reviews = []) {
   if (!Array.isArray(reviews) || reviews.length === 0) {
-    return "El usuario aún no registra reseñas personales. Pregunta por sus gustos antes de recomendar.";
+    return "El usuario aun no registra resenas personales. Pregunta por sus gustos antes de recomendar.";
   }
 
   return reviews
-    .slice(0, 8)
-    .map((review, index) => {
-      const title = review.obraTitulo ?? review.titulo ?? "Sin título";
-      const category = review.categoria ?? review.kind ?? "Categoría desconocida";
-      const rating =
+      .slice(0, 8)
+      .map((review) => {
+        const title = review.obraTitulo ?? review.titulo ?? "Sin titulo";
+        const category = review.categoria ?? review.kind ?? "Categoria desconocida";
+        const rating =
         typeof review.estrellas === "number"
           ? `${Number(review.estrellas).toFixed(1)}/5`
           : "sin rating";
-      const comment = cleanSnippet(review.comentario || review.review || "");
-      return `Tu reseña sobre ${title} (${category}) fue de ${rating}. Comentaste: ${
-        comment || "sin comentario registrado."
-      }`;
-    })
-    .join("\n");
+        const comment = cleanSnippet(review.comentario || review.review || "");
+        return `Tu resena sobre ${title} (${category}) fue de ${rating}. Comentaste: ${
+          comment || "sin comentario registrado."
+        }`;
+      })
+      .join("\n");
 }
 
 export function buildCommunityReviewSummary(reviews = []) {
   if (!Array.isArray(reviews) || reviews.length === 0) {
-    return "La comunidad aún no ha dejado reseñas aprovechables para este contexto.";
+    return "La comunidad aun no ha dejado resenas aprovechables para este contexto.";
   }
 
   return reviews
-    .slice(0, 12)
-    .map((review, index) => {
-      const title = review.obraTitulo ?? review.titulo ?? "Sin título";
-      const category = review.categoria ?? review.kind ?? "Categoría desconocida";
-      const rating =
+      .slice(0, 12)
+      .map((review) => {
+        const title = review.obraTitulo ?? review.titulo ?? "Sin titulo";
+        const category = review.categoria ?? review.kind ?? "Categoria desconocida";
+        const rating =
         typeof review.estrellas === "number"
           ? `${Number(review.estrellas).toFixed(1)}/5`
           : "sin rating";
-      const comment = cleanSnippet(review.comentario || review.review || "");
-      const criticName = review.userName?.trim();
-      const origin = criticName ? `El usuario ${criticName}` : "La comunidad de CulturaX";
-      const commentLabel = comment
-        ? `${origin} comenta: ${comment}`
-        : `${origin} no dejó un comentario adicional.`;
-      return `La comunidad registra ${rating} para ${title} (${category}). ${commentLabel}`;
-    })
-    .join("\n");
+        const comment = cleanSnippet(review.comentario || review.review || "");
+        const criticName = review.userName?.trim();
+        const origin = criticName ? `El usuario ${criticName}` : "La comunidad de CulturaX";
+        const commentLabel = comment
+          ? `${origin} comenta: ${comment}`
+          : `${origin} no dejo un comentario adicional.`;
+        return `La comunidad registra ${rating} para ${title} (${category}). ${commentLabel}`;
+      })
+      .join("\n");
 }
-
-const buildGeminiUrl = (model) =>
-  `${GEMINI_API_BASE}/${model}:generateContent`;
 
 function extractTextFromCandidate(candidate) {
   const parts = candidate?.content?.parts;
   if (!Array.isArray(parts)) return "";
 
   const segments = parts
-    .map((part) => {
-      if (typeof part.text === "string" && part.text.trim()) {
-        return part.text.trim();
-      }
-      if (part.functionCall) {
-        const args = part.functionCall.args
-          ? JSON.stringify(part.functionCall.args)
-          : "";
-        return `Sugerencia estructurada: ${part.functionCall.name} ${args}`;
-      }
-      if (part.inlineData?.data) {
-        return part.inlineData.data;
-      }
-      if (part.executableCode?.code) {
-        return part.executableCode.code;
-      }
-      if (part.fileData?.mimeType) {
-        return `[Archivo ${part.fileData.mimeType}]`;
-      }
-      return "";
-    })
-    .filter(Boolean);
+      .map((part) => {
+        if (typeof part.text === "string" && part.text.trim()) {
+          return part.text.trim();
+        }
+        if (part.functionCall) {
+          const args = part.functionCall.args
+            ? JSON.stringify(part.functionCall.args)
+            : "";
+          return `Sugerencia estructurada: ${part.functionCall.name} ${args}`;
+        }
+        if (part.inlineData?.data) {
+          return part.inlineData.data;
+        }
+        if (part.executableCode?.code) {
+          return part.executableCode.code;
+        }
+        if (part.fileData?.mimeType) {
+          return `[Archivo ${part.fileData.mimeType}]`;
+        }
+        return "";
+      })
+      .filter(Boolean);
 
   return segments.join("\n").trim();
 }
 
-async function callGeminiModel(model, payload, apiKey) {
-  const response = await fetch(
-    `${buildGeminiUrl(model)}?key=${encodeURIComponent(apiKey)}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }
-  );
+async function callGeminiModel(model, payload) {
+  const response = await fetch(GEMINI_PROXY_URL, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({model, payload}),
+  });
 
   if (!response.ok) {
     let details = {};
@@ -172,8 +150,8 @@ async function callGeminiModel(model, payload, apiKey) {
       // ignore parse error
     }
     const err = new Error(
-      details?.error?.message ||
-        `El servicio IA respondió con ${response.status}`
+        details?.error?.message ||
+        `El proxy IA respondio con ${response.status}`,
     );
     err.code = details?.error?.code ?? response.status;
     err.httpStatus = response.status;
@@ -191,7 +169,7 @@ async function callGeminiModel(model, payload, apiKey) {
       candidate?.finishReason ||
       payloadData?.promptFeedback?.blockReason ||
       "motivos desconocidos";
-    const fallbackText = `No pude generar sugerencias porque la petición fue bloqueada por ${blockReason}. Intenta reformular tu pregunta con menos contenido sensible.`;
+    const fallbackText = `No pude generar sugerencias porque la peticion fue bloqueada por ${blockReason}. Intenta reformular tu pregunta con menos contenido sensible.`;
     return {
       text: fallbackText,
       candidate,
@@ -199,11 +177,7 @@ async function callGeminiModel(model, payload, apiKey) {
     };
   }
 
-  return {
-    text,
-    candidate,
-    fallback: false,
-  };
+  return {text, candidate, fallback: false};
 }
 
 export async function requestGeminiRecommendation({
@@ -217,25 +191,21 @@ export async function requestGeminiRecommendation({
     throw new Error("EMPTY_MESSAGE");
   }
 
-  if (!hasGeminiApiKey()) {
-    throw new Error("GEMINI_API_KEY_MISSING");
-  }
-
   const catalogContext =
     catalogSummary ||
-    "No hay reseñas en este momento, así que responde con tendencias generales pero avisa que son estimaciones.";
+    "No hay resenas en este momento, asi que responde con tendencias generales pero avisa que son estimaciones.";
   const userContext =
     userReviewSummary ||
-    "El usuario no tiene reseñas previas; debes indagar sus gustos durante la conversación.";
+    "El usuario no tiene resenas previas; debes indagar sus gustos durante la conversacion.";
   const communityContext =
     communityReviewSummary ||
-    "La comunidad no ha generado reseñas recientes; usa el catálogo como referencia principal.";
+    "La comunidad no ha generado resenas recientes; usa el catalogo como referencia principal.";
 
   const composedPrompt = [
-    "Contexto con reseñas reales y calificaciones de la comunidad de CulturaX:",
+    "Contexto con resenas reales y calificaciones de la comunidad de CulturaX:",
     catalogContext,
     "",
-    "Historial del usuario (reseñas personales):",
+    "Historial del usuario (resenas personales):",
     userContext,
     "",
     "Lo que comenta la comunidad recientemente:",
@@ -243,22 +213,22 @@ export async function requestGeminiRecommendation({
     "",
     "Instrucciones:",
     "- Usa SOLO los datos anteriores cuando existan coincidencias.",
-    "- Prioriza opciones que se alineen con las reseñas personales del usuario.",
+    "- Prioriza opciones que se alineen con las resenas personales del usuario.",
     "- Cuando el usuario pregunte por una obra, resume lo que la comunidad opina (si hay datos).",
-    "- Si el usuario pide revisar \"sus reseñas\", limita las recomendaciones a títulos presentes en su historial. Si no hay coincidencias, dilo explícitamente antes de sugerir algo nuevo.",
-    "- No inventes títulos ni reseñas inexistentes; menciona únicamente los contenidos proporcionados.",
-    "- Responde en español neutro con el tono cercano de CulturIAx, el asistente de ecommerce de CulturaX.",
+    '- Si el usuario pide revisar "sus resenas", limita las recomendaciones a titulos presentes en su historial. Si no hay coincidencias, dilo explicitamente antes de sugerir algo nuevo.',
+    "- No inventes titulos ni resenas inexistentes; menciona unicamente los contenidos proporcionados.",
+    "- Responde en espanol neutro con el tono cercano de CulturIAx, el asistente de ecommerce de CulturaX.",
     "- Entrega texto plano, sin Markdown ni negritas; evita asteriscos dobles o triples.",
-    "- Si das recomendaciones, usa hasta 3 líneas con guiones (-) o enumeración simple, sin viñetas con asteriscos.",
-    "- Indica por qué cada título tiene buenas reseñas o encaja con la solicitud.",
-    "- Si no encuentras coincidencias, di que no hay datos y sugiere explorar el catálogo.",
+    "- Si das recomendaciones, usa hasta 3 lineas con guiones (-) o enumeracion simple, sin vinetas con asteriscos.",
+    "- Indica por que cada titulo tiene buenas resenas o encaja con la solicitud.",
+    "- Si no encuentras coincidencias, di que no hay datos y sugiere explorar el catalogo.",
     "",
     `Consulta del usuario: ${userMessage.trim()}`,
   ].join("\n");
 
   const submittedContent = {
     role: "user",
-    parts: [{ text: composedPrompt }],
+    parts: [{text: composedPrompt}],
   };
 
   const normalizedHistory = Array.isArray(history) ? history : [];
@@ -267,7 +237,7 @@ export async function requestGeminiRecommendation({
       role: "system",
       parts: [
         {
-          text: "Eres CulturIAx, el asistente IA de CulturaX. Usas reseñas verificadas para recomendar películas y series con máximo 120 palabras, estilo conversacional profesional. Responde exclusivamente en texto plano, sin function calls ni respuestas estructuradas.",
+          text: "Eres CulturIAx, el asistente IA de CulturaX. Usas resenas verificadas para recomendar peliculas y series con maximo 120 palabras, estilo conversacional profesional. Responde exclusivamente en texto plano, sin function calls ni respuestas estructuradas.",
         },
       ],
     },
@@ -280,7 +250,7 @@ export async function requestGeminiRecommendation({
     },
   };
 
-  const result = await callGeminiModel(GEMINI_MODEL, payload, geminiApiKey);
+  const result = await callGeminiModel(GEMINI_MODEL, payload);
   return {
     text: result.text,
     submittedContent,
@@ -288,3 +258,5 @@ export async function requestGeminiRecommendation({
     fallback: result.fallback,
   };
 }
+
+export default requestGeminiRecommendation;

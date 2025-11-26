@@ -6,7 +6,7 @@ export function Navbar() {
   return `
   <header class="cx-header">
     <div class="container py-2">
-      <div class="cx-header-frame d-flex align-items-center gap-3">
+      <div class="cx-header-frame d-flex align-items-center gap-3 flex-wrap w-100">
 
         <!-- Brand -->
         <a href="#/" class="navbar-brand fw-bold text-white d-flex align-items-center gap-2 m-0">
@@ -26,6 +26,22 @@ export function Navbar() {
 
         </ul>
 
+        <div class="dropdown d-md-none">
+          <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Categorias
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark shadow-sm">
+            <li><a class="dropdown-item" href="#/peliculas">Peliculas</a></li>
+            <li><a class="dropdown-item" href="#/series">Series</a></li>
+            <li><a class="dropdown-item" href="#/anime">Anime</a></li>
+            <li><a class="dropdown-item" href="#/musica">Musica</a></li>
+            <li><a class="dropdown-item" href="#/videojuegos">Videojuegos</a></li>
+            <li><a class="dropdown-item" href="#/libros">Libros</a></li>
+            <li><a class="dropdown-item" href="#/manga">Mangas</a></li>
+            <li><a class="dropdown-item" href="#/documentales">Documentales</a></li>
+          </ul>
+        </div>
+
         <!-- Search -->
         <form id="siteSearch" class="ms-auto me-2 d-none d-md-flex position-relative" role="search" style="min-width:360px;">
           <input id="siteSearchInput" class="form-control form-control-sm" placeholder="Buscar títulos, géneros, artistas" autocomplete="off"/>
@@ -34,7 +50,7 @@ export function Navbar() {
         </form>
 
         <!-- Session -->
-        <div id="navSessionBox" class="d-flex align-items-center gap-2">
+        <div id="navSessionBox" class="d-flex align-items-center gap-2 ms-auto">
           <!-- Botón (no autenticado) -->
           <a id="loginSignupBtn" href="#/login" class="btn btn-primary btn-sm">Login / Sign up</a>
 
