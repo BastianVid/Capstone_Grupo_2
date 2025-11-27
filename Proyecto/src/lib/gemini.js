@@ -246,7 +246,6 @@ export async function requestGeminiRecommendation({
       temperature: 0.65,
       topP: 0.9,
       topK: 32,
-      maxOutputTokens: 2048,
     },
   };
 

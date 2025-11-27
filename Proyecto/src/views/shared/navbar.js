@@ -1,6 +1,7 @@
 // src/views/shared/navbar.js
 import { resolveImagePath } from './resolve-image-path.js';
 import { initNavbarSessionWatcher, updateNavbarSessionUI } from './navbarSession.js';
+import { navigate } from '../../core/router.js';
 
 export function Navbar() {
   return `
@@ -44,11 +45,23 @@ export function Navbar() {
           </ul>
         </div>
 
-        <!-- Search -->
+        <!-- Search desktop -->
         <form id="siteSearch" class="ms-auto me-2 d-none d-md-flex position-relative" role="search" style="min-width:360px;">
           <input id="siteSearchInput" class="form-control form-control-sm" placeholder="Buscar títulos, géneros, artistas" autocomplete="off"/>
           <div id="searchDropdown" class="bg-dark text-white position-absolute w-100 rounded shadow d-none" 
                style="top: 110%; left: 0; z-index: 1000; max-height: 400px; overflow-y: auto;"></div>
+        </form>
+
+        <!-- Search mobile -->
+        <form id="siteSearchMobile" class="w-100 d-md-none mt-2 position-relative" role="search">
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-dark text-white border-secondary">
+              <i class="bi bi-search"></i>
+            </span>
+            <input id="siteSearchInputMobile" class="form-control form-control-sm" placeholder="Buscar títulos, géneros, artistas" autocomplete="off"/>
+          </div>
+          <div id="searchDropdownMobile" class="bg-dark text-white position-absolute w-100 rounded shadow d-none" 
+               style="top: 110%; left: 0; z-index: 1000; max-height: 360px; overflow-y: auto;"></div>
         </form>
 
         <!-- Session -->
@@ -83,11 +96,20 @@ export function Navbar() {
  * Busca global
  */
 export function initNavbarSearch() {
-  const input = document.getElementById("siteSearchInput");
-  const dropdown = document.getElementById("searchDropdown");
-  const form = document.getElementById("siteSearch");
+  const configs = [
+    {
+      input: document.getElementById("siteSearchInput"),
+      dropdown: document.getElementById("searchDropdown"),
+      form: document.getElementById("siteSearch"),
+    },
+    {
+      input: document.getElementById("siteSearchInputMobile"),
+      dropdown: document.getElementById("searchDropdownMobile"),
+      form: document.getElementById("siteSearchMobile"),
+    },
+  ].filter((cfg) => cfg.input && cfg.dropdown && cfg.form);
 
-  if (!input || !dropdown || !form) return;
+  if (!configs.length) return;
 
   let cache = null;
   let building = false;
@@ -105,7 +127,6 @@ export function initNavbarSearch() {
       ContentModel.listLibros?.().catch(() => []),
       ContentModel.listManga?.().catch(() => []),
       ContentModel.listDocumentales?.().catch(() => []),
-      ContentModel.listProximamente?.().catch(() => []),
     ]);
 
     const norm = (x, categoria, def) => ({
@@ -125,7 +146,6 @@ export function initNavbarSearch() {
       ...libros.map(p => norm(p, "libros", { img: "book.jpg", tag: "Libro" })),
       ...manga.map(p => norm(p, "manga", { img: "chainsaw-man.jpg", tag: "Manga" })),
       ...documentales.map(p => norm(p, "documentales", { img: "doc.jpg", tag: "Documental" })),
-      ...proximamente.map(p => norm(p, "proximamente", { img: "comingsoon.jpg", tag: "Próximamente" })),
 
     ];
 
@@ -133,62 +153,77 @@ export function initNavbarSearch() {
   }
 
   const hideDropdown = () => {
-    dropdown.classList.add("d-none");
-    dropdown.innerHTML = "";
+    configs.forEach(({ dropdown }) => {
+      dropdown.classList.add("d-none");
+      dropdown.innerHTML = "";
+    });
   };
 
-  const showDropdown = (html) => {
+  const showDropdown = (dropdown, html) => {
     dropdown.innerHTML = html;
     dropdown.classList.remove("d-none");
   };
 
-  input.addEventListener("input", async (e) => {
-    const query = e.target.value.trim().toLowerCase();
+  configs.forEach(({ input, dropdown, form }) => {
+    input.addEventListener("input", async (e) => {
+      const query = e.target.value.trim().toLowerCase();
 
-    if (!query) return hideDropdown();
+      if (!query) return hideDropdown();
 
-    const dropdownAllowedHashes = ["", "#/", "#/detalle"];
+      const hash = location.hash || "";
+      const allowDropdown =
+        hash === "" ||
+        hash === "#/" ||
+        hash.startsWith("#/detalle");
 
-    if (!dropdownAllowedHashes.includes(location.hash)) {
-      window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
-      hideDropdown();
-      return;
-    }
-
-    await buildCache();
-    const results = cache.filter(x =>
-      x._title.toLowerCase().includes(query) ||
-      (x._tag && x._tag.toLowerCase().includes(query))
-    ).slice(0, 8);
-
-    if (!results.length) {
-      return showDropdown(`<div class="p-2 text-center text-secondary small">Sin resultados</div>`);
-    }
-
-    showDropdown(results.map((r, i) => `
-      <button type="button" class="w-100 text-start btn btn-dark border-0 border-bottom rounded-0 d-flex align-items-center gap-2 px-2 py-2 search-item" data-index="${i}">
-        <img src="${r._img}" width="40" height="40" class="rounded" style="object-fit:cover;">
-        <div>
-          <div class="small fw-semibold">${r._title}</div>
-          <div class="text-secondary small">${r._tag || ""}</div>
-        </div>
-      </button>
-    `).join(""));
-
-    dropdown.querySelectorAll(".search-item").forEach((btn, i) => {
-      btn.addEventListener("click", () => {
-        const item = results[i];
-        sessionStorage.setItem("detalleItem", JSON.stringify(item));
-        sessionStorage.setItem("detalleCategoria", item.categoria);
-        location.hash = "#/detalle";
+      if (!allowDropdown) {
+        window.dispatchEvent(new CustomEvent("globalSearch", { detail: { query } }));
         hideDropdown();
+        return;
+      }
+
+      await buildCache();
+      const results = cache.filter(x =>
+        x._title.toLowerCase().includes(query) ||
+        (x._tag && x._tag.toLowerCase().includes(query))
+      ).slice(0, 8);
+
+      if (!results.length) {
+        return showDropdown(dropdown, `<div class="p-2 text-center text-secondary small">Sin resultados</div>`);
+      }
+
+      showDropdown(dropdown, results.map((r, i) => `
+        <button type="button" class="w-100 text-start btn btn-dark border-0 border-bottom rounded-0 d-flex align-items-center gap-2 px-2 py-2 search-item" data-index="${i}">
+          <img src="${r._img}" width="40" height="40" class="rounded" style="object-fit:cover;">
+          <div>
+            <div class="small fw-semibold">${r._title}</div>
+            <div class="text-secondary small">${r._tag || ""}</div>
+          </div>
+        </button>
+      `).join(""));
+
+      dropdown.querySelectorAll(".search-item").forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+          const item = results[i];
+          sessionStorage.setItem("detalleItem", JSON.stringify(item));
+          sessionStorage.setItem("detalleCategoria", item.categoria);
+          const base = "#/detalle";
+          const forced = `${base}?ts=${Date.now()}`;
+          if (location.hash.split('?')[0] === base) {
+            location.hash = forced; // fuerza hashchange aunque ya estés en detalle
+          } else {
+            location.hash = base;
+          }
+          hideDropdown();
+        });
       });
     });
+
+    form.addEventListener("submit", (e) => e.preventDefault());
   });
 
   document.addEventListener("click", (e) => {
-    if (!form.contains(e.target)) hideDropdown();
+    const inside = configs.some(({ form }) => form.contains(e.target));
+    if (!inside) hideDropdown();
   });
-
-  form.addEventListener("submit", (e) => e.preventDefault());
 }

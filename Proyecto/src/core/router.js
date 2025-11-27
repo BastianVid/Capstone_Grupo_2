@@ -54,14 +54,15 @@ const routes = {
   '/manga':           { view: MangaView,        secure: false, title: 'Manga • CulturaX' },
   '/documentales':    { view: DocumentalesView, secure: false, title: 'Documentales • CulturaX' },
   '/admin':           { view: AdminView,        secure: true, title: 'Dashboard • CulturaX' },
-  '/proximamente':    { view: ProximamenteView, secure: true, title: 'Proximamente • CulturaX' },
+  '/proximamente':    { view: ProximamenteView, secure: false, title: 'Próximamente • CulturaX' },
   '/404':             { view: NotFoundView,     secure: false, title: 'No encontrado • CulturaX' },
 };
 
 // Normaliza el hash a un path conocido
 function getPathFromHash() {
   const raw = (location.hash || '').trim();
-  const path = raw.startsWith('#') ? raw.slice(1) : raw;
+  const cleaned = raw.startsWith('#') ? raw.slice(1) : raw;
+  const path = cleaned.split('?')[0]; // ignora query para permitir #/detalle?ts=...
   return path || '/';
 }
 

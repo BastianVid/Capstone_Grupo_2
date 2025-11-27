@@ -392,6 +392,17 @@ footer {
   object-fit: cover;
   border-radius: 6px;
 }
+.upcoming-card .list-group-item {
+  padding: 10px 12px;
+}
+.upcoming-card .list-group-item + .list-group-item {
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+@media (min-width: 992px) {
+  .upcoming-card .list-group {
+    max-height: 380px;
+  }
+}
 
 /* 
    [16] Utilidades: truncado multilínea

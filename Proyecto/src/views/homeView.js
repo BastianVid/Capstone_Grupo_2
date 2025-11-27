@@ -214,8 +214,9 @@ export function HomeView() {
       const documentales = (documentalesRaw || []).map(x => norm(x, 'documentales', 'avatar.jpg', 'Documental'));
       const videojuegos = (videojuegosRaw || []).map(x => norm(x, 'videojuegos', 'avatar.jpg', 'Videojuego'));
       const manga = (mangaRaw || []).map(x => norm(x, 'manga', 'naruto.jpg', 'Manga'));
-      const proximamente = (proximamenteRaw || []).map(x => norm(x, 'proximamente', 'default.jpg', 'Próximamente')
-);
+        const proximamente = (proximamenteRaw || []).map(x =>
+          norm(x, 'proximamente', 'default.jpg', 'Próximamente')
+        );
 
 
       // === Top dinámico y seguro ===
@@ -275,7 +276,10 @@ export function HomeView() {
       const geminiKeyReady = hasGeminiApiKey();
 
       // === Destacados aleatorios (si no hay rating, usa mezcla básica)
-      const shuffle = (arr) => arr.sort(() => Math.random() - 0.5);
+      const shuffle = (arr = []) => arr
+        .map((v) => ({ v, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ v }) => v);
       const destacados = shuffle([
         ...topPelis.slice(0, 3),
         ...topSeries.slice(0, 3),
@@ -284,7 +288,14 @@ export function HomeView() {
       ]).slice(0, 10);
 
       // === HERO ===
-      const heroPicks = [...topPelis.slice(0, 2), ...topSeries.slice(0, 2)];
+      const heroCandidates = [
+        ...topPelis,
+        ...topSeries,
+        ...topAnime,
+        ...topMusica,
+        ...topDocumentales,
+      ];
+      const heroPicks = shuffle(heroCandidates).slice(0, 6);
       const slides = heroPicks.map((s, i) => `
         <div class="carousel-item ${i === 0 ? 'active' : ''} h-100 position-relative">
           <img src="${resolveImagePath(s.img)}" alt="${s.title}" class="w-100 h-100 img-with-fallback" style="object-fit:cover;">
@@ -299,7 +310,7 @@ export function HomeView() {
       applyImgFallback(document, 'img.img-with-fallback');
 
       // === Próximamente (desde Firestore) ===
-      const upcomingItems = proximamente.slice(0, 6);  // limita a 6 resultados
+      const upcomingItems = shuffle(proximamente).slice(0, 6);  // limita a 6 resultados
 
       document.getElementById('upcoming-list').innerHTML =
         upcomingItems.length

@@ -1,11 +1,11 @@
-// ============================== IMPORTS ==============================
+﻿// ============================== IMPORTS ==============================
 import { Navbar, initNavbarSearch } from './shared/navbar.js';
 import { Footer } from './shared/footer.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import { guardarResena, obtenerResenaUsuario, eliminarResena, toggleLikeResena } from '../controllers/resenasController.js';
+import { guardarReseña, obtenerReseñaUsuario, eliminarReseña, toggleLikeReseña } from '../controllers/reseñasController.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { navigate } from '../core/router.js';
 
@@ -214,9 +214,9 @@ export function DetalleView(item, categoria) {
         </div>
 
         <div class="col-lg-4">
-          <!-- Integraciones -->
+          <!-- Franquicia -->
           <div class="cx-card p-4 mb-4">
-            <h5 class="text-white mb-3">Integraciones</h5>
+            <h5 class="text-white mb-3">Franquicia</h5>
             <div id="integrationRail" class="integration-rail d-flex gap-3 flex-nowrap overflow-auto pb-2 scrollbar-dark"></div>
           </div>
 
@@ -382,12 +382,12 @@ export function DetalleView(item, categoria) {
         temporadasEl.classList.remove('d-none');
         temporadasEl.querySelector('span').textContent = item.temporadas;
       }
-      // ======================= INTEGRACIONES ==========================
+      // ======================= FRANQUICIA ==========================
       const renderIntegraciones = async () => {
         const rail = document.getElementById("integrationRail");
         if (!rail) return;
 
-        rail.innerHTML = `<p class="text-secondary small">Buscando integraciones...</p>`;
+        rail.innerHTML = `<p class="text-secondary small">Buscando franquicia relacionada...</p>`;
 
         try {
           const { ContentModel } = await import("../models/contentModel.js");
@@ -590,11 +590,11 @@ export function DetalleView(item, categoria) {
       const renderPromedio = async () => {
         const snap = await getDoc(doc(db, categoria, item.id));
         const data = snap.data() || {};
-        const p = data.calificacionPromedio || 0;
+        const p = data.calificaciónPromedio || 0;
         const v = data.totalVotos || 0;
         promedioGeneralEl.textContent = v
           ? `★ ${p.toFixed(1)} / 5 (${v} votos)`
-          : '★ Sin calificaciones aún';
+          : '★ Sin calificaciónes aún';
       };
 
       // ============================== RESEÑAS ==============================
@@ -630,10 +630,10 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      const renderResenas = async user => {
-        const snap = await getDocs(collection(db, categoria, item.id, "resenas"));
+      const renderReseñas = async user => {
+        const snap = await getDocs(collection(db, categoria, item.id, "reseñas"));
         if (snap.empty) {
-          commentsList.innerHTML = `<p class="text-muted">No hay resenas aun.</p>`;
+          commentsList.innerHTML = `<p class="text-muted">No hay reseñas aun.</p>`;
           return;
         }
 
@@ -671,12 +671,12 @@ export function DetalleView(item, categoria) {
             <div class="border-bottom border-secondary pb-2 mb-2 ${own ? 'review-own' : ''}">
               <div class="d-flex justify-content-between align-items-start gap-3">
                 <div class="flex-grow-1">
-                  <strong>${author}${own ? ' (Tu resena)' : ''}</strong>
+                  <strong>${author}${own ? ' (Tu reseña)' : ''}</strong>
                   <p class="mb-1 text-warning small">${"&#9733;".repeat(data.estrellas)}${"&#9734;".repeat(5 - data.estrellas)}</p>
                   <p class="mb-0 small">${data.comentario}</p>
                 </div>
-                <button class="btn btn-sm ${liked ? 'btn-primary' : 'btn-outline-primary'} btn-like-resena"
-                        data-resena-id="${id}" aria-pressed="${liked}">
+                <button class="btn btn-sm ${liked ? 'btn-primary' : 'btn-outline-primary'} btn-like-reseña"
+                        data-reseña-id="${id}" aria-pressed="${liked}">
                   <i class="bi ${liked ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'} like-icon"></i>
                   <span class="like-count">${likesCount}</span>
                 </button>
@@ -686,19 +686,19 @@ export function DetalleView(item, categoria) {
 
         commentsList.innerHTML = html;
 
-        commentsList.querySelectorAll('.btn-like-resena').forEach(btn => {
+        commentsList.querySelectorAll('.btn-like-reseña').forEach(btn => {
           btn.addEventListener('click', async () => {
             errorEl.textContent = '';
             if (!auth.currentUser) {
-              errorEl.textContent = 'Debes iniciar sesion para dar like.';
+              errorEl.textContent = 'Debes iniciar sesión para dar like.';
               return;
             }
 
             btn.disabled = true;
-            const targetResenaUserId = btn.dataset.resenaId;
+            const targetReseñaUserId = btn.dataset.reseñaId;
 
             try {
-              const { likesCount, liked } = await toggleLikeResena(categoria, item.id, targetResenaUserId);
+              const { likesCount, liked } = await toggleLikeReseña(categoria, item.id, targetReseñaUserId);
               const icon = btn.querySelector('.like-icon');
               const countEl = btn.querySelector('.like-count');
               if (countEl) countEl.textContent = likesCount;
@@ -707,7 +707,7 @@ export function DetalleView(item, categoria) {
               btn.classList.toggle('btn-outline-primary', !liked);
               btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
             } catch (err) {
-              console.error('toggleLikeResena failed', err);
+              console.error('toggleLikeReseña failed', err);
               errorEl.textContent = 'No se pudo registrar tu like.';
             } finally {
               btn.disabled = false;
@@ -719,10 +719,10 @@ export function DetalleView(item, categoria) {
       // ============================== AUTENTICACIÓN ==============================
       onAuthStateChanged(auth, async user => {
         await renderPromedio();
-        await renderResenas(user);
+        await renderReseñas(user);
 
         if (user) {
-          const r = await obtenerResenaUsuario(categoria, item.id);
+          const r = await obtenerReseñaUsuario(categoria, item.id);
           if (r) {
             currentRating = r.estrellas;
             comentarioEl.value = r.comentario;
@@ -739,17 +739,17 @@ export function DetalleView(item, categoria) {
         }
 
         // ============================== GUARDA RESEÑAS ==============================
-        addBtn.addEventListener('click', async () => {
+                addBtn.addEventListener('click', async () => {
           errorEl.textContent = '';
           const comentario = comentarioEl.value.trim();
-          if (!user) { errorEl.textContent = '⚠️ Debes iniciar sesión.'; return; }
-          if (!currentRating) { errorEl.textContent = '⚠️ Debes calificar con estrellas.'; return; }
-          if (!comentario) { errorEl.textContent = '⚠️ El comentario no puede estar vacío.'; return; }
+          if (!user) { navigate('/login'); return; }
+          if (!currentRating) { errorEl.textContent = 'Debes calificar con estrellas.'; return; }
+          if (!comentario) { errorEl.textContent = 'El comentario no puede estar vacío.'; return; }
 
-          await guardarResena(categoria, item.id, currentRating, comentario);
+          await guardarReseña(categoria, item.id, currentRating, comentario);
           msg.textContent = '✅ Reseña guardada.';
           delBtn.classList.remove('d-none');
-          await renderResenas(user);
+          await renderReseñas(user);
           await renderPromedio();
         });
 
@@ -757,13 +757,13 @@ export function DetalleView(item, categoria) {
         delBtn.addEventListener('click', async () => {
           if (!user) return;
           if (confirm('¿Eliminar tu reseña?')) {
-            await eliminarResena(categoria, item.id);
+            await eliminarReseña(categoria, item.id);
             comentarioEl.value = '';
             currentRating = 0;
             pintarEstrellas(0);
             msg.textContent = '🗑️ Reseña eliminada.';
             delBtn.classList.add('d-none');
-            await renderResenas(user);
+            await renderReseñas(user);
             await renderPromedio();
           }
         });
@@ -771,6 +771,11 @@ export function DetalleView(item, categoria) {
     },
   };
 }
+
+
+
+
+
 
 
 
