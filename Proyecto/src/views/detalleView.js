@@ -5,7 +5,7 @@ import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbar
 import { auth, db } from '../lib/firebase.js';
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-import { guardarReseña, obtenerReseñaUsuario, eliminarReseña, toggleLikeReseña } from '../controllers/reseñasController.js';
+import { guardarResena, obtenerResenaUsuario, eliminarResena, toggleLikeResena } from '../controllers/resenasController.js';
 import { resolveImagePath } from './shared/resolve-image-path.js';
 import { navigate } from '../core/router.js';
 
@@ -590,7 +590,7 @@ export function DetalleView(item, categoria) {
       const renderPromedio = async () => {
         const snap = await getDoc(doc(db, categoria, item.id));
         const data = snap.data() || {};
-        const p = data.calificaciónPromedio || 0;
+        const p = data.calificacionPromedio || 0;
         const v = data.totalVotos || 0;
         promedioGeneralEl.textContent = v
           ? `★ ${p.toFixed(1)} / 5 (${v} votos)`
@@ -630,8 +630,8 @@ export function DetalleView(item, categoria) {
         });
       });
 
-      const renderReseñas = async user => {
-        const snap = await getDocs(collection(db, categoria, item.id, "reseñas"));
+      const renderResenas = async user => {
+        const snap = await getDocs(collection(db, categoria, item.id, "resenas"));
         if (snap.empty) {
           commentsList.innerHTML = `<p class="text-muted">No hay reseñas aun.</p>`;
           return;
@@ -675,8 +675,8 @@ export function DetalleView(item, categoria) {
                   <p class="mb-1 text-warning small">${"&#9733;".repeat(data.estrellas)}${"&#9734;".repeat(5 - data.estrellas)}</p>
                   <p class="mb-0 small">${data.comentario}</p>
                 </div>
-                <button class="btn btn-sm ${liked ? 'btn-primary' : 'btn-outline-primary'} btn-like-reseña"
-                        data-reseña-id="${id}" aria-pressed="${liked}">
+                <button class="btn btn-sm ${liked ? 'btn-primary' : 'btn-outline-primary'} btn-like-resena"
+                        data-resena-id="${id}" aria-pressed="${liked}">
                   <i class="bi ${liked ? 'bi-hand-thumbs-up-fill' : 'bi-hand-thumbs-up'} like-icon"></i>
                   <span class="like-count">${likesCount}</span>
                 </button>
@@ -686,7 +686,7 @@ export function DetalleView(item, categoria) {
 
         commentsList.innerHTML = html;
 
-        commentsList.querySelectorAll('.btn-like-reseña').forEach(btn => {
+        commentsList.querySelectorAll('.btn-like-resena').forEach(btn => {
           btn.addEventListener('click', async () => {
             errorEl.textContent = '';
             if (!auth.currentUser) {
@@ -695,10 +695,10 @@ export function DetalleView(item, categoria) {
             }
 
             btn.disabled = true;
-            const targetReseñaUserId = btn.dataset.reseñaId;
+            const targetResenaUserId = btn.dataset.resenaId;
 
             try {
-              const { likesCount, liked } = await toggleLikeReseña(categoria, item.id, targetReseñaUserId);
+              const { likesCount, liked } = await toggleLikeResena(categoria, item.id, targetResenaUserId);
               const icon = btn.querySelector('.like-icon');
               const countEl = btn.querySelector('.like-count');
               if (countEl) countEl.textContent = likesCount;
@@ -707,7 +707,7 @@ export function DetalleView(item, categoria) {
               btn.classList.toggle('btn-outline-primary', !liked);
               btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
             } catch (err) {
-              console.error('toggleLikeReseña failed', err);
+              console.error('toggleLikeResena failed', err);
               errorEl.textContent = 'No se pudo registrar tu like.';
             } finally {
               btn.disabled = false;
@@ -719,10 +719,10 @@ export function DetalleView(item, categoria) {
       // ============================== AUTENTICACIÓN ==============================
       onAuthStateChanged(auth, async user => {
         await renderPromedio();
-        await renderReseñas(user);
+        await renderResenas(user);
 
         if (user) {
-          const r = await obtenerReseñaUsuario(categoria, item.id);
+          const r = await obtenerResenaUsuario(categoria, item.id);
           if (r) {
             currentRating = r.estrellas;
             comentarioEl.value = r.comentario;
@@ -746,10 +746,10 @@ export function DetalleView(item, categoria) {
           if (!currentRating) { errorEl.textContent = 'Debes calificar con estrellas.'; return; }
           if (!comentario) { errorEl.textContent = 'El comentario no puede estar vacío.'; return; }
 
-          await guardarReseña(categoria, item.id, currentRating, comentario);
+          await guardarResena(categoria, item.id, currentRating, comentario);
           msg.textContent = '✅ Reseña guardada.';
           delBtn.classList.remove('d-none');
-          await renderReseñas(user);
+          await renderResenas(user);
           await renderPromedio();
         });
 
@@ -757,13 +757,13 @@ export function DetalleView(item, categoria) {
         delBtn.addEventListener('click', async () => {
           if (!user) return;
           if (confirm('¿Eliminar tu reseña?')) {
-            await eliminarReseña(categoria, item.id);
+            await eliminarResena(categoria, item.id);
             comentarioEl.value = '';
             currentRating = 0;
             pintarEstrellas(0);
             msg.textContent = '🗑️ Reseña eliminada.';
             delBtn.classList.add('d-none');
-            await renderReseñas(user);
+            await renderResenas(user);
             await renderPromedio();
           }
         });
