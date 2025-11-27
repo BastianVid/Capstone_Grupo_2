@@ -44,6 +44,7 @@
   --accent: #38bdf8;
   --text: #f1f5f9;
   --muted: #94a3b8;
+  --hero-height: 668px;
   --rail-card-w: clamp(170px, 18vw, 210px);
   --rail-body-h: 150px;
   --rail-gap: 14px;
@@ -355,12 +356,12 @@ footer {
    [14] Hero (carrusel principal)
 */
 .cx-hero {
-  height: 668px;
+  height: var(--hero-height);
   border-radius: 12px;
   overflow: hidden;
 }
 @media (max-width: 768px) {
-  .cx-hero { height: 240px; }
+  :root { --hero-height: 240px; }
 }
 .cx-hero .carousel-inner,
 .cx-hero .carousel-item { height: 100%; }
@@ -382,8 +383,18 @@ footer {
 @media (min-width: 1200px) {
   .ad-billboard { height: 200px; }
 }
+
+/* Ajuste de altura para alinear el bloque lateral con el hero */
+.upcoming-card {
+  height: var(--hero-height);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
 .upcoming-card .list-group {
-  max-height: 360px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
   overflow: auto;
 }
 .upcoming-thumb {
@@ -398,21 +409,13 @@ footer {
 .upcoming-card .list-group-item + .list-group-item {
   border-top: 1px solid rgba(255,255,255,0.05);
 }
-@media (min-width: 992px) {
-  .upcoming-card .list-group {
-    max-height: 380px;
+@media (max-width: 991.98px) {
+  .upcoming-card {
+    height: auto;
   }
-}
-
-/* Ajuste de altura para alinear el bloque de "Próximamente" con el hero */
-.upcoming-card {
-  min-height: 520px;
-}
-.upcoming-card .list-group {
-  max-height: calc(100% - 82px); /* header + padding aproximados */
-}
-@media (min-width: 992px) {
-  .upcoming-card { min-height: 640px; }
+  .upcoming-card .list-group {
+    max-height: 360px;
+  }
 }
 
 /* 

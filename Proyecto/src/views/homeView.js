@@ -24,7 +24,7 @@ export function HomeView() {
           <div class="card bg-dark border-0 shadow-sm upcoming-card">
             <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
               <span class="fw-semibold">Proximamente</span>
-              <a class="small" href="#/proximamente">Explorar trAilers</a>
+              <a class="small" href="#/proximamente">Explorar trailers</a>
             </div>
             <div id="upcoming-list" class="list-group list-group-flush scrollbar-dark"></div>
           </div>
@@ -314,6 +314,26 @@ export function HomeView() {
         applyImgFallback(document, 'img.img-with-fallback');
       }
 
+      // Igualar alto de la tarjeta "Proximamente" con el hero
+      const syncHeroSidebarHeight = () => {
+        const heroBox = document.querySelector('.cx-hero');
+        const upcomingCardEl = document.querySelector('.upcoming-card');
+        if (!heroBox || !upcomingCardEl) return;
+        if (window.innerWidth < 992) {
+          upcomingCardEl.style.height = '';
+          return;
+        }
+        const adEl = document.getElementById('ad-superior');
+        const adStyles = adEl ? window.getComputedStyle(adEl) : null;
+        const adMargin =
+          adStyles ? parseFloat(adStyles.marginTop || 0) + parseFloat(adStyles.marginBottom || 0) : 0;
+        const adHeight = adEl ? adEl.offsetHeight + adMargin : 0;
+        const target = heroBox.offsetHeight - adHeight;
+        const minHeight = 320;
+        upcomingCardEl.style.height = `${Math.max(target, minHeight)}px`;
+      };
+      window.addEventListener('resize', syncHeroSidebarHeight);
+
       // === Proximamente (desde Firestore) ===
       const upcomingItems = shuffle(proximamente).slice(0, 6);  // limita a 6 resultados
       const upcomingEl = document.getElementById('upcoming-list');
@@ -590,7 +610,11 @@ export function HomeView() {
         const [ad1, ad2] = pick(ads.inferior, 2);
         renderAd('ad-bottom-1', ad1);
         renderAd('ad-bottom-2', ad2);
+        setTimeout(syncHeroSidebarHeight, 200);
       } catch {}
+
+      // Ajustar altura inicial (en caso de no haber publicidad o en desktop)
+      syncHeroSidebarHeight();
 
       // === Logout ===
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
