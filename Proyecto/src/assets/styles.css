@@ -404,6 +404,17 @@ footer {
   }
 }
 
+/* Ajuste de altura para alinear el bloque de "Próximamente" con el hero */
+.upcoming-card {
+  min-height: 520px;
+}
+.upcoming-card .list-group {
+  max-height: calc(100% - 82px); /* header + padding aproximados */
+}
+@media (min-width: 992px) {
+  .upcoming-card { min-height: 640px; }
+}
+
 /* 
    [16] Utilidades: truncado multilínea
 */

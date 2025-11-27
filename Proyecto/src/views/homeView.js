@@ -1,4 +1,4 @@
-﻿// ============================== IMPORTS ==============================
+// ============================== IMPORTS ==============================
 import { Navbar, initNavbarSearch } from './shared/navbar.js';
 import { Footer } from './shared/footer.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
@@ -23,8 +23,8 @@ export function HomeView() {
 
           <div class="card bg-dark border-0 shadow-sm upcoming-card">
             <div class="card-header bg-transparent border-0 d-flex align-items-center justify-content-between">
-              <span class="fw-semibold">Próximamente</span>
-              <a class="small" href="#/proximamente">Explorar tráilers</a>
+              <span class="fw-semibold">Proximamente</span>
+              <a class="small" href="#/proximamente">Explorar trAilers</a>
             </div>
             <div id="upcoming-list" class="list-group list-group-flush scrollbar-dark"></div>
           </div>
@@ -59,7 +59,7 @@ export function HomeView() {
 
     <section class="container my-4">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2 class="h5 mb-0">Top películas</h2>
+        <h2 class="h5 mb-0">Top pelAculas</h2>
         <a href="#/peliculas" class="cx-btn cx-btn-sm">
           Ver todo <i class="bi bi-arrow-right-short"></i>
         </a>
@@ -89,7 +89,7 @@ export function HomeView() {
 
     <section class="container my-4 mb-5">
       <div class="d-flex justify-content-between align-items-center mb-2">
-        <h2 class="h5 mb-0">Lo más escuchado</h2>
+        <h2 class="h5 mb-0">Lo mAs escuchado</h2>
         <a href="#/musica" class="cx-btn cx-btn-sm">
           Ver todo <i class="bi bi-arrow-right-short"></i>
         </a>
@@ -117,7 +117,7 @@ export function HomeView() {
           <div class="cx-ai-chat__header">
             <div>
               <p class="cx-ai-chat__title mb-0" id="cxAiChatTitle">CulturIAx</p>
-              <small class="text-secondary">Sugerencias según reseñas</small>
+              <small class="text-secondary">Sugerencias segAon reseAas</small>
             </div>
             <button type="button" class="btn btn-sm btn-outline-light border-0" id="cxAiChatClose" aria-label="Cerrar chat">
               <i class="bi bi-x-lg"></i>
@@ -128,7 +128,7 @@ export function HomeView() {
           <div class="cx-ai-chat__suggestions" id="cxAiChatSuggestions"></div>
 
           <form class="cx-ai-chat__form" id="cxAiChatForm">
-            <input type="text" class="form-control" id="cxAiChatInput" placeholder="Cuéntame qué quieres ver..." autocomplete="off" />
+            <input type="text" class="form-control" id="cxAiChatInput" placeholder="CuAntame quA quieres ver..." autocomplete="off" />
             <button class="cx-ai-chat__send" type="submit" aria-label="Enviar mensaje a CulturIAx">
               <i class="bi bi-send"></i>
             </button>
@@ -143,7 +143,7 @@ export function HomeView() {
 
       <button type="button" class="cx-ai-chat__fab" id="cxAiChatToggle" aria-expanded="false" aria-controls="cxAiChatWindow">
         <i class="bi bi-stars"></i>
-        <span>¿No sabes qué ver?</span>
+        <span>ANo sabes quA ver?</span>
       </button>
     </div>
   `;
@@ -151,7 +151,7 @@ export function HomeView() {
   return {
     html,
     async bind() {
-      // === Navbar y sesión ===
+      // === Navbar y sesion ===
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
       initNavbarSearch();
@@ -182,7 +182,7 @@ export function HomeView() {
     ]);
 
 
-      // === Normalización ===
+      // === Normalizacion ===
       const norm = (x, kind, defImg, defTag) => {
         const genres = Array.isArray(x.genero)
           ? x.genero.filter(Boolean)
@@ -196,7 +196,7 @@ export function HomeView() {
 
         return {
           id: x.id ?? null,
-          title: x.titulo ?? x.title ?? 'Sin título',
+          title: x.titulo ?? x.title ?? 'Sin tAtulo',
           img: resolveImagePath(x.imagen ?? x.img ?? defImg),
           tag: genres[0] ?? x.genero ?? x.genre ?? defTag,
           genres,
@@ -206,20 +206,20 @@ export function HomeView() {
         };
       };
 
-      const pelis = (pelisRaw || []).map(x => norm(x, 'peliculas', 'inception.jpg', 'Película'));
+      const pelis = (pelisRaw || []).map(x => norm(x, 'peliculas', 'inception.jpg', 'PelAcula'));
       const series = (seriesRaw || []).map(x => norm(x, 'series', 'stranger-things.jpg', 'Serie'));
       const anime = (animeRaw || []).map(x => norm(x, 'anime', 'naruto.jpg', 'Anime'));
-      const musica = (musicaRaw || []).map(x => norm(x, 'musica', 'avatar.jpg', 'Música'));
+      const musica = (musicaRaw || []).map(x => norm(x, 'musica', 'avatar.jpg', 'MAosica'));
       const libros = (librosRaw || []).map(x => norm(x, 'libros', 'avatar.jpg', 'Libro'));
       const documentales = (documentalesRaw || []).map(x => norm(x, 'documentales', 'avatar.jpg', 'Documental'));
       const videojuegos = (videojuegosRaw || []).map(x => norm(x, 'videojuegos', 'avatar.jpg', 'Videojuego'));
       const manga = (mangaRaw || []).map(x => norm(x, 'manga', 'naruto.jpg', 'Manga'));
         const proximamente = (proximamenteRaw || []).map(x =>
-          norm(x, 'proximamente', 'default.jpg', 'Próximamente')
+          norm(x, 'proximamente', 'default.jpg', 'Proximamente')
         );
 
 
-      // === Top dinámico y seguro ===
+      // === Top dinAmico y seguro ===
       const getTopRated = (arr) => {
         const rated = arr.filter((x) => x.rating && x.rating > 0);
         if (rated.length > 0) return rated.sort((a, b) => b.rating - a.rating).slice(0, 10);
@@ -270,12 +270,12 @@ export function HomeView() {
           }
         }
       } catch (err) {
-        console.error('[CulturIAx] No se pudieron leer reseñas personales:', err);
+        console.error('[CulturIAx] No se pudieron leer reseAas personales:', err);
       }
       const userReviewSummary = buildUserReviewSummary(userReviewEntries);
       const geminiKeyReady = hasGeminiApiKey();
 
-      // === Destacados aleatorios (si no hay rating, usa mezcla básica)
+      // === Destacados aleatorios (si no hay rating, usa mezcla bAsica)
       const shuffle = (arr = []) => arr
         .map((v) => ({ v, sort: Math.random() }))
         .sort((a, b) => a.sort - b.sort)
@@ -306,25 +306,32 @@ export function HomeView() {
           </div>
         </div>
       `).join('');
-      document.getElementById('hero-slides').innerHTML = slides;
-      applyImgFallback(document, 'img.img-with-fallback');
+      const heroEl = document.getElementById('hero-slides');
+      if (!heroEl) {
+        console.error('[Home] No se encontro el contenedor del hero');
+      } else {
+        heroEl.innerHTML = slides;
+        applyImgFallback(document, 'img.img-with-fallback');
+      }
 
-      // === Próximamente (desde Firestore) ===
+      // === Proximamente (desde Firestore) ===
       const upcomingItems = shuffle(proximamente).slice(0, 6);  // limita a 6 resultados
-
-      document.getElementById('upcoming-list').innerHTML =
-        upcomingItems.length
-          ? upcomingItems.map(x => `
-              <a class="list-group-item list-group-item-action bg-transparent text-white d-flex gap-2 align-items-start"
-                data-id="${x.id}" data-kind="${x.kind}">
-                <img src="${resolveImagePath(x.img)}" style="width:70px;height:100px;object-fit:cover;">
-                <div class="flex-grow-1">
-                  <div class="small fw-semibold text-truncate">${x.title}</div>
-                  <div class="small text-secondary">${x.tag}</div>
-                </div>
-              </a>
-            `).join('')
-          : `<div class="p-2 text-secondary small">Sin próximos estrenos</div>`;
+      const upcomingEl = document.getElementById('upcoming-list');
+      if (upcomingEl) {
+        upcomingEl.innerHTML =
+          upcomingItems.length
+            ? upcomingItems.map(x => `
+                <a class="list-group-item list-group-item-action bg-transparent text-white d-flex gap-2 align-items-start"
+                  data-id="${x.id}" data-kind="${x.kind}">
+                  <img src="${resolveImagePath(x.img)}" style="width:70px;height:100px;object-fit:cover;">
+                  <div class="flex-grow-1">
+                    <div class="small fw-semibold text-truncate">${x.title}</div>
+                    <div class="small text-secondary">${x.tag}</div>
+                  </div>
+                </a>
+              `).join('')
+            : `<div class="p-2 text-secondary small">Sin proximos estrenos</div>`;
+      }
 
       
      // Activar clic en las tarjetas
@@ -416,8 +423,8 @@ export function HomeView() {
           // Quitar negritas estilo Markdown y asteriscos duplicados
           output = output.replace(/\*\*(.*?)\*\*/g, '$1');
           output = output.replace(/__([^_]+)__/g, '$1');
-          // Convertir viñetas con asterisco a puntos simples
-          output = output.replace(/^\s*\*\s+/gm, '• ');
+          // Convertir viAetas con asterisco a puntos simples
+          output = output.replace(/^\s*\*\s+/gm, 'a ');
           // Remover acumulaciones de asteriscos sueltos
           output = output.replace(/\*{2,}/g, '');
           return output.trim();
@@ -463,8 +470,8 @@ export function HomeView() {
 
         messagesEl.innerHTML = '';
         const greeting = geminiKeyReady
-          ? 'Hola, ¿no sabes qué ver? Soy CulturIAx y puedo proponerte películas y series con reseñas brillantes de CulturaX. Cuéntame qué ganas tienes hoy.'
-          : 'El asistente IA no está disponible por ahora. Intenta de nuevo en unos minutos.';
+          ? 'Hola, Ano sabes quA ver? Soy CulturIAx y puedo proponerte pelAculas y series con reseAas brillantes de CulturaX. CuAntame quA ganas tienes hoy.'
+          : 'El asistente IA no estA disponible por ahora. Intenta de nuevo en unos minutos.';
         appendMessage(greeting, 'ai');
 
         const sendMessage = async (rawMessage) => {
@@ -473,7 +480,7 @@ export function HomeView() {
           appendMessage(message, 'user');
 
           if (!geminiKeyReady) {
-            appendMessage('El asistente IA no está disponible por ahora. Intenta más tarde.', 'ai');
+            appendMessage('El asistente IA no estA disponible por ahora. Intenta mAs tarde.', 'ai');
             return;
           }
 
@@ -492,8 +499,8 @@ export function HomeView() {
           } catch (err) {
             const fallback =
               err.message === 'GEMINI_API_KEY_MISSING'
-                ? 'El asistente IA no está configurado en el servidor.'
-                : 'No pude contactar al motor IA ahora mismo. Inténtalo nuevamente en unos segundos.';
+                ? 'El asistente IA no estA configurado en el servidor.'
+                : 'No pude contactar al motor IA ahora mismo. IntAntalo nuevamente en unos segundos.';
             appendMessage(fallback, 'ai');
             console.error('[CulturIAx]', err);
           } finally {
@@ -519,10 +526,10 @@ export function HomeView() {
 
         if (suggestionsEl) {
           const baseSuggestion = userReviewEntries.length
-            ? 'CulturIAx, revisa mis reseñas y sugiere algo que encaje con ellas.'
+            ? 'CulturIAx, revisa mis reseAas y sugiere algo que encaje con ellas.'
             : trendingGenres[0]
-            ? `CulturIAx, recomiéndame algo de ${trendingGenres[0]} con buenas reseñas.`
-            : 'CulturIAx, sorpréndeme con algo muy recomendado.';
+            ? `CulturIAx, recomiAndame algo de ${trendingGenres[0]} con buenas reseAas.`
+            : 'CulturIAx, sorprAndeme con algo muy recomendado.';
           suggestionsEl.innerHTML = '';
           const button = document.createElement('button');
           button.type = 'button';
