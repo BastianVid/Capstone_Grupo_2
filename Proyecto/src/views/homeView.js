@@ -1,4 +1,4 @@
-// ============================== IMPORTS ==============================
+﻿// ============================== IMPORTS ==============================
 import { Navbar, initNavbarSearch } from './shared/navbar.js';
 import { Footer } from './shared/footer.js';
 import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
@@ -264,15 +264,23 @@ export function HomeView() {
       try {
         const activeUser = firebaseCurrentUser || auth.currentUser;
         if (activeUser?.uid) {
+          // reseñas rápidas
           userReviewEntries = await ContentModel.listUserResenasQuick(activeUser.uid, 20);
+
+          // fallback opcional
           if (!userReviewEntries.length) {
             userReviewEntries = await ContentModel.listResenasByUser(activeUser.uid, 20);
           }
         }
       } catch (err) {
-        console.error('[CulturIAx] No se pudieron leer reseAas personales:', err);
+        console.error('[CulturIAx] No se pudieron leer reseñas personales:', err);
       }
-      const userReviewSummary = buildUserReviewSummary(userReviewEntries);
+
+// === Fallback crítico para usuarios nuevos ===
+const userReviewSummary = userReviewEntries.length
+  ? buildUserReviewSummary(userReviewEntries)
+  : "El usuario no tiene reseñas todavía. Sugiere contenido general popular de acuerdo al catálogo.";
+
       const geminiKeyReady = hasGeminiApiKey();
 
       // === Destacados aleatorios (si no hay rating, usa mezcla bAsica)
