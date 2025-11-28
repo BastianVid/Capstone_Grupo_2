@@ -1,6 +1,6 @@
 // Resuelve nombres y rutas a la carpeta real de imágenes del proyecto.
 // Con Live Server es mejor usar rutas ABSOLUTAS desde la raíz.
-const ASSETS_DIR = '/src/assets/img/';
+const ASSETS_DIR = '/Proyecto/src/assets/img/';
 
 function isAbsoluteUrl(str = '') {  
   return /^(https?:|data:)/i.test(str);
