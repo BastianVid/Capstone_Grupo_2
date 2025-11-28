@@ -1,3 +1,5 @@
+import { resolveImagePath } from './resolve-image-path.js';
+
 /**
  * Renderiza una grilla de cards Bootstrap.
  *
@@ -43,7 +45,7 @@ export function renderCards(selector, items = [], options = {}) {
     <div class="row g-3">
       ${items.map((x, i) => {
         const title = safe(x.title);
-        const img = safe(x.img);
+        const img = resolveImagePath(x.img ?? x.image ?? '');
         const tag = safe(x.tag);
         const subtitle = safe(x.subtitle);
         const description = safe(x.description);

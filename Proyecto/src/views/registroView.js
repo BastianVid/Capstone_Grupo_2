@@ -1,5 +1,5 @@
-import { Navbar } from './navbar.js';
-import { updateNavbarSessionUI, initNavbarSessionWatcher  } from './navbarSession.js';
+import { Navbar } from './shared/navbar.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
 
 export function RegistroView() {
   const html = `
@@ -34,7 +34,7 @@ export function RegistroView() {
               <label for="password" class="form-label">Contraseña</label>
               <input type="password" id="password" name="password" class="form-control" placeholder="********" required minlength="8">
               <div class="form-text">
-                Debe tener mínimo 8 caracteres, una mayúscula, un número y un punto (.)
+                Debe tener mínimo 8 caracteres, una mayúscula y un número
               </div>
               <div class="invalid-feedback">Contraseña inválida.</div>
             </div>
@@ -59,22 +59,19 @@ export function RegistroView() {
   return {
     html,
     bind() {
-      // Actualiza estado del navbar según la sesión
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
 
       const form = document.getElementById('regForm');
       const alertBox = document.getElementById('alertBox');
-      const strongPass = /^(?=.*[A-Z])(?=.*\d)(?=.*\.)[A-Za-z\d.]{8,}$/;
+      const strongPass = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
 
-      function showAlert(msg, type = 'danger') {
+      const showAlert = (msg, type = 'danger') => {
         alertBox.className = `alert alert-${type}`;
         alertBox.textContent = msg;
         alertBox.classList.remove('d-none');
-      }
-      function hideAlert() {
-        alertBox.classList.add('d-none');
-      }
+      };
+      const hideAlert = () => alertBox.classList.add('d-none');
 
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -92,38 +89,40 @@ export function RegistroView() {
         const pass2    = document.getElementById('password2').value;
 
         if (pass !== pass2) {
-          showAlert('❌ Las contraseñas no coinciden');
+          showAlert('Las contraseñas no coinciden');
           document.getElementById('password2').classList.add('is-invalid');
           return;
         }
         if (!strongPass.test(pass)) {
-          showAlert('⚠️ La contraseña debe tener mínimo 8 caracteres, una mayúscula, un número y un punto (.)');
+          showAlert('La contraseña debe tener mínimo 8 caracteres, una mayúscula y un número');
           document.getElementById('password').classList.add('is-invalid');
           return;
         }
 
-        const displayName = usuario || nombre;
-
         const { register } = await import('../controllers/authController.js');
         try {
-          await register(email, pass, displayName);
-          // redirige a '#/' desde el controller
+          await register(email, pass, nombre, usuario);
         } catch (err) {
-          showAlert('❌ Error al registrar: ' + (err?.message || err));
+          const map = {
+            'auth/email-already-in-use': 'Este correo ya está en uso. Inicia sesión o usa otro.',
+            'USERNAME_TAKEN': 'Ese nombre de usuario ya está en uso. Elige otro.',
+            'auth/invalid-email': 'El correo no es válido.',
+            'auth/weak-password': 'La contraseña es demasiado débil.',
+          };
+          showAlert('Error al registrar: ' + (map[err?.code] ?? err?.message ?? err));
         }
       });
 
-      // Logout (por si ya está logueado)
       document.getElementById('logoutBtn')?.addEventListener('click', async () => {
         const { logout } = await import('../controllers/authController.js');
         logout();
       });
 
       document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const q = e.currentTarget.querySelector('input').value.trim();
-      if (q) sessionStorage.setItem('cx:q', q);
-      location.hash = '#/peliculas';
+        e.preventDefault();
+        const q = e.currentTarget.querySelector('input').value.trim();
+        if (q) sessionStorage.setItem('cx:q', q);
+        location.hash = '#/buscar';
       });
     },
   };

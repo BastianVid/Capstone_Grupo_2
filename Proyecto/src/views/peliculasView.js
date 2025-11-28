@@ -1,19 +1,18 @@
-import { Navbar } from './navbar.js';
+// src/views/peliculasView.js
+import { Navbar, initNavbarSearch } from './shared/navbar.js';
 import { renderCards } from './shared/renderCards.js';
-import { updateNavbarSessionUI,initNavbarSessionWatcher  } from './navbarSession.js';
+import { updateNavbarSessionUI, initNavbarSessionWatcher } from './shared/navbarSession.js';
+import { resolveImagePath } from './shared/resolve-image-path.js';
+import { Footer } from './shared/footer.js';
 
 export function PeliculasView() {
   const html = `
     ${Navbar()}
-    <div class="container py-4">
+    <div class="container py-4" data-category-top="peliculas">
       <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h1 class="h3 mb-0"><i class="bi bi-camera-reels"></i> Películas</h1>
 
         <div class="d-flex gap-2 align-items-center">
-          <div class="input-group w-auto">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input id="q" class="form-control" placeholder="Buscar por título, director, género o año...">
-          </div>
           <select id="genre" class="form-select form-select-sm w-auto">
             <option value="">Género</option>
           </select>
@@ -27,103 +26,161 @@ export function PeliculasView() {
       </div>
 
       <div id="grid"></div>
+
+      <!-- 🔹 Controles de paginación -->
+      <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+        <button id="prevPage" class="btn btn-outline-light btn-sm" disabled>Anterior</button>
+        <span id="pageInfo" class="text-light small"></span>
+        <button id="nextPage" class="btn btn-outline-light btn-sm" disabled>Siguiente</button>
+      </div>
     </div>
+    ${Footer()}
   `;
 
   return {
     html,
     async bind() {
+      // === Inicialización de sesión y buscador global ===
       initNavbarSessionWatcher();
       updateNavbarSessionUI();
+      initNavbarSearch();
 
-      const { ContentModel } = await import('../models/contentModel.js');
-      let data = await ContentModel.listPeliculas();
+      const categoryTop = document.querySelector('[data-category-top="peliculas"]');
+      const scrollToTop = () =>
+        categoryTop?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      // 🔁 Adaptación a tu esquema:
-      // año, descripcion, director, duracion, genero(array), imagen, titulo, id(opcional)
-      const normalize = (arr) =>
-        (arr || []).map((x) => {
-          const genres = Array.isArray(x.genero) ? x.genero : (x.genre ? [x.genre] : []);
-          const year = x.año ?? x.year ?? '';
-          const director = x.director ?? '';
-          return {
-            // usa el id del doc si existe; si también guardas "id" en el doc, respétalo
-            id: x.id ?? x.slug ?? x.docId ?? x.documentId ?? x.__id ?? x?.__name ?? x?.$id ?? x?.docid,
-            title: x.titulo ?? x.title ?? 'Sin título',
-            img: x.imagen ?? x.img ?? 'img/inception.jpg',   // mantiene tu ruta "img/..." (no cambiamos la DB)
-            tag: genres[0] ?? 'Película',
-            genres,                                          // para filtrar por varios géneros
-            subtitle: [director, year].filter(Boolean).join(' • '), // muestra Director • Año
-            year: year ? String(year) : '',
-            description: x.descripcion ?? x.description ?? '',
-          };
-        });
+      // === Cargar datos con caching para reducir lecturas ===
+      let data;
+      const cached = sessionStorage.getItem('peliculasData');
 
-      data = normalize(data);
+      if (cached) {
+        data = JSON.parse(cached);
+      } else {
+        const { ContentModel } = await import('../models/contentModel.js');
+        const rawData = await ContentModel.listPeliculas();
 
-      // Opcional: si en ContentModel no estabas incluyendo doc.id, recupéralo desde snapshot en el futuro.
-      // (Por ahora usamos lo que venga; si id es null no rompe nada.)
+        const normalize = (arr) =>
+          (arr || []).map((x) => {
+            const genres = Array.isArray(x.genero)
+              ? x.genero
+              : (x.genre ? [x.genre] : []);
+            const year = x.año ?? x.year ?? '';
+            const director = x.director ?? '';
+            const imgCandidate =
+              x.imagen ?? x.img ?? x.image ?? 'inception.jpg';
+            const img = resolveImagePath(imgCandidate);
 
-      // Rellena el select de géneros dinámicamente según tus datos
-      const gEl = document.getElementById('genre');
-      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
-      gEl.innerHTML =
-        `<option value="">Género</option>` +
-        uniqueGenres.map((g) => `<option>${g}</option>`).join('');
+            return {
+              id: x.id,
+              title: x.titulo ?? x.title ?? 'Sin título',
+              img,
+              tag: genres[0] ?? 'Película',
+              genres,
+              subtitle: [director, year].filter(Boolean).join(' • '),
+              year: year ? String(year) : '',
+              description: x.descripcion ?? x.description ?? '',
+            };
+          });
+
+        data = normalize(rawData);
+        sessionStorage.setItem('peliculasData', JSON.stringify(data));
+      }
+
+      // === Paginación ===
+      let currentPage = 1;
+      const itemsPerPage = 20;
+      let filteredData = [...data]; // dataset actual filtrado
+      const totalPages = () => Math.ceil(filteredData.length / itemsPerPage);
+
+      const getPaginatedData = () => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return filteredData.slice(start, end);
+      };
+
+      const updatePaginationControls = () => {
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage >= totalPages();
+        document.getElementById('pageInfo').textContent =
+          `Página ${currentPage} de ${totalPages() || 1}`;
+      };
 
       const draw = (arr) =>
         renderCards('#grid', arr, {
           showDescription: true,
           ctaText: 'Leer reseña',
           onCardClick: (item) => {
-            // import { navigate } from '../core/router.js'; navigate(`/peliculas/${item.id}`);
-            alert(`Próximamente reseña de: ${item.title}`);
+            sessionStorage.setItem("detalleItem", JSON.stringify(item));
+            sessionStorage.setItem("detalleCategoria", "peliculas");
+            location.hash = "#/detalle";
           },
         });
 
-      draw(data);
+      // === Render inicial ===
+      const renderPage = () => {
+        draw(getPaginatedData());
+        updatePaginationControls();
+      };
 
-      // Filtros: texto (título, director, descripción, géneros), género (array) y año
-      const qEl = document.getElementById('q');
+      // === Filtros ===
+      const gEl = document.getElementById('genre');
       const yEl = document.getElementById('year');
+      const uniqueGenres = [...new Set(data.flatMap((d) => d.genres || []).filter(Boolean))];
+      gEl.innerHTML = `<option value="">Género</option>` + uniqueGenres.map((g) => `<option>${g}</option>`).join('');
 
-      const applyFilters = () => {
-        const q = String(qEl?.value || '').toLowerCase().trim();
+      const applyFilters = (q = "") => {
         const g = String(gEl?.value || '').toLowerCase().trim();
         const y = String(yEl?.value || '').trim();
 
-        const filtered = data.filter((x) => {
+        filteredData = data.filter((x) => {
           const hayTexto =
             !q ||
             [x.title, x.subtitle, x.description, ...(x.genres || [])]
               .filter(Boolean)
               .some((f) => String(f).toLowerCase().includes(q));
-
-          const hayGenero =
-            !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
-
+          const hayGenero = !g || (x.genres || []).some((gg) => String(gg).toLowerCase() === g);
           const hayAnio = !y || x.year === y;
-
           return hayTexto && hayGenero && hayAnio;
         });
 
-        draw(filtered);
+        currentPage = 1;
+        renderPage();
       };
 
-      qEl?.addEventListener('input', applyFilters);
-      gEl?.addEventListener('change', applyFilters);
-      yEl?.addEventListener('change', applyFilters);
+      gEl?.addEventListener('change', () => applyFilters());
+      yEl?.addEventListener('change', () => applyFilters());
 
-      document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-        const { logout } = await import('../controllers/authController.js');
-        logout();
+      // 🔹 Escuchar buscador global del navbar
+      window.addEventListener("globalSearch", (e) => {
+        const q = e.detail.query;
+        applyFilters(q);
       });
 
-      document.getElementById('siteSearch')?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const q = e.currentTarget.querySelector('input').value.trim();
-      if (q) sessionStorage.setItem('cx:q', q);
-      location.hash = '#/peliculas';
+      // 🔹 Controles de paginación
+      document.getElementById('prevPage').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderPage();
+          scrollToTop();
+        }
+      });
+
+      document.getElementById('nextPage').addEventListener('click', () => {
+        if (currentPage < totalPages()) {
+          currentPage++;
+          renderPage();
+          scrollToTop();
+        }
+      });
+
+      // Render inicial
+      renderPage();
+
+      // === Logout ===
+      document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        sessionStorage.removeItem('peliculasData');
+        const { logout } = await import('../controllers/authController.js');
+        logout();
       });
     },
   };

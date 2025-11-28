@@ -1,54 +1,88 @@
-// Fila horizontal tipo "carrusel" simple con scroll
-export function renderRail(selector, items = [], { onItemClick = null } = {}) {
-  const host = document.querySelector(selector);
+// src/views/shared/renderRail.js
+import { applyImgFallback } from './image-fallback.js';
+import { resolveImagePath } from './resolve-image-path.js';
+
+/**
+ * Renderiza una rail horizontal de tarjetas uniformes.
+ * items: [{ id, title, img, tag, subtitle, description }]
+ * opts:  { onItemClick, ctaText='Ver más', showDescription=false }
+ */
+export function renderRail(mountSelector, items = [], opts = {}) {
+  const {
+    onItemClick,
+    ctaText = 'Ver más',
+    // quitamos descripciones por defecto
+    showDescription = false,
+  } = opts;
+
+  const host = typeof mountSelector === 'string'
+    ? document.querySelector(mountSelector)
+    : mountSelector;
+
   if (!host) return;
 
-  const uid = Math.random().toString(36).slice(2, 8);
-  host.innerHTML = `
-    <div class="position-relative">
-      <div id="rail-${uid}" class="d-flex gap-3 flex-nowrap overflow-auto pb-2">
-        ${items.map((x, i) => `
-          <div class="card shadow-sm" style="min-width:180px; max-width:180px" data-index="${i}" role="button" tabindex="0">
-            <div class="ratio ratio-2x3 bg-body-tertiary">
-              <img src="${x.img}" alt="${escapeHtml(x.title)}" class="object-fit-cover"
-                   onerror="this.src='https://placehold.co/360x540?text=CulturaX'; this.classList.add('opacity-50')" />
-            </div>
-            <div class="card-body p-2">
-              <div class="small fw-semibold text-truncate" title="${escapeHtml(x.title)}">${escapeHtml(x.title)}</div>
-              <div class="small text-secondary text-truncate">${escapeHtml([x.tag, x.year].filter(Boolean).join(' • '))}</div>
-            </div>
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) {
+    host.innerHTML = `<div class="text-secondary small">No hay contenido disponible.</div>`;
+    return;
+  }
+
+  const cards = list.map((x) => {
+    const src = resolveImagePath(x.img || x.imagen || x.image || '');
+    const meta = [
+      x.tag ? String(x.tag) : null,
+      x.subtitle ? String(x.subtitle) : (x.year ? String(x.year) : null)
+    ].filter(Boolean).join(' • ');
+
+    return `
+      <article class="cx-rail-card" data-id="${x.id ?? ''}">
+        <img
+          class="cx-rail-thumb img-with-fallback"
+          src="${src}"
+          alt="${escapeHtml(x.title ?? 'Sin título')}"
+          data-fallback data-w="360" data-h="540" data-ph="CulturaX"
+        >
+        <div class="cx-rail-body">
+          ${meta ? `<div class="cx-rail-meta">${escapeHtml(meta)}</div>` : ''}
+          <h3 class="cx-rail-title text-truncate-2">${escapeHtml(x.title ?? 'Sin título')}</h3>
+          ${showDescription
+            ? `<p class="cx-rail-desc text-truncate-3">${escapeHtml(x.description ?? '')}</p>`
+            : ''
+          }
+          <div class="cx-rail-actions">
+            <button type="button" class="btn btn-secondary btn-sm">${ctaText}</button>
           </div>
-        `).join('')}
+        </div>
+      </article>
+    `;
+  }).join('');
+
+  host.innerHTML = `
+    <div class="cx-rail">
+      <div class="cx-rail-track">
+        ${cards}
       </div>
-      <button class="btn btn-dark btn-sm position-absolute top-50 start-0 translate-middle-y d-none d-md-inline-flex"
-              style="--bs-btn-padding-y:.25rem; --bs-btn-padding-x:.5rem" data-dir="-1">‹</button>
-      <button class="btn btn-dark btn-sm position-absolute top-50 end-0 translate-middle-y d-none d-md-inline-flex"
-              style="--bs-btn-padding-y:.25rem; --bs-btn-padding-x:.5rem" data-dir="1">›</button>
     </div>
   `;
 
-  const rail = host.querySelector(`#rail-${uid}`);
-  host.querySelectorAll('button[data-dir]').forEach(btn => {
-    btn.addEventListener('click', () => rail.scrollBy({ left: 300 * Number(btn.dataset.dir), behavior: 'smooth' }));
-  });
+  // Fallback dinámico
+  applyImgFallback(host, 'img.img-with-fallback');
 
-  if (typeof onItemClick === 'function') {
-    host.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('click', () => {
-        const i = Number(card.getAttribute('data-index'));
-        onItemClick(items[i], i);
-      });
-      card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          const i = Number(card.getAttribute('data-index'));
-          onItemClick(items[i], i);
-        }
+  // Click handling
+  if (onItemClick) {
+    host.querySelectorAll('.cx-rail-card').forEach((card, idx) => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        const item = items[idx];
+        if (item) onItemClick(item);
       });
     });
   }
+}
 
-  function escapeHtml(s) {
-    return String(s ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
-  }
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }

@@ -1,0 +1,844 @@
+[
+  {
+    "id": "20th-century-boys",
+    "descripcion": "Un grupo de amigos debe detener a una secta que amenaza al mundo con un plan apocalíptico.",
+    "editorial": "Shogakukan",
+    "genero": [
+      "Misterio",
+      "Ciencia Ficción",
+      "Thriller"
+    ],
+    "año": 1999,
+    "titulo": "20th Century Boys",
+    "autor": "Naoki Urasawa",
+    "imagen": "20th-century-boys.jpg",
+    "tomos": 22
+  },
+  {
+    "id": "akame-ga-kill",
+    "imagen": "akame-ga-kill.jpg",
+    "año": 2010,
+    "descripcion": "Un joven se une a un grupo de asesinos que lucha contra la corrupción del imperio.",
+    "titulo": "Akame ga Kill!",
+    "editorial": "Square Enix",
+    "autor": "Takahiro, Tetsuya Tashiro",
+    "tomos": 15,
+    "genero": [
+      "Acción",
+      "Fantasía",
+      "Drama"
+    ]
+  },
+  {
+    "id": "attack-on-titan",
+    "año": 2009,
+    "editorial": "Kodansha",
+    "genero": [
+      "Acción",
+      "Drama",
+      "Fantasía"
+    ],
+    "descripcion": "La humanidad sobrevive dentro de murallas que la protegen de gigantes devoradores.",
+    "titulo": "Shingeki no Kyojin (Attack on Titan)",
+    "tomos": 34,
+    "imagen": "attack-on-titan.jpg",
+    "autor": "Hajime Isayama"
+  },
+  {
+    "id": "baki",
+    "tomos": 42,
+    "descripcion": "Baki Hanma entrena para superar a su padre, el luchador más fuerte del mundo.",
+    "editorial": "Akita Shoten",
+    "titulo": "Baki the Grappler",
+    "año": 1991,
+    "genero": [
+      "Acción",
+      "Artes Marciales"
+    ],
+    "autor": "Keisuke Itagaki",
+    "imagen": "baki.jpg"
+  },
+  {
+    "id": "bakuman",
+    "genero": [
+      "Drama",
+      "Comedia",
+      "Slice of Life"
+    ],
+    "descripcion": "Dos estudiantes de secundaria persiguen su sueño de convertirse en mangakas exitosos.",
+    "titulo": "Bakuman",
+    "tomos": 20,
+    "autor": "Tsugumi Ohba, Takeshi Obata",
+    "año": 2008,
+    "editorial": "Shueisha",
+    "imagen": "bakuman.jpg"
+  },
+  {
+    "id": "berserk",
+    "editorial": "Hakusensha",
+    "genero": [
+      "Acción",
+      "Oscuro",
+      "Fantasía"
+    ],
+    "año": 1989,
+    "titulo": "Berserk",
+    "imagen": "berserk.jpg",
+    "descripcion": "Guts, un guerrero errante, busca venganza en un mundo brutal lleno de demonios.",
+    "autor": "Kentaro Miura",
+    "tomos": 42
+  },
+  {
+    "id": "black-bullet",
+    "titulo": "Black Bullet",
+    "autor": "Shiden Kanzaki, Saki Ukai",
+    "genero": [
+      "Acción",
+      "Ciencia Ficción"
+    ],
+    "año": 2012,
+    "imagen": "black-bullet.jpg",
+    "editorial": "ASCII Media Works",
+    "descripcion": "Humanos luchan contra criaturas virales con la ayuda de niñas infectadas con superpoderes.",
+    "tomos": 4
+  },
+  {
+    "id": "black-clover",
+    "autor": "Yūki Tabata",
+    "tomos": 35,
+    "titulo": "Black Clover",
+    "editorial": "Shueisha",
+    "imagen": "black-clover.jpg",
+    "año": 2015,
+    "descripcion": "Asta, un joven sin magia, sueña con convertirse en el Rey Mago.",
+    "genero": [
+      "Acción",
+      "Fantasía",
+      "Shonen"
+    ]
+  },
+  {
+    "id": "bleach",
+    "descripcion": "Ichigo Kurosaki obtiene poderes de un Shinigami y debe proteger a los vivos y a los muertos.",
+    "genero": [
+      "Acción",
+      "Sobrenatural",
+      "Shonen"
+    ],
+    "autor": "Tite Kubo",
+    "año": 2001,
+    "editorial": "Shueisha",
+    "tomos": 74,
+    "imagen": "bleach.jpg",
+    "titulo": "Bleach"
+  },
+  {
+    "id": "blue-lock",
+    "tomos": 29,
+    "descripcion": "Un proyecto busca crear al mejor delantero del mundo entre jóvenes futbolistas japoneses.",
+    "genero": [
+      "Deportes",
+      "Acción"
+    ],
+    "editorial": "Kodansha",
+    "autor": "Muneyuki Kaneshiro, Yusuke Nomura",
+    "año": 2018,
+    "imagen": "blue-lock.jpg",
+    "titulo": "Blue Lock"
+  },
+  {
+    "id": "chainsaw-man",
+    "titulo": "Chainsaw Man",
+    "año": 2018,
+    "genero": [
+      "Acción",
+      "Sobrenatural"
+    ],
+    "autor": "Tatsuki Fujimoto",
+    "imagen": "chainsaw-man.jpg",
+    "descripcion": "Denji obtiene poderes demoníacos tras fusionarse con su perro Pochita.",
+    "tomos": 16,
+    "editorial": "Shueisha"
+  },
+  {
+    "id": "chainsaw-man-part-2",
+    "editorial": "Shueisha",
+    "autor": "Tatsuki Fujimoto",
+    "titulo": "Chainsaw Man: Parte 2",
+    "imagen": "chainsaw-man-2.jpg",
+    "genero": [
+      "Acción",
+      "Sobrenatural"
+    ],
+    "descripcion": "Denji intenta vivir una vida normal mientras nuevos demonios amenazan la paz alcanzada.",
+    "tomos": 7,
+    "año": 2022
+  },
+  {
+    "id": "claymore",
+    "titulo": "Claymore",
+    "editorial": "Shueisha",
+    "genero": [
+      "Acción",
+      "Fantasía Oscura"
+    ],
+    "autor": "Norihiro Yagi",
+    "imagen": "claymore.jpg",
+    "tomos": 27,
+    "año": 2001,
+    "descripcion": "Mujeres guerreras mitad humanas mitad monstruos luchan contra criaturas devoradoras de hombres."
+  },
+  {
+    "id": "death-note",
+    "descripcion": "Un estudiante encuentra un cuaderno con el poder de matar a quien escriba su nombre en él.",
+    "autor": "Tsugumi Ohba, Takeshi Obata",
+    "año": 2003,
+    "imagen": "death-note.jpg",
+    "genero": [
+      "Misterio",
+      "Psicológico",
+      "Sobrenatural"
+    ],
+    "editorial": "Shueisha",
+    "titulo": "Death Note",
+    "tomos": 12
+  },
+  {
+    "id": "demon-slayer",
+    "descripcion": "Tanjiro Kamado busca vengar a su familia y devolver la humanidad a su hermana demonio Nezuko.",
+    "autor": "Koyoharu Gotouge",
+    "editorial": "Shueisha",
+    "tomos": 23,
+    "año": 2016,
+    "imagen": "demon-slayer.jpg",
+    "genero": [
+      "Acción",
+      "Sobrenatural",
+      "Drama"
+    ],
+    "titulo": "Kimetsu no Yaiba (Guardianes de la Noche)"
+  },
+  {
+    "id": "dorohedoro",
+    "tomos": 23,
+    "año": 2000,
+    "titulo": "Dorohedoro",
+    "genero": [
+      "Acción",
+      "Fantasía Oscura",
+      "Comedia"
+    ],
+    "autor": "Q Hayashida",
+    "editorial": "Shogakukan",
+    "descripcion": "Un hombre con cabeza de reptil busca recuperar su memoria en un mundo violento y surrealista.",
+    "imagen": "dorohedoro.jpg"
+  },
+  {
+    "id": "dr-stone",
+    "tomos": 26,
+    "titulo": "Dr. Stone",
+    "imagen": "dr-stone.jpg",
+    "genero": [
+      "Ciencia Ficción",
+      "Aventura"
+    ],
+    "autor": "Riichiro Inagaki, Boichi",
+    "editorial": "Shueisha",
+    "año": 2017,
+    "descripcion": "Senku intenta reconstruir la civilización tras miles de años de petrificación humana."
+  },
+  {
+    "id": "dragon-ball",
+    "genero": [
+      "Acción",
+      "Aventura",
+      "Comedia"
+    ],
+    "descripcion": "Goku, un guerrero saiyajin, entrena y lucha por proteger la Tierra de poderosos enemigos.",
+    "editorial": "Shueisha",
+    "imagen": "dragon-ball.jpg",
+    "titulo": "Dragon Ball",
+    "año": 1984,
+    "tomos": 42,
+    "autor": "Akira Toriyama"
+  },
+  {
+    "id": "erased",
+    "descripcion": "Un hombre viaja al pasado para evitar una serie de secuestros y asesinatos.",
+    "titulo": "Erased (Boku dake ga Inai Machi)",
+    "año": 2012,
+    "imagen": "erased.jpg",
+    "tomos": 9,
+    "autor": "Kei Sanbe",
+    "editorial": "Kadokawa",
+    "genero": [
+      "Misterio",
+      "Drama",
+      "Ciencia Ficción"
+    ]
+  },
+  {
+    "id": "fairy-tail",
+    "imagen": "fairy-tail.jpg",
+    "editorial": "Kodansha",
+    "tomos": 63,
+    "autor": "Hiro Mashima",
+    "titulo": "Fairy Tail",
+    "año": 2006,
+    "genero": [
+      "Fantasía",
+      "Acción",
+      "Aventura"
+    ],
+    "descripcion": "Lucy se une al gremio de magos Fairy Tail y vive emocionantes aventuras junto a Natsu y sus amigos."
+  },
+  {
+    "id": "fire-force",
+    "tomos": 34,
+    "descripcion": "Bomberos con poderes especiales luchan contra humanos que se convierten en fuego viviente.",
+    "editorial": "Kodansha",
+    "imagen": "fire-force.jpg",
+    "año": 2015,
+    "autor": "Atsushi Ōkubo",
+    "titulo": "En’en no Shōbōtai (Fire Force)",
+    "genero": [
+      "Acción",
+      "Sobrenatural"
+    ]
+  },
+  {
+    "id": "fullmetal-alchemist",
+    "descripcion": "Dos hermanos alquimistas buscan la piedra filosofal para recuperar sus cuerpos perdidos.",
+    "editorial": "Square Enix",
+    "imagen": "fullmetal-alchemist.jpg",
+    "genero": [
+      "Aventura",
+      "Drama",
+      "Fantasía"
+    ],
+    "titulo": "Fullmetal Alchemist",
+    "autor": "Hiromu Arakawa",
+    "año": 2001,
+    "tomos": 27
+  },
+  {
+    "id": "gantz",
+    "titulo": "Gantz",
+    "imagen": "gantz.jpg",
+    "descripcion": "Personas resucitadas deben participar en misiones mortales organizadas por una misteriosa esfera negra.",
+    "genero": [
+      "Acción",
+      "Ciencia Ficción",
+      "Terror"
+    ],
+    "año": 2000,
+    "editorial": "Shueisha",
+    "autor": "Hiroya Oku",
+    "tomos": 37
+  },
+  {
+    "id": "haikyuu",
+    "año": 2012,
+    "tomos": 45,
+    "editorial": "Shueisha",
+    "descripcion": "Hinata Shoyo busca convertirse en una estrella del voleibol a pesar de su baja estatura.",
+    "genero": [
+      "Deportes",
+      "Comedia",
+      "Drama"
+    ],
+    "titulo": "Haikyuu!!",
+    "autor": "Haruichi Furudate",
+    "imagen": "haikyuu.jpg"
+  },
+  {
+    "id": "hunter-x-hunter",
+    "autor": "Yoshihiro Togashi",
+    "descripcion": "Gon Freecss se convierte en cazador para encontrar a su padre desaparecido.",
+    "genero": [
+      "Aventura",
+      "Acción",
+      "Fantasía"
+    ],
+    "titulo": "Hunter × Hunter",
+    "editorial": "Shueisha",
+    "año": 1998,
+    "imagen": "hunter-x-hunter.jpg",
+    "tomos": 37
+  },
+  {
+    "id": "jujutsu-kaisen",
+    "año": 2018,
+    "titulo": "Jujutsu Kaisen",
+    "autor": "Gege Akutami",
+    "imagen": "jujutsu-kaisen.jpg",
+    "tomos": 28,
+    "editorial": "Shueisha",
+    "descripcion": "Yuji Itadori se une a una escuela de hechiceros para combatir maldiciones y espíritus malignos.",
+    "genero": [
+      "Acción",
+      "Sobrenatural",
+      "Shonen"
+    ]
+  },
+  {
+    "id": "kaguya-sama",
+    "editorial": "Shueisha",
+    "genero": [
+      "Comedia",
+      "Romance",
+      "Psicológico"
+    ],
+    "titulo": "Kaguya-sama: Love is War",
+    "descripcion": "Dos genios escolares se enfrentan en una guerra de ingenio para que el otro confiese su amor primero.",
+    "año": 2015,
+    "imagen": "kaguya-sama.jpg",
+    "autor": "Aka Akasaka",
+    "tomos": 28
+  },
+  {
+    "id": "kengan-ashura",
+    "titulo": "Kengan Ashura",
+    "imagen": "kengan-ashura.jpg",
+    "descripcion": "Peleadores representan a corporaciones en feroces combates sin reglas.",
+    "genero": [
+      "Acción",
+      "Artes Marciales"
+    ],
+    "tomos": 27,
+    "autor": "Yabako Sandrovich, Daromeon",
+    "editorial": "Ura Sunday",
+    "año": 2012
+  },
+  {
+    "id": "komi-san",
+    "editorial": "Shogakukan",
+    "año": 2016,
+    "titulo": "Komi-san wa, Komyushou desu (Komi Can't Communicate)",
+    "tomos": 34,
+    "descripcion": "Komi intenta superar su timidez extrema para hacer 100 amigos en su escuela.",
+    "genero": [
+      "Comedia",
+      "Romance",
+      "Slice of Life"
+    ],
+    "imagen": "komi-san.jpg",
+    "autor": "Tomohito Oda"
+  },
+  {
+    "id": "made-in-abyss",
+    "descripcion": "Una niña y un androide descienden a un abismo misterioso lleno de criaturas y secretos.",
+    "autor": "Akihito Tsukushi",
+    "titulo": "Made in Abyss",
+    "imagen": "made-in-abyss.jpg",
+    "editorial": "Takeshobo",
+    "tomos": 13,
+    "genero": [
+      "Aventura",
+      "Fantasía",
+      "Drama"
+    ],
+    "año": 2012
+  },
+  {
+    "id": "monster",
+    "año": 1994,
+    "descripcion": "Un neurocirujano se ve envuelto en una oscura conspiración tras salvar la vida de un niño.",
+    "autor": "Naoki Urasawa",
+    "tomos": 18,
+    "titulo": "Monster",
+    "editorial": "Shogakukan",
+    "imagen": "monster.jpg",
+    "genero": [
+      "Suspenso",
+      "Drama",
+      "Misterio"
+    ]
+  },
+  {
+    "id": "monster-musume",
+    "imagen": "monster-musume.jpg",
+    "descripcion": "Un joven humano vive con chicas monstruo bajo un programa de convivencia entre especies.",
+    "titulo": "Monster Musume",
+    "autor": "Okayado",
+    "genero": [
+      "Comedia",
+      "Romance",
+      "Fantasía"
+    ],
+    "tomos": 17,
+    "editorial": "Tokuma Shoten",
+    "año": 2012
+  },
+  {
+    "id": "my-hero-academia",
+    "titulo": "Boku no Hero Academia (My Hero Academia)",
+    "genero": [
+      "Acción",
+      "Superhéroes",
+      "Shonen"
+    ],
+    "imagen": "my-hero-academia.jpg",
+    "autor": "Kohei Horikoshi",
+    "año": 2014,
+    "tomos": 42,
+    "descripcion": "En un mundo donde casi todos tienen poderes, un joven sin habilidades sueña con ser un héroe.",
+    "editorial": "Shueisha"
+  },
+  {
+    "id": "nagatoro-san",
+    "descripcion": "Una estudiante traviesa se divierte molestando a su tímido senpai, desarrollando un vínculo inesperado.",
+    "editorial": "Kodansha",
+    "año": 2017,
+    "tomos": 20,
+    "imagen": "nagatoro-san.jpg",
+    "genero": [
+      "Comedia",
+      "Romance",
+      "Slice of Life"
+    ],
+    "autor": "Nanashi",
+    "titulo": "Ijiranaide, Nagatoro-san"
+  },
+  {
+    "id": "naruto",
+    "descripcion": "Naruto Uzumaki busca convertirse en Hokage mientras aprende el valor de la amistad y la perseverancia.",
+    "imagen": "naruto.jpg",
+    "editorial": "Shueisha",
+    "autor": "Masashi Kishimoto",
+    "año": 1999,
+    "genero": [
+      "Acción",
+      "Aventura",
+      "Shonen"
+    ],
+    "tomos": 72,
+    "titulo": "Naruto"
+  },
+  {
+    "id": "neon-genesis-evangelion",
+    "descripcion": "Adolescentes pilotan mechas gigantes para proteger la humanidad de misteriosas criaturas llamadas Ángeles.",
+    "editorial": "Kadokawa Shoten",
+    "tomos": 14,
+    "imagen": "evangelion.jpg",
+    "genero": [
+      "Ciencia Ficción",
+      "Psicológico",
+      "Drama"
+    ],
+    "titulo": "Neon Genesis Evangelion",
+    "autor": "Yoshiyuki Sadamoto",
+    "año": 1994
+  },
+  {
+    "id": "one-punch-man",
+    "editorial": "Shueisha",
+    "descripcion": "Saitama puede derrotar a cualquier enemigo con un solo golpe, pero su vida se vuelve aburrida.",
+    "genero": [
+      "Acción",
+      "Comedia",
+      "Superhéroes"
+    ],
+    "titulo": "One Punch Man",
+    "año": 2012,
+    "autor": "ONE, Yusuke Murata",
+    "tomos": 29,
+    "imagen": "one-punch-man.jpg"
+  },
+  {
+    "id": "orange",
+    "titulo": "Orange",
+    "descripcion": "Una estudiante recibe cartas de su yo del futuro pidiéndole que evite un trágico destino.",
+    "imagen": "orange.jpg",
+    "año": 2012,
+    "tomos": 6,
+    "editorial": "Shueisha",
+    "autor": "Ichigo Takano",
+    "genero": [
+      "Drama",
+      "Romance",
+      "Ciencia Ficción"
+    ]
+  },
+  {
+    "id": "oshi-no-ko",
+    "titulo": "Oshi no Ko",
+    "genero": [
+      "Drama",
+      "Misterio",
+      "Reencarnación"
+    ],
+    "autor": "Aka Akasaka, Mengo Yokoyari",
+    "editorial": "Shueisha",
+    "año": 2020,
+    "imagen": "oshi-no-ko.jpg",
+    "descripcion": "Un médico y su paciente son asesinados y renacen como los hijos de una idol japonesa.",
+    "tomos": 14
+  },
+  {
+    "id": "parasyte",
+    "titulo": "Parasyte (Kiseijuu)",
+    "autor": "Hitoshi Iwaaki",
+    "año": 1988,
+    "descripcion": "Un parásito alienígena ocupa la mano de un joven, obligándolo a convivir con él para sobrevivir.",
+    "editorial": "Kodansha",
+    "imagen": "parasyte.jpg",
+    "tomos": 10,
+    "genero": [
+      "Terror",
+      "Ciencia Ficción",
+      "Drama"
+    ]
+  },
+  {
+    "id": "pluto",
+    "titulo": "Pluto",
+    "editorial": "Shogakukan",
+    "tomos": 8,
+    "imagen": "pluto.jpg",
+    "descripcion": "Un detective androide investiga asesinatos de robots y humanos en un mundo futurista.",
+    "año": 2003,
+    "genero": [
+      "Ciencia Ficción",
+      "Misterio",
+      "Drama"
+    ],
+    "autor": "Naoki Urasawa, Osamu Tezuka"
+  },
+  {
+    "id": "re-zero",
+    "tomos": 33,
+    "autor": "Tappei Nagatsuki, Shinichirou Otsuka",
+    "descripcion": "Subaru Natsuki revive cada vez que muere, intentando cambiar su trágico destino.",
+    "titulo": "Re:Zero - Empezar de cero en un mundo diferente",
+    "imagen": "rezero.jpg",
+    "año": 2014,
+    "genero": [
+      "Fantasía",
+      "Drama",
+      "Reencarnación"
+    ],
+    "editorial": "Media Factory"
+  },
+  {
+    "id": "rent-a-girlfriend",
+    "titulo": "Kanojo, Okarishimasu (Rent-A-Girlfriend)",
+    "editorial": "Kodansha",
+    "genero": [
+      "Comedia",
+      "Romance"
+    ],
+    "tomos": 35,
+    "imagen": "rent-a-girlfriend.jpg",
+    "descripcion": "Kazuya alquila a una novia falsa tras una ruptura y termina enredado en una serie de malentendidos románticos.",
+    "año": 2017,
+    "autor": "Reiji Miyajima"
+  },
+  {
+    "id": "rorouni-kenshin",
+    "editorial": "Shueisha",
+    "genero": [
+      "Acción",
+      "Histórica",
+      "Romance"
+    ],
+    "descripcion": "Un espadachín errante busca redención tras haber sido un asesino durante la Restauración Meiji.",
+    "titulo": "Rurouni Kenshin",
+    "imagen": "rurouni-kenshin.jpg",
+    "año": 1994,
+    "autor": "Nobuhiro Watsuki",
+    "tomos": 28
+  },
+  {
+    "id": "sakamoto-days",
+    "imagen": "sakamoto-days.jpg",
+    "año": 2020,
+    "editorial": "Shueisha",
+    "titulo": "Sakamoto Days",
+    "descripcion": "Un exasesino legendario vive una vida pacífica como dueño de una tienda, pero su pasado lo persigue.",
+    "autor": "Yuto Suzuki",
+    "tomos": 17,
+    "genero": [
+      "Acción",
+      "Comedia"
+    ]
+  },
+  {
+    "id": "slam-dunk",
+    "titulo": "Slam Dunk",
+    "editorial": "Shueisha",
+    "imagen": "slam-dunk.jpg",
+    "descripcion": "Hanamichi Sakuragi se une al equipo de baloncesto de su escuela para impresionar a una chica.",
+    "año": 1990,
+    "autor": "Takehiko Inoue",
+    "tomos": 31,
+    "genero": [
+      "Deportes",
+      "Comedia",
+      "Shonen"
+    ]
+  },
+  {
+    "id": "solo-leveling",
+    "año": 2016,
+    "descripcion": "Un cazador débil obtiene un misterioso poder que le permite subir de nivel sin límites.",
+    "editorial": "D&C Media",
+    "imagen": "solo-leveling.jpg",
+    "autor": "Chugong, DUBU",
+    "genero": [
+      "Acción",
+      "Fantasía"
+    ],
+    "tomos": 14,
+    "titulo": "Solo Leveling"
+  },
+  {
+    "id": "soul-eater",
+    "genero": [
+      "Acción",
+      "Comedia",
+      "Fantasía"
+    ],
+    "editorial": "Square Enix",
+    "tomos": 25,
+    "descripcion": "Estudiantes de una academia cazan almas malignas para convertirse en armas definitivas.",
+    "imagen": "soul-eater.jpg",
+    "año": 2004,
+    "autor": "Atsushi Ōkubo",
+    "titulo": "Soul Eater"
+  },
+  {
+    "id": "spy-x-family",
+    "imagen": "spy-x-family.jpg",
+    "descripcion": "Un espía debe formar una familia falsa sin saber que su esposa es asesina y su hija telépata.",
+    "autor": "Tatsuya Endo",
+    "genero": [
+      "Comedia",
+      "Acción",
+      "Espionaje"
+    ],
+    "tomos": 13,
+    "titulo": "Spy x Family",
+    "editorial": "Shueisha",
+    "año": 2019
+  },
+  {
+    "id": "sword-art-online",
+    "genero": [
+      "Aventura",
+      "Ciencia Ficción",
+      "Romance"
+    ],
+    "imagen": "sword-art-online.jpg",
+    "descripcion": "Jugadores quedan atrapados en un videojuego de realidad virtual donde morir significa morir en la vida real.",
+    "autor": "Reki Kawahara, abec",
+    "tomos": 26,
+    "año": 2009,
+    "editorial": "ASCII Media Works",
+    "titulo": "Sword Art Online"
+  },
+  {
+    "id": "tokyo-ghoul",
+    "descripcion": "Kaneki Ken se convierte en mitad ghoul tras un accidente y lucha por mantener su humanidad.",
+    "genero": [
+      "Terror",
+      "Drama",
+      "Acción"
+    ],
+    "editorial": "Shueisha",
+    "imagen": "tokyo-ghoul.jpg",
+    "autor": "Sui Ishida",
+    "año": 2011,
+    "tomos": 14,
+    "titulo": "Tokyo Ghoul"
+  },
+  {
+    "id": "tokyo-revengers",
+    "editorial": "Kodansha",
+    "tomos": 31,
+    "titulo": "Tokyo Revengers",
+    "descripcion": "Un joven viaja al pasado para salvar a su exnovia y evitar el auge de una peligrosa pandilla.",
+    "año": 2017,
+    "autor": "Ken Wakui",
+    "imagen": "tokyo-revengers.jpg",
+    "genero": [
+      "Acción",
+      "Drama",
+      "Viaje en el tiempo"
+    ]
+  },
+  {
+    "id": "toradora",
+    "genero": [
+      "Comedia",
+      "Romance"
+    ],
+    "imagen": "toradora.jpg",
+    "editorial": "ASCII Media Works",
+    "tomos": 10,
+    "descripcion": "Dos adolescentes con amores imposibles deciden ayudarse mutuamente a conquistarlos.",
+    "titulo": "Toradora!",
+    "año": 2006,
+    "autor": "Yuyuko Takemiya, Zekkyou"
+  },
+  {
+    "id": "trigun",
+    "tomos": 3,
+    "titulo": "Trigun",
+    "genero": [
+      "Acción",
+      "Western",
+      "Ciencia Ficción"
+    ],
+    "editorial": "Shonen Gahosha",
+    "imagen": "trigun.jpg",
+    "año": 1995,
+    "descripcion": "Vash la Estampida viaja por un planeta desértico con un precio por su cabeza.",
+    "autor": "Yasuhiro Nightow"
+  },
+  {
+    "id": "vagabond",
+    "autor": "Takehiko Inoue",
+    "año": 1998,
+    "genero": [
+      "Histórica",
+      "Acción",
+      "Drama"
+    ],
+    "imagen": "vagabond.jpg",
+    "descripcion": "Basado en la vida del legendario espadachín Musashi Miyamoto y su búsqueda espiritual.",
+    "tomos": 37,
+    "titulo": "Vagabond",
+    "editorial": "Kodansha"
+  },
+  {
+    "id": "vinland-saga",
+    "genero": [
+      "Histórica",
+      "Acción",
+      "Aventura"
+    ],
+    "editorial": "Kodansha",
+    "tomos": 27,
+    "descripcion": "Thorfinn busca venganza en una historia ambientada en la era vikinga.",
+    "año": 2005,
+    "imagen": "vinland-saga.jpg",
+    "autor": "Makoto Yukimura",
+    "titulo": "Vinland Saga"
+  },
+  {
+    "id": "your-lie-in-april",
+    "editorial": "Kodansha",
+    "descripcion": "Un pianista prodigio recupera la pasión por la música gracias a una violinista llena de vida.",
+    "tomos": 11,
+    "titulo": "Your Lie in April",
+    "autor": "Naoshi Arakawa",
+    "genero": [
+      "Drama",
+      "Romance",
+      "Música"
+    ],
+    "imagen": "your-lie-in-april.jpg",
+    "año": 2011
+  }
+]
