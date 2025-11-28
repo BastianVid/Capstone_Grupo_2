@@ -263,7 +263,7 @@ export function HomeView() {
       const geminiCatalogSummary = buildCatalogSummary(combinedTop);
       const communityReviewSummary = buildCommunityReviewSummary(communityReviewsRaw);
       const fallbackUserReviewSummary =
-        "El usuario no tiene resenas todavia. Sugiere contenido general popular de acuerdo al catalogo.";
+        "El usuario no tiene resenas todavia. Recomienda titulos con buenas resenas del catalogo y explica por que destacan.";
       let rerenderGeminiSuggestions = () => {};
       let userReviewEntries = [];
       let userReviewSummary = fallbackUserReviewSummary;
@@ -399,6 +399,9 @@ export function HomeView() {
       } else {
         heroEl.innerHTML = slides;
         applyImgFallback(document, 'img.img-with-fallback');
+        heroEl.querySelectorAll('img').forEach((img) => {
+          img.addEventListener('load', () => syncHeroSidebarHeight(), { once: true });
+        });
       }
 
       // Igualar alto de la tarjeta "Proximamente" con el hero
@@ -420,6 +423,7 @@ export function HomeView() {
         upcomingCardEl.style.height = `${Math.max(target, minHeight)}px`;
       };
       window.addEventListener('resize', syncHeroSidebarHeight);
+      window.addEventListener('load', syncHeroSidebarHeight);
 
       // === Proximamente (desde Firestore) ===
       const upcomingItems = shuffle(proximamente).slice(0, 6);  // limita a 6 resultados
@@ -636,9 +640,7 @@ export function HomeView() {
           if (!suggestionsEl) return;
         const baseSuggestion = userReviewEntries.length
           ? 'CulturIAx, revisa mis resenas y sugiere algo que encaje con ellas.'
-          : trendingGenres[0]
-          ? `CulturIAx, recomiendame algo de ${trendingGenres[0]} con buenas resenas.`
-          : 'CulturIAx, sorprendeme con algo muy recomendado.';
+          : 'CulturIAx, recomiendame algo con las mejores resenas del catalogo.';
           suggestionsEl.innerHTML = '';
           const button = document.createElement('button');
           button.type = 'button';

@@ -1,6 +1,6 @@
-// Resuelve nombres y rutas a la carpeta real de imágenes del proyecto.
-// Con Live Server es mejor usar rutas ABSOLUTAS desde la raíz.
-const ASSETS_DIR = '/Proyecto/src/assets/img/';
+﻿// Resuelve nombres y rutas a la carpeta real de imÃ¡genes del proyecto.
+// Con Live Server es mejor usar rutas ABSOLUTAS desde la raÃ­z.
+const ASSETS_DIR = '/src/assets/img/';
 
 function isAbsoluteUrl(str = '') {  
   return /^(https?:|data:)/i.test(str);
@@ -15,7 +15,7 @@ function toAssetsPath(nameOrPath = '') {
   let s = String(nameOrPath).trim().replace(/\\/g, '/');
   s = s.replace(/^\.\/+/, '');
 
-  // si viene ya con /src/assets/img/... lo dejamos así (pero normalizamos una sola / inicial)
+  // si viene ya con /src/assets/img/... lo dejamos asÃ­ (pero normalizamos una sola / inicial)
   s = s.replace(/^\/+/, '/');
   if (s.startsWith('/src/assets/img/')) return s;
 
@@ -50,3 +50,4 @@ export function resolveImagePath(input) {
 }
 
 export default resolveImagePath;
+
