@@ -259,14 +259,20 @@ export function HomeView() {
         ...topVideojuegos.slice(0, 3),
         ...topManga.slice(0, 3),
       ];
+
       const geminiCatalogSummary = buildCatalogSummary(combinedTop);
       const communityReviewSummary = buildCommunityReviewSummary(communityReviewsRaw);
-      const fallbackUserReviewSummary = "El usuario no tiene resenas todavia. Sugiere contenido general popular de acuerdo al catalogo.";
+      const fallbackUserReviewSummary =
+        "El usuario no tiene resenas todavia. Sugiere contenido general popular de acuerdo al catalogo.";
+      let rerenderGeminiSuggestions = () => {};
       let userReviewEntries = [];
       let userReviewSummary = fallbackUserReviewSummary;
       let userReviewUid = null;
+      let legacyLookupPromise = null;
+      let legacyLookupAttemptedForUid = null;
 
-      const loadUserReviews = async (force = false) => {
+
+      const loadUserReviews = async ({ force = false, useLegacyFallback = false } = {}) => {
         try {
           const activeUser = firebaseCurrentUser || auth.currentUser;
           const uid = activeUser?.uid;
@@ -275,43 +281,98 @@ export function HomeView() {
             userReviewEntries = [];
             userReviewSummary = fallbackUserReviewSummary;
             userReviewUid = null;
+            legacyLookupPromise = null;
+            legacyLookupAttemptedForUid = null;
             return;
           }
 
-          if (!force && uid === userReviewUid && userReviewEntries.length) return;
-
-          userReviewEntries = await ContentModel.listUserResenasQuick(uid, 20);
-          if (!userReviewEntries.length) {
-            userReviewEntries = await ContentModel.listResenasByUser(uid, 20);
+          const isSameUser = uid === userReviewUid;
+          if (!force && isSameUser && userReviewEntries.length) return;
+          if (!isSameUser) {
+            legacyLookupAttemptedForUid = null;
           }
 
+          const quick = await ContentModel.listUserResenasQuick(uid, 20);
+          userReviewEntries = Array.isArray(quick) ? quick : [];
           userReviewUid = uid;
           userReviewSummary = userReviewEntries.length
             ? buildUserReviewSummary(userReviewEntries)
             : fallbackUserReviewSummary;
+          rerenderGeminiSuggestions();
+
+          // Consulta legacy en segundo plano solo si se solicita (evita bloquear el render en cuentas sin resenas)
+          const shouldRunLegacy =
+            useLegacyFallback &&
+            !userReviewEntries.length &&
+            legacyLookupAttemptedForUid !== uid &&
+            !legacyLookupPromise;
+
+          if (shouldRunLegacy) {
+            legacyLookupAttemptedForUid = uid;
+            legacyLookupPromise = ContentModel.listResenasByUser(uid, 20)
+              .then((legacy) => {
+                if (userReviewUid !== uid) return;
+                if (Array.isArray(legacy) && legacy.length) {
+                  userReviewEntries = legacy;
+                  userReviewSummary = buildUserReviewSummary(legacy);
+                  rerenderGeminiSuggestions();
+                }
+              })
+              .catch((err) => {
+                console.warn("[CulturIAx] No se pudieron leer resenas legacy:", err);
+              })
+              .finally(() => {
+                legacyLookupPromise = null;
+              });
+          }
         } catch (err) {
-          console.error('[CulturIAx] No se pudieron leer resenas personales:', err);
+          console.error("[CulturIAx] No se pudieron leer resenas personales:", err);
           userReviewEntries = [];
           userReviewSummary = fallbackUserReviewSummary;
           userReviewUid = null;
+          legacyLookupAttemptedForUid = null;
         }
       };
 
-      await loadUserReviews(true);
+// === Cargar reseñas del usuario de forma segura ===
+      await loadUserReviews({ force: true });
 
       const geminiKeyReady = hasGeminiApiKey();
 
-      // === Destacados aleatorios (si no hay rating, usa mezcla bAsica)
-      const shuffle = (arr = []) => arr
-        .map((v) => ({ v, sort: Math.random() }))
-        .sort((a, b) => a.sort - b.sort)
-        .map(({ v }) => v);
-      const destacados = shuffle([
+      // === Utilidad segura para mezclar contenido ===
+      const shuffle = (arr = []) => Array.isArray(arr)
+        ? arr
+            .map((v) => ({ v, sort: Math.random() }))
+            .sort((a, b) => a.sort - b.sort)
+            .map(({ v }) => v)
+        : [];
+
+      // === Asegurar que siempre haya contenido en “Destacados hoy” ===
+      const destacadosSource = [
         ...topPelis.slice(0, 3),
         ...topSeries.slice(0, 3),
         ...topAnime.slice(0, 3),
         ...topMusica.slice(0, 3),
-      ]).slice(0, 10);
+      ];
+
+      // Si no hay ratings suficientes ? usar fallback general
+      const destacados = destacadosSource.length > 0
+        ? shuffle(destacadosSource).slice(0, 10)
+        : shuffle([
+            ...pelis.slice(0, 5),
+            ...series.slice(0, 5),
+            ...anime.slice(0, 5),
+            ...musica.slice(0, 5),
+          ]).slice(0, 10);
+
+      // === Fallback seguro para cada rail (si no hay ratings, mostrar catálogo) ===
+      const safeTop = (topArr, fallbackArr) =>
+        topArr.length > 0 ? topArr : fallbackArr.slice(0, 10);
+
+      const safeTopPelis = safeTop(topPelis, pelis);
+      const safeTopSeries = safeTop(topSeries, series);
+      const safeTopAnime = safeTop(topAnime, anime);
+      const safeTopMusica = safeTop(topMusica, musica);
 
       // === HERO ===
       const heroCandidates = [
@@ -408,7 +469,6 @@ export function HomeView() {
       renderRail('#rail-musica', topMusica, { onItemClick: onCard });
 
       // === CulturIAx (AI chat) ===
-      let rerenderGeminiSuggestions = () => {};
       const initCulturIAx = () => {
         const root = document.getElementById('cxAiChat');
         const panelEl = document.getElementById('cxAiChatPanel');
@@ -531,7 +591,7 @@ export function HomeView() {
             return;
           }
 
-          await loadUserReviews();
+          await loadUserReviews({ useLegacyFallback: true });
           setPending(true, 'Buscando recomendaciones...');
           try {
             const { text, submittedContent } = await requestGeminiRecommendation({
@@ -593,9 +653,14 @@ export function HomeView() {
 
       initCulturIAx();
       onAuthStateChanged(auth, async () => {
-        await loadUserReviews(true);
-        rerenderGeminiSuggestions();
+        try {
+          await loadUserReviews({ force: true, useLegacyFallback: true });
+          rerenderGeminiSuggestions();
+        } catch (err) {
+          console.error("[CulturIAx] Error al refrescar resenas tras cambio de sesion:", err);
+        }
       });
+
 
       // === Autoscroll ===
       const setupAutoScroll = (selector, step = 1, everyMs = 25) => {
@@ -660,3 +725,5 @@ export function HomeView() {
     },
   };
 }
+
+
