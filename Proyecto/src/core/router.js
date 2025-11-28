@@ -73,7 +73,13 @@ async function resolve() {
 
   // Si es la vista de detalle, le pasamos item y categoría
   if (path === '/detalle') {
-    const item = JSON.parse(sessionStorage.getItem("detalleItem"));
+    let item = null;
+    try {
+      const raw = sessionStorage.getItem("detalleItem");
+      item = raw ? JSON.parse(raw) : null;
+    } catch {
+      item = null;
+    }
     const categoria = sessionStorage.getItem("detalleCategoria");
     const { html, bind, title } = route.view(item, categoria);
     render(html);

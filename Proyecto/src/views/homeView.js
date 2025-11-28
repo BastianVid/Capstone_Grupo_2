@@ -7,6 +7,7 @@ import { resolveImagePath } from './shared/resolve-image-path.js';
 import { applyImgFallback } from './shared/image-fallback.js';
 import { requestGeminiRecommendation, buildCatalogSummary, buildUserReviewSummary, buildCommunityReviewSummary, hasGeminiApiKey } from '../lib/gemini.js';
 import { auth, currentUser as firebaseCurrentUser } from '../lib/firebase.js';
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
 // ============================== HOME VIEW ==============================
 export function HomeView() {
@@ -117,7 +118,7 @@ export function HomeView() {
           <div class="cx-ai-chat__header">
             <div>
               <p class="cx-ai-chat__title mb-0" id="cxAiChatTitle">CulturIAx</p>
-              <small class="text-secondary">Sugerencias segAon reseAas</small>
+              <small class="text-secondary">Sugerencias segun resenas</small>
             </div>
             <button type="button" class="btn btn-sm btn-outline-light border-0" id="cxAiChatClose" aria-label="Cerrar chat">
               <i class="bi bi-x-lg"></i>
@@ -128,7 +129,7 @@ export function HomeView() {
           <div class="cx-ai-chat__suggestions" id="cxAiChatSuggestions"></div>
 
           <form class="cx-ai-chat__form" id="cxAiChatForm">
-            <input type="text" class="form-control" id="cxAiChatInput" placeholder="CuAntame quA quieres ver..." autocomplete="off" />
+            <input type="text" class="form-control" id="cxAiChatInput" placeholder="Cuentame que quieres ver..." autocomplete="off" />
             <button class="cx-ai-chat__send" type="submit" aria-label="Enviar mensaje a CulturIAx">
               <i class="bi bi-send"></i>
             </button>
@@ -143,7 +144,7 @@ export function HomeView() {
 
       <button type="button" class="cx-ai-chat__fab" id="cxAiChatToggle" aria-expanded="false" aria-controls="cxAiChatWindow">
         <i class="bi bi-stars"></i>
-        <span>ANo sabes quA ver?</span>
+        <span>No sabes que ver?</span>
       </button>
     </div>
   `;
@@ -157,29 +158,29 @@ export function HomeView() {
       initNavbarSearch();
 
       const { ContentModel } = await import('../models/contentModel.js');
-    const [
-      pelisRaw,
-      seriesRaw,
-      animeRaw,
-      musicaRaw,
-      librosRaw,
-      documentalesRaw,
-      videojuegosRaw,
-      mangaRaw,
-      proximamenteRaw,
-      communityReviewsRaw,
-    ] = await Promise.all([
-      ContentModel.listPeliculas(),
-      ContentModel.listSeries(),
-      ContentModel.listAnime(),
-      ContentModel.listMusica(),
-      ContentModel.listLibros(),
-      ContentModel.listDocumentales(),
-      ContentModel.listVideojuegos(),
-      ContentModel.listManga(),
-      ContentModel.listProximamente(),   
-      ContentModel.listCommunityResenas(60),
-    ]);
+      const [
+        pelisRaw,
+        seriesRaw,
+        animeRaw,
+        musicaRaw,
+        librosRaw,
+        documentalesRaw,
+        videojuegosRaw,
+        mangaRaw,
+        proximamenteRaw,
+        communityReviewsRaw,
+      ] = await Promise.all([
+        ContentModel.listPeliculas(),
+        ContentModel.listSeries(),
+        ContentModel.listAnime(),
+        ContentModel.listMusica(),
+        ContentModel.listLibros(),
+        ContentModel.listDocumentales(),
+        ContentModel.listVideojuegos(),
+        ContentModel.listManga(),
+        ContentModel.listProximamente(),
+        ContentModel.listCommunityResenas(60),
+      ]);
 
 
       // === Normalizacion ===
@@ -260,26 +261,43 @@ export function HomeView() {
       ];
       const geminiCatalogSummary = buildCatalogSummary(combinedTop);
       const communityReviewSummary = buildCommunityReviewSummary(communityReviewsRaw);
+      const fallbackUserReviewSummary = "El usuario no tiene resenas todavia. Sugiere contenido general popular de acuerdo al catalogo.";
       let userReviewEntries = [];
-      try {
-        const activeUser = firebaseCurrentUser || auth.currentUser;
-        if (activeUser?.uid) {
-          // reseñas rápidas
-          userReviewEntries = await ContentModel.listUserResenasQuick(activeUser.uid, 20);
+      let userReviewSummary = fallbackUserReviewSummary;
+      let userReviewUid = null;
 
-          // fallback opcional
-          if (!userReviewEntries.length) {
-            userReviewEntries = await ContentModel.listResenasByUser(activeUser.uid, 20);
+      const loadUserReviews = async (force = false) => {
+        try {
+          const activeUser = firebaseCurrentUser || auth.currentUser;
+          const uid = activeUser?.uid;
+
+          if (!uid) {
+            userReviewEntries = [];
+            userReviewSummary = fallbackUserReviewSummary;
+            userReviewUid = null;
+            return;
           }
-        }
-      } catch (err) {
-        console.error('[CulturIAx] No se pudieron leer reseñas personales:', err);
-      }
 
-// === Fallback crítico para usuarios nuevos ===
-const userReviewSummary = userReviewEntries.length
-  ? buildUserReviewSummary(userReviewEntries)
-  : "El usuario no tiene reseñas todavía. Sugiere contenido general popular de acuerdo al catálogo.";
+          if (!force && uid === userReviewUid && userReviewEntries.length) return;
+
+          userReviewEntries = await ContentModel.listUserResenasQuick(uid, 20);
+          if (!userReviewEntries.length) {
+            userReviewEntries = await ContentModel.listResenasByUser(uid, 20);
+          }
+
+          userReviewUid = uid;
+          userReviewSummary = userReviewEntries.length
+            ? buildUserReviewSummary(userReviewEntries)
+            : fallbackUserReviewSummary;
+        } catch (err) {
+          console.error('[CulturIAx] No se pudieron leer resenas personales:', err);
+          userReviewEntries = [];
+          userReviewSummary = fallbackUserReviewSummary;
+          userReviewUid = null;
+        }
+      };
+
+      await loadUserReviews(true);
 
       const geminiKeyReady = hasGeminiApiKey();
 
@@ -390,6 +408,7 @@ const userReviewSummary = userReviewEntries.length
       renderRail('#rail-musica', topMusica, { onItemClick: onCard });
 
       // === CulturIAx (AI chat) ===
+      let rerenderGeminiSuggestions = () => {};
       const initCulturIAx = () => {
         const root = document.getElementById('cxAiChat');
         const panelEl = document.getElementById('cxAiChatPanel');
@@ -498,8 +517,8 @@ const userReviewSummary = userReviewEntries.length
 
         messagesEl.innerHTML = '';
         const greeting = geminiKeyReady
-          ? 'Hola, Ano sabes quA ver? Soy CulturIAx y puedo proponerte pelAculas y series con reseAas brillantes de CulturaX. CuAntame quA ganas tienes hoy.'
-          : 'El asistente IA no estA disponible por ahora. Intenta de nuevo en unos minutos.';
+          ? 'Hola, no sabes que ver? Soy CulturIAx y puedo proponerte peliculas y series con resenas destacadas de CulturaX. Cuentame que ganas tienes hoy.'
+          : 'El asistente IA no esta disponible por ahora. Intenta de nuevo en unos minutos.';
         appendMessage(greeting, 'ai');
 
         const sendMessage = async (rawMessage) => {
@@ -508,10 +527,11 @@ const userReviewSummary = userReviewEntries.length
           appendMessage(message, 'user');
 
           if (!geminiKeyReady) {
-            appendMessage('El asistente IA no estA disponible por ahora. Intenta mAs tarde.', 'ai');
+            appendMessage('El asistente IA no esta disponible por ahora. Intenta mas tarde.', 'ai');
             return;
           }
 
+          await loadUserReviews();
           setPending(true, 'Buscando recomendaciones...');
           try {
             const { text, submittedContent } = await requestGeminiRecommendation({
@@ -527,8 +547,8 @@ const userReviewSummary = userReviewEntries.length
           } catch (err) {
             const fallback =
               err.message === 'GEMINI_API_KEY_MISSING'
-                ? 'El asistente IA no estA configurado en el servidor.'
-                : 'No pude contactar al motor IA ahora mismo. IntAntalo nuevamente en unos segundos.';
+                ? 'El asistente IA no esta configurado en el servidor.'
+                : 'No pude contactar al motor IA ahora mismo. Intentalo nuevamente en unos segundos.';
             appendMessage(fallback, 'ai');
             console.error('[CulturIAx]', err);
           } finally {
@@ -552,22 +572,30 @@ const userReviewSummary = userReviewEntries.length
           sendMessage(button.dataset.suggestion);
         });
 
-        if (suggestionsEl) {
-          const baseSuggestion = userReviewEntries.length
-            ? 'CulturIAx, revisa mis reseAas y sugiere algo que encaje con ellas.'
-            : trendingGenres[0]
-            ? `CulturIAx, recomiAndame algo de ${trendingGenres[0]} con buenas reseAas.`
-            : 'CulturIAx, sorprAndeme con algo muy recomendado.';
+        const renderSuggestions = () => {
+          if (!suggestionsEl) return;
+        const baseSuggestion = userReviewEntries.length
+          ? 'CulturIAx, revisa mis resenas y sugiere algo que encaje con ellas.'
+          : trendingGenres[0]
+          ? `CulturIAx, recomiendame algo de ${trendingGenres[0]} con buenas resenas.`
+          : 'CulturIAx, sorprendeme con algo muy recomendado.';
           suggestionsEl.innerHTML = '';
           const button = document.createElement('button');
           button.type = 'button';
           button.dataset.suggestion = baseSuggestion;
           button.textContent = baseSuggestion;
           suggestionsEl.appendChild(button);
-        }
+        };
+
+        rerenderGeminiSuggestions = renderSuggestions;
+        renderSuggestions();
       };
 
       initCulturIAx();
+      onAuthStateChanged(auth, async () => {
+        await loadUserReviews(true);
+        rerenderGeminiSuggestions();
+      });
 
       // === Autoscroll ===
       const setupAutoScroll = (selector, step = 1, everyMs = 25) => {

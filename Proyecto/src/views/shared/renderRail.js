@@ -21,7 +21,13 @@ export function renderRail(mountSelector, items = [], opts = {}) {
 
   if (!host) return;
 
-  const cards = (items || []).map((x) => {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) {
+    host.innerHTML = `<div class="text-secondary small">No hay contenido disponible.</div>`;
+    return;
+  }
+
+  const cards = list.map((x) => {
     const src = resolveImagePath(x.img || x.imagen || x.image || '');
     const meta = [
       x.tag ? String(x.tag) : null,

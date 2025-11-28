@@ -56,29 +56,37 @@ async function claimUsername(uid, desired, extras = {}) {
   const usernameLower = toLowerId(desired);
   if (!usernameLower) throw usernameError('USERNAME_INVALID', 'Nombre de usuario inválido');
 
-  return runTransaction(db, async (tx) => {
-    const unameRef = doc(db, 'usernames', usernameLower);
-    const unameSnap = await tx.get(unameRef);
-    if (unameSnap.exists() && unameSnap.data()?.uid !== uid) {
+  try {
+    return await runTransaction(db, async (tx) => {
+      const unameRef = doc(db, 'usernames', usernameLower);
+      const unameSnap = await tx.get(unameRef);
+      if (unameSnap.exists() && unameSnap.data()?.uid !== uid) {
+        throw usernameError('USERNAME_TAKEN', 'El usuario ya existe');
+      }
+
+      const userRef = doc(db, 'users', uid);
+      const baseData = (await tx.get(userRef)).data() || {};
+      const payload = {
+        ...baseData,
+        email: extras.email ?? baseData.email ?? null,
+        nombre: extras.nombre ?? baseData.nombre ?? null,
+        username,
+        usernameLower,
+        updatedAt: new Date().toISOString(),
+      };
+
+      tx.set(unameRef, { uid, username: username, usernameLower });
+      tx.set(userRef, payload, { merge: true });
+      cache.set(uid, { uid, ...payload });
+      return { username, profile: { uid, ...payload } };
+    });
+  } catch (err) {
+    if (err?.code === 'already-exists') {
+      // Firestore puede responder 409 si otro proceso creó el username simultáneamente
       throw usernameError('USERNAME_TAKEN', 'El usuario ya existe');
     }
-
-    const userRef = doc(db, 'users', uid);
-    const baseData = (await tx.get(userRef)).data() || {};
-    const payload = {
-      ...baseData,
-      email: extras.email ?? baseData.email ?? null,
-      nombre: extras.nombre ?? baseData.nombre ?? null,
-      username,
-      usernameLower,
-      updatedAt: new Date().toISOString(),
-    };
-
-    tx.set(unameRef, { uid, username: username, usernameLower });
-    tx.set(userRef, payload, { merge: true });
-    cache.set(uid, { uid, ...payload });
-    return { username, profile: { uid, ...payload } };
-  });
+    throw err;
+  }
 }
 
 async function ensureProfile(user, opts = {}) {
@@ -114,7 +122,7 @@ async function ensureProfile(user, opts = {}) {
       });
       return profile;
     } catch (err) {
-      if (err.code === 'USERNAME_TAKEN') {
+      if (err.code === 'USERNAME_TAKEN' || err.code === 'already-exists') {
         attempt = `${base}${Math.floor(Math.random() * 900 + 100)}`;
         continue;
       }
