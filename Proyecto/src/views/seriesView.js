@@ -103,7 +103,7 @@ export function SeriesView() {
 
       const draw = (arr) =>
         renderCards('#grid', arr, {
-          showDescription: true,
+          showDescription: false,
           ctaText: 'Leer reseña',
           onCardClick: (item) => {
             sessionStorage.setItem("detalleItem", JSON.stringify(item));
